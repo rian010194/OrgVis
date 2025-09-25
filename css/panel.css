@@ -1,0 +1,65 @@
+.panel {
+  position: absolute;
+  top: 40px;
+  left: 40px;
+  width: 360px;
+  max-width: 90vw;
+  min-width: 280px;
+  background: var(--card);
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(11,15,30,0.08);
+  padding: 18px;
+  height: 70vh;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  z-index: 1000;
+  transition: width 0.3s, height 0.3s;
+  cursor: default;
+}
+
+/* Panel header / drag */
+.panel-header {
+  cursor: move;
+  font-weight: bold;
+  margin-bottom: 8px;
+  user-select: none;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #e6e9ef;
+}
+
+.panel h2 { margin: 0 0 8px 0; }
+
+.section { margin: 12px 0; }
+
+.small { font-size: 13px; color: var(--muted); }
+
+/* Listor i panel */
+#details ul { padding-left: 18px; margin: 4px 0; }
+#details li { margin-bottom: 4px; }
+
+/* Inputs */
+#details input[type="text"] {
+  width: 100%;
+  padding: 6px 8px;
+  margin-bottom: 4px;
+  border: 1px solid #e6e9ef;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+/* Action-area */
+#actionArea {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.panel.editing {
+  width: 720px;
+  height: 80vh;
+  max-width: 95vw;
+}

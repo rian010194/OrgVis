@@ -1,0 +1,58 @@
+/* Gemensam grund */
+.drawflow .drawflow-node {
+  font-family: sans-serif;
+  font-size: 14px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  overflow: hidden;
+  text-align: center;
+}
+
+/* Header-rad i noder */
+.node-header {
+  font-weight: bold;
+  padding: 4px;
+  color: white;
+}
+
+/* Trigger-nod */
+.node-trigger {
+  background: #fff8e1;
+  border: 2px solid #f7c948;
+}
+.node-trigger .node-header {
+  background: #f7c948;
+}
+
+/* Action-nod */
+.node-action {
+  background: #e8f5e9;
+  border: 2px solid #28a745;
+}
+.node-action .node-header {
+  background: #28a745;
+}
+
+/* Review-nod */
+.node-review {
+  background: #f1f3f9;
+  border: 2px solid #6c757d;
+  min-width: 240px;
+  min-height: 140px;
+}
+.node-review .node-header {
+  background: #6c757d;
+}
+.node-review select {
+  margin-top: 6px;
+  width: 90%;
+  padding: 4px;
+  border-radius: 4px;
+  border: 1px solid #aaa;
+}
+
+/* Fix: portar inte över text */
+.drawflow .output,
+.drawflow .input {
+  z-index: 10;
+}

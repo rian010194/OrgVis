@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organisationsvisualisering</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/orgchart.css">
+  <link rel="stylesheet" href="css/workflow.css">
+  <link rel="stylesheet" href="css/panel.css">
+  <link rel="stylesheet" href="css/header.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/drawflow/dist/drawflow.min.css">
+
+  <style>
+    #workflowStage { background: #f6f7fb; width:100%; height:100%; }
+    #drawflow { width:100%; height:100%; }
+    #orgchartContent { position:relative; width:100%; height:100%; transform:translate(0,0) scale(1); transition:transform 0s; }
+    #nodes,#edges { position:absolute; top:0; left:0; width:100%; height:100%; }
+    #edges { pointer-events:none; }
+    #nodes { pointer-events:auto; }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <label class="small">Du är inloggad som:</label>
+    <select id="viewerRole"></select>
+
+    <button id="pingBtn" class="btn">Skicka Ping</button>
+    <button id="addNodeBtn" class="btn">Lägg till nod</button>
+    <button id="workflowBtn" class="btn">Bygg Workflow</button>
+    <button id="closeWorkflow" class="btn secondary" style="display:none;">Tillbaka till Orgchart</button>
+  </header>
+
+  <div class="main-content">
+    <div class="canvas" id="canvas">
+      <!-- Orgchart -->
+      <div class="stage" id="stage">
+        <div id="orgchartContent">
+          <svg id="edges"></svg>
+          <div id="nodes"></div>
+        </div>
+      </div>
+
+      <!-- Workflow -->
+      <div class="stage" id="workflowStage" style="display:none;">
+        <div id="drawflow"></div>
+      </div>
+    </div>
+
+    <div id="dragHandle"></div>
+
+    <div class="panel" id="panel">
+      <h2>Välj en nod</h2>
+      <div class="small">Klicka på en nod för att visa ansvar och interaktioner.</div>
+      <div class="section" id="details" style="display:none">
+        <h3 id="d-title"></h3>
+        <div class="small" id="d-role" style="margin-bottom:8px"></div>
+        <div class="section"><strong>Ansvar</strong><ul id="d-resp"></ul></div>
+        <div class="section"><strong>Outputs</strong><ul id="d-outs"></ul></div>
+        <div class="section"><strong>Inputs</strong><ul id="d-ins"></ul></div>
+        <div class="section"><strong>Interaktionsmöjligheter</strong><div id="d-interact"></div></div>
+        <div class="section" id="actionArea" style="margin-top:18px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Skript -->
+  <!-- 1. Drawflow -->
+  <script src="https://cdn.jsdelivr.net/npm/drawflow/dist/drawflow.min.js"></script>
+
+  <!-- 2. Workflow logik -->
+  <script src="js/workflow.js"></script>
+
+  <!-- 3. Main.js som modul, körs först efter DOM är redo -->
+  <script type="module">
+    import './js/main.js';
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (window.setupWorkflowButtons) window.setupWorkflowButtons();
+    });
+  </script>
+</body>
+</html>

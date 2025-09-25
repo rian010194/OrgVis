@@ -1,0 +1,268 @@
+{
+  "nodes": [
+    {
+      "id": "node-vd",
+      "title": "VD ",
+      "role": "",
+      "x": 660.5,
+      "y": 50,
+      "ansvar": [
+        "Strategi & långsiktiga beslut",
+        "Ekonomiskt övergripande ansvar",
+        "Rapportering till styrelsen"
+      ],
+      "outputs": [
+        "Strategiska beslut",
+        "Policy & riktlinjer",
+        "Resursfördelning"
+      ],
+      "inputs": [],
+      "level": 0,
+      "interactions": [
+        {
+          "label": "KvartalsRapport",
+          "description": "Q2",
+          "fromNodeId": "node-vvd1",
+          "toNodeId": "node-vd"
+        },
+        {
+          "label": "Rapport",
+          "description": "Test",
+          "fromNodeId": "node-1758230187632",
+          "toNodeId": "node-vd"
+        },
+        {
+          "label": "Månadsrapport",
+          "description": "Månads rapport",
+          "fromNodeId": "node-vd",
+          "toNodeId": "node-avd"
+        },
+        {
+          "label": "Möte",
+          "description": "Möte",
+          "fromNodeId": "node-vvd2",
+          "toNodeId": "node-vd"
+        }
+      ],
+      "width": 264,
+      "height": 144
+    },
+    {
+      "id": "node-vvd1",
+      "title": "Vice VD 1",
+      "role": "Vice VD",
+      "x": 660.5,
+      "y": 190,
+      "ansvar": [
+        "Operativ styrning",
+        "Implementering av VD:s beslut",
+        "Samordning mellan avdelningar"
+      ],
+      "outputs": [
+        "Operativa direktiv",
+        "Sammanställningar till VD"
+      ],
+      "inputs": [
+        "Strategiska beslut från VD",
+        "Rapporter från avdelningschefer"
+      ],
+      "level": 1,
+      "interactions": [
+        {
+          "label": "KvartalsRapport",
+          "description": "Q2",
+          "fromNodeId": "node-vvd1",
+          "toNodeId": "node-vd"
+        },
+        {
+          "label": "Veckorapport",
+          "description": "",
+          "fromNodeId": "node-vvd1",
+          "toNodeId": "node-avd"
+        }
+      ],
+      "width": 264,
+      "height": 144
+    },
+    {
+      "id": "node-vvd2",
+      "title": "Vice VD 2",
+      "role": "Vice VD",
+      "x": 974.5,
+      "y": 190,
+      "ansvar": [
+        "Ekonomisk planering",
+        "Personalstrategi",
+        "Riskhantering"
+      ],
+      "outputs": [
+        "Budgetrapporter",
+        "HR-policyer",
+        "Riskbedömningar"
+      ],
+      "inputs": [
+        "Strategiska beslut från VD",
+        "Rapporter från ekonomi/HR"
+      ],
+      "level": 1,
+      "interactions": [
+        {
+          "label": "Möte",
+          "description": "Möte",
+          "fromNodeId": "node-vvd2",
+          "toNodeId": "node-vd"
+        }
+      ],
+      "width": 264,
+      "height": 144
+    },
+    {
+      "id": "node-avd",
+      "title": "Avdelningschef (IT)",
+      "role": "Avdelningschef",
+      "x": 974.5,
+      "y": 330,
+      "ansvar": [
+        "Operativ ledning av sitt team",
+        "Rapportering till vice VD",
+        "Säkerställa leverans"
+      ],
+      "outputs": [
+        "Statusrapporter till Vice VD",
+        "Leverabler från team"
+      ],
+      "inputs": [
+        "Operativa direktiv från Vice VD",
+        "Feedback från team"
+      ],
+      "level": 2,
+      "interactions": [
+        {
+          "label": "Feedback gällande städning",
+          "description": "",
+          "fromNodeId": "node-avd",
+          "toNodeId": "node-team"
+        },
+        {
+          "label": "KPI:er",
+          "description": "",
+          "fromNodeId": "node-avd",
+          "toNodeId": "node-team"
+        },
+        {
+          "label": "Veckorapport",
+          "description": "",
+          "fromNodeId": "node-vvd1",
+          "toNodeId": "node-avd"
+        },
+        {
+          "label": "Månadsrapport",
+          "description": "Månads rapport",
+          "fromNodeId": "node-vd",
+          "toNodeId": "node-avd"
+        },
+        {
+          "label": "Feedback",
+          "description": "",
+          "fromNodeId": "node-avd",
+          "toNodeId": "node-1758230187632"
+        }
+      ],
+      "width": 264,
+      "height": 144
+    },
+    {
+      "id": "node-team",
+      "title": "Team (Utveckling)",
+      "role": "Team",
+      "x": 974.5,
+      "y": 470,
+      "ansvar": [
+        "Utföra uppgifter",
+        "Rapportera framsteg",
+        "Bidra till leverabler"
+      ],
+      "outputs": [
+        "Kod, rapporter, produkter"
+      ],
+      "inputs": [
+        "Arbetsuppgifter från avdelningschef",
+        "Feedback från kollegor"
+      ],
+      "level": 3,
+      "interactions": [
+        {
+          "label": "Feedback gällande städning",
+          "description": "",
+          "fromNodeId": "node-avd",
+          "toNodeId": "node-team"
+        },
+        {
+          "label": "KPI:er",
+          "description": "",
+          "fromNodeId": "node-avd",
+          "toNodeId": "node-team"
+        }
+      ],
+      "width": 264,
+      "height": 144
+    },
+    {
+      "id": "node-1758230187632",
+      "title": "Admin",
+      "role": "Admin",
+      "x": 974.5,
+      "y": 50,
+      "ansvar": [
+        "",
+        ""
+      ],
+      "outputs": [
+        "",
+        ""
+      ],
+      "inputs": [
+        ""
+      ],
+      "interactions": [
+        {
+          "label": "Rapport",
+          "description": "Test",
+          "fromNodeId": "node-1758230187632",
+          "toNodeId": "node-vd"
+        },
+        {
+          "label": "Feedback",
+          "description": "",
+          "fromNodeId": "node-avd",
+          "toNodeId": "node-1758230187632"
+        }
+      ],
+      "level": 0,
+      "width": 264,
+      "height": 144
+    }
+  ],
+  "edges": [
+    {
+      "from": "node-vd",
+      "to": "node-vvd1"
+    },
+    {
+      "from": "node-vd",
+      "to": "node-vvd2"
+    },
+    {
+      "from": "node-vvd1",
+      "to": "node-avd"
+    },
+    {
+      "from": "node-vvd2",
+      "to": "node-avd"
+    },
+    {
+      "from": "node-avd",
+      "to": "node-team"
+    }
+  ]
+}

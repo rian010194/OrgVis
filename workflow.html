@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>Workflow Prototype</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/drawflow/dist/drawflow.min.css">
+  <style>
+    body { margin:0; font-family: sans-serif; }
+    #drawflow { width:100vw; height:100vh; background:#f6f7fb; }
+    .node-title { font-weight:bold; margin-bottom:4px; }
+  </style>
+</head>
+<body>
+  <div id="drawflow"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/drawflow/dist/drawflow.min.js"></script>
+  <script>
+    const editor = new Drawflow(document.getElementById('drawflow'));
+    editor.start();
+
+    // Lägg till Trigger-node
+    editor.addNode('Trigger', 1, 1, 100, 100, 'trigger', { text: 'Varje vecka' });
+
+    // Lägg till Action-node
+    editor.addNode('Action', 1, 1, 400, 100, 'action', { text: 'Skicka veckorapport till VD' });
+
+    // Koppla Trigger -> Action
+    editor.addConnection('node-1', 'output_1', 'node-2', 'input_1');
+
+    // Lyssna på changes
+    editor.on('nodeCreated', (id) => console.log('Node created:', id));
+    editor.on('connectionCreated', (id) => console.log('Connection created:', id));
+
+    // Exportera workflow som JSON
+    window.saveWorkflow = () => {
+      const json = editor.export();
+      console.log(JSON.stringify(json, null, 2));
+    };
+  </script>
+</body>
+</html>

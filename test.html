@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Organisationsvisualisering — VD & Vice VD</title>
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --accent:#2b6df6;
+      --muted:#667085;
+      --success:#16a34a;
+      --danger:#ef4444;
+      --node-w:220px;
+      --node-h:100px;
+    }
+    html,body{height:100%;margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+    body{background:var(--bg);display:flex;gap:18px}
+    /* left canvas */
+    .toolbar{
+      position:fixed; left:18px; top:18px; z-index:50;
+      background:var(--card); padding:10px 12px; border-radius:10px; box-shadow:0 6px 18px rgba(11,15,30,0.06);
+    }
+    .canvas{
+      flex:1; min-height:100vh; padding:40px; position:relative;
+      overflow:auto;
+    }
+    .stage{
+      width:1200px; height:800px; background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.4));
+      border-radius:12px; position:relative; margin:20px auto; box-shadow:0 6px 20px rgba(11,15,30,0.06);
+    }
+    .node{
+      width:var(--node-w); height:var(--node-h); background:var(--card); position:absolute; border-radius:10px;
+      box-shadow:0 6px 18px rgba(11,15,30,0.06); padding:10px; cursor:pointer; user-select:none;
+      display:flex; flex-direction:column; justify-content:space-between;
+    }
+    .node .title{font-weight:600; font-size:16px}
+    .node .sub{font-size:12px; color:var(--muted)}
+    .node .chips{display:flex; gap:6px; flex-wrap:wrap}
+    .chip{background:#f1f5ff; color:var(--accent); padding:4px 8px; border-radius:999px; font-size:12px}
+    /* side panel */
+    .panel{
+      width:360px; background:var(--card); border-radius:12px; box-shadow:0 6px 20px rgba(11,15,30,0.08);
+      padding:18px; margin:40px; height:calc(100vh - 80px); overflow:auto;
+    }
+    .panel h2{margin:0 0 8px 0}
+    .section{margin:12px 0}
+    .small{font-size:13px;color:var(--muted)}
+    .btn{background:var(--accent); color:white; border:none; padding:8px 12px; border-radius:8px; cursor:pointer}
+    .btn.secondary{background:#eef2ff;color:var(--accent); border:1px solid rgba(43,109,246,0.08)}
+    /* SVG links */
+    svg{position:absolute; inset:0; pointer-events:none; overflow:visible}
+    .edge{stroke:#c7d2fe; stroke-width:3; fill:none; transition:stroke 0.25s, stroke-width 0.25s; stroke-linecap:round}
+    .edge.active{stroke:var(--accent); stroke-width:5}
+    /* role selector */
+    select{padding:8px;border-radius:8px;border:1px solid #e6e9ef;background:white}
+    /* responsive */
+    @media (max-width:1100px){
+      .stage{width:900px;height:700px}
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <label class="small">Du är inloggad som:</label><br/>
+    <select id="viewerRole">
+      <option value="Vice VD">Vice VD</option>
+      <option value="Avdelningschef">Avdelningschef</option>
+      <option value="Extern partner">Extern partner</option>
+      <option value="Teammedlem">Teammedlem</option>
+      <option value="VD">VD</option>
+    </select>
+    <div style="height:8px"></div>
+    <button id="pingBtn" class="btn">Skicka Ping (VD → Avdelningschef)</button>
+  </div>
+
+  <div class="canvas">
+    <div class="stage" id="stage">
+      <svg id="edges" width="1200" height="800"></svg>
+
+      <!-- Noder -->
+      <div class="node" id="node-vd" data-role="VD" style="left:490px; top:40px">
+        <div>
+          <div class="title">VD</div>
+          <div class="sub">Toppnivå: Strategi &amp; Styrelse</div>
+        </div>
+        <div class="chips">
+          <div class="chip">Outputs: Strategiska beslut</div>
+          <div class="chip">Inputs: Rapporter</div>
+        </div>
+      </div>
+
+      <div class="node" id="node-vvd1" data-role="Vice VD 1" style="left:220px; top:220px">
+        <div>
+          <div class="title">Vice VD 1</div>
+          <div class="sub">Operativt ansvar</div>
+        </div>
+        <div class="chips">
+          <div class="chip">Outputs: Operativa direktiv</div>
+        </div>
+      </div>
+
+      <div class="node" id="node-vvd2" data-role="Vice VD 2" style="left:760px; top:220px">
+        <div>
+          <div class="title">Vice VD 2</div>
+          <div class="sub">Ekonomi & HR</div>
+        </div>
+        <div class="chips">
+          <div class="chip">Outputs: Budgetrapporter</div>
+        </div>
+      </div>
+
+      <div class="node" id="node-avd" data-role="Avdelningschef" style="left:120px; top:420px">
+        <div>
+          <div class="title">Avdelningschef (IT)</div>
+          <div class="sub">Ledar teamet</div>
+        </div>
+        <div class="chips">
+          <div class="chip">Inputs: Direktiv</div>
+          <div class="chip">Outputs: Statusrapporter</div>
+        </div>
+      </div>
+
+      <div class="node" id="node-team" data-role="Team" style="left:380px; top:520px">
+        <div>
+          <div class="title">Team (Utveckling)</div>
+          <div class="sub">Levererar kod & analys</div>
+        </div>
+        <div class="chips">
+          <div class="chip">Outputs: Leverabler</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="panel" id="panel">
+    <h2>Välj en nod</h2>
+    <div class="small">Klicka på en nod för att visa ansvar, inputs/outputs och tillgängliga interaktioner beroende på vilken roll du har valt.</div>
+
+    <div class="section" id="details" style="display:none">
+      <h3 id="d-title"></h3>
+      <div class="small" id="d-role" style="margin-bottom:8px"></div>
+
+      <div class="section">
+        <strong>Ansvar</strong>
+        <ul id="d-resp"></ul>
+      </div>
+
+      <div class="section">
+        <strong>Outputs</strong>
+        <ul id="d-outs"></ul>
+      </div>
+
+      <div class="section">
+        <strong>Inputs</strong>
+        <ul id="d-ins"></ul>
+      </div>
+
+      <div class="section">
+        <strong>Interaktionsmöjligheter (beroende på din roll)</strong>
+        <div id="d-interact"></div>
+      </div>
+
+      <div class="section" id="actionArea" style="margin-top:18px"></div>
+    </div>
+
+  </div>
+
+<script>
+  // Data för varje nod (kan senare bytas mot en JSON från backend)
+  const nodesData = {
+    "node-vd": {
+      title: "VD",
+      role: "VD",
+      ansvar: [
+        "Strategi & långsiktiga beslut",
+        "Ekonomiskt övergripande ansvar",
+        "Rapportering till styrelsen"
+      ],
+      outputs: [
+        "Strategiska beslut",
+        "Policy & riktlinjer",
+        "Resursfördelning"
+      ],
+      inputs: [
+        "Rapporter från vice VD:er",
+        "Feedback från styrelse"
+      ]
+    },
+    "node-vvd1": {
+      title: "Vice VD 1",
+      role: "Vice VD",
+      ansvar: [
+        "Operativ styrning",
+        "Implementering av VD:s beslut",
+        "Samordning mellan avdelningar"
+      ],
+      outputs: ["Operativa direktiv", "Sammanställningar till VD"],
+      inputs: ["Strategiska beslut från VD", "Rapporter från avdelningschefer"]
+    },
+    "node-vvd2": {
+      title: "Vice VD 2",
+      role: "Vice VD",
+      ansvar: ["Ekonomisk planering", "Personalstrategi", "Riskhantering"],
+      outputs: ["Budgetrapporter", "HR-policyer", "Riskbedömningar"],
+      inputs: ["Strategiska beslut från VD", "Rapporter från ekonomi/HR"]
+    },
+    "node-avd": {
+      title: "Avdelningschef (IT)",
+      role: "Avdelningschef",
+      ansvar: ["Operativ ledning av sitt team", "Rapportering till vice VD", "Säkerställa leverans"],
+      outputs: ["Statusrapporter till Vice VD", "Leverabler från team"],
+      inputs: ["Operativa direktiv från Vice VD", "Feedback från team"]
+    },
+    "node-team": {
+      title: "Team (Utveckling)",
+      role: "Team",
+      ansvar: ["Utföra uppgifter", "Rapportera framsteg", "Bidra till leverabler"],
+      outputs: ["Kod, rapporter, produkter"],
+      inputs: ["Arbetsuppgifter från avdelningschef", "Feedback från kollegor"]
+    }
+  };
+
+  // Bas-regler för interaktion beroende på viewerRole och target node role
+  function getInteractions(viewerRole, targetRole) {
+    // default inga möjligheter
+    const res = [];
+
+    if (targetRole === "VD") {
+      if (viewerRole === "Vice VD") {
+        res.push("Du kan skicka rapporter till VD.");
+        res.push("Du kan ta emot beslut från VD.");
+      } else if (viewerRole === "Avdelningschef") {
+        res.push("Du kan eskalera frågor via Vice VD (ingen direktkontakt med VD).");
+      } else if (viewerRole === "Extern partner") {
+        res.push("Du kan se policies men inte påverka dem.");
+      } else if (viewerRole === "Teammedlem") {
+        res.push("Ingen direktkontakt — kommunicera via din Avdelningschef.");
+      } else if (viewerRole === "VD") {
+        res.push("Du kan fatta strategiska beslut och distribuera outputs.");
+      }
+    }
+
+    if (targetRole === "Vice VD") {
+      if (viewerRole === "VD") {
+        res.push("Du kan skicka strategiska beslut till Vice VD.");
+      } else if (viewerRole === "Avdelningschef") {
+        res.push("Du kan rapportera status till Vice VD.");
+      } else if (viewerRole === "Extern partner") {
+        res.push("Ingen direkt interaktion - kontakta via officiella kanaler.");
+      } else if (viewerRole === "Teammedlem") {
+        res.push("Du kan rapportera till din Avdelningschef som i sin tur rapporterar till Vice VD.");
+      } else if (viewerRole === "Vice VD") {
+        res.push("Du kan ta emot rapporter från avdelningschefer och eskalera till VD.");
+      }
+    }
+
+    if (targetRole === "Avdelningschef") {
+      if (viewerRole === "Vice VD") {
+        res.push("Du kan skicka direktiv till Avdelningschef och få statusrapporter.");
+      } else if (viewerRole === "Teammedlem") {
+        res.push("Du kan ta emot arbetsuppgifter från Avdelningschef och rapportera framsteg.");
+      } else if (viewerRole === "Extern partner") {
+        res.push("Extern partner kan ha kontakt via avdelningschef beroende på avtal.");
+      } else if (viewerRole === "VD") {
+        res.push("Kontakt sker vanligtvis via Vice VD.");
+      }
+    }
+
+    if (targetRole === "Team") {
+      if (viewerRole === "Avdelningschef") {
+        res.push("Du kan tilldela uppgifter och granska leverabler.");
+      } else if (viewerRole === "Teammedlem") {
+        res.push("Du jobbar dagligen med uppgifter och rapporterar till Avdelningschef.");
+      } else {
+        res.push("Ingen direktkontakt med högre nivåer — kommunicera via Avdelningschef/VD beroende på ärende.");
+      }
+    }
+
+    return res;
+  }
+
+  // Ritning av kanter (edges) mellan noder med SVG linjer; här hårdkodade kopplingar.
+  const edgesConfig = [
+    { from: "node-vd", to: "node-vvd1", id: "e-vd-vvd1" },
+    { from: "node-vd", to: "node-vvd2", id: "e-vd-vvd2" },
+    { from: "node-vvd1", to: "node-avd", id: "e-vvd1-avd" },
+    { from: "node-vvd2", to: "node-avd", id: "e-vvd2-avd" },
+    { from: "node-avd", to: "node-team", id: "e-avd-team" }
+  ];
+
+  function createEdges() {
+    const svg = document.getElementById('edges');
+    svg.innerHTML = '';
+    for (const e of edgesConfig) {
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      line.setAttribute("id", e.id);
+      line.setAttribute("class", "edge");
+      line.setAttribute("d", "M0 0 L0 0");
+      svg.appendChild(line);
+    }
+    updateEdges();
+  }
+
+  function centerOf(el) {
+    const r = el.getBoundingClientRect();
+    const s = document.getElementById('stage').getBoundingClientRect();
+    // return coordinates relative to stage (svg is absolute inside stage)
+    return {
+      x: r.left - s.left + r.width/2,
+      y: r.top - s.top + r.height/2
+    };
+  }
+
+  function updateEdges() {
+    for (const e of edgesConfig) {
+      const fromEl = document.getElementById(e.from);
+      const toEl = document.getElementById(e.to);
+      const from = centerOf(fromEl);
+      const to = centerOf(toEl);
+      // draw simple curved path
+      const dx = to.x - from.x;
+      const dy = to.y - from.y;
+      const qx = from.x + dx * 0.5;
+      const qy = from.y + dy * 0.1;
+      const d = `M ${from.x.toFixed(1)} ${from.y.toFixed(1)} Q ${qx.toFixed(1)} ${qy.toFixed(1)} ${to.x.toFixed(1)} ${to.y.toFixed(1)}`;
+      const path = document.getElementById(e.id);
+      if (path) path.setAttribute('d', d);
+    }
+  }
+
+  // visa nod-detaljer i panelen
+  function showDetails(nodeId) {
+    const data = nodesData[nodeId];
+    if (!data) return;
+    document.getElementById('details').style.display = 'block';
+    document.getElementById('d-title').innerText = data.title;
+    document.getElementById('d-role').innerText = data.role;
+    const rList = document.getElementById('d-resp');
+    const oList = document.getElementById('d-outs');
+    const iList = document.getElementById('d-ins');
+    rList.innerHTML = ''; oList.innerHTML = ''; iList.innerHTML = '';
+    data.ansvar.forEach(x => { const li=document.createElement('li'); li.innerText=x; rList.appendChild(li); });
+    data.outputs.forEach(x => { const li=document.createElement('li'); li.innerText=x; oList.appendChild(li); });
+    data.inputs.forEach(x => { const li=document.createElement('li'); li.innerText=x; iList.appendChild(li); });
+
+    // interaktionsregler beroende på viewerRole
+    const viewerRole = document.getElementById('viewerRole').value;
+    const interactions = getInteractions(viewerRole, data.role);
+    const di = document.getElementById('d-interact');
+    di.innerHTML = '';
+    interactions.forEach(txt => {
+      const p = document.createElement('div'); p.className='small'; p.style.margin='6px 0'; p.innerText = txt;
+      di.appendChild(p);
+    });
+
+    // actions (exempelvis knappar)
+    const actionArea = document.getElementById('actionArea');
+    actionArea.innerHTML = '';
+
+    // Exempel på actions beroende på roll/kontaktmöjlighet
+    if (viewerRole === "Vice VD" && data.role === "VD") {
+      const btnReport = document.createElement('button'); btnReport.className='btn secondary'; btnReport.innerText='Skicka rapport till VD';
+      btnReport.onclick = ()=> alert('Rapport skickad (demo).');
+      const btnReceive = document.createElement('button'); btnReceive.className='btn'; btnReceive.style.marginLeft='8px'; btnReceive.innerText='Ta emot beslut';
+      btnReceive.onclick = ()=> alert('Visar VD-beslut (demo).');
+      actionArea.appendChild(btnReport); actionArea.appendChild(btnReceive);
+    } else if (viewerRole === "Avdelningschef" && data.role === "VD") {
+      const p = document.createElement('div'); p.className='small'; p.innerText='Du måste eskalera via Vice VD. Visa kontaktlista:';
+      const btn = document.createElement('button'); btn.className='btn'; btn.innerText='Skicka ärende till Vice VD';
+      btn.onclick = ()=> alert('Ärende eskalerat till Vice VD (demo).');
+      actionArea.appendChild(p); actionArea.appendChild(btn);
+    } else {
+      // default: ingen action eller visa möjligheter att se outputs/inputs
+      const p = document.createElement('div'); p.className='small'; p.innerText='Inga direkta åtgärder tillgängliga i demo. Du kan se inputs/outputs ovan.';
+      actionArea.appendChild(p);
+    }
+  }
+
+  // init: bind klick-händelser
+  function init() {
+    // position/resize
+    createEdges();
+    window.addEventListener('resize', () => {
+      updateEdges();
+    });
+
+    // klicka på noder
+    for (const id in nodesData) {
+      const el = document.getElementById(id);
+      if (!el) continue;
+      el.addEventListener('click', (ev)=> {
+        // markera visuell
+        document.querySelectorAll('.node').forEach(n=>n.style.boxShadow='0 6px 18px rgba(11,15,30,0.06)');
+        el.style.boxShadow = '0 12px 30px rgba(43,109,246,0.12)';
+        showDetails(id);
+      });
+      // drag (enkel)
+      let isDown=false, startX=0, startY=0, origX=0, origY=0;
+      el.addEventListener('mousedown', (e)=>{
+        isDown=true; startX=e.clientX; startY=e.clientY;
+        const rect = el.getBoundingClientRect();
+        origX = rect.left; origY = rect.top;
+        el.style.transition='none';
+      });
+      window.addEventListener('mousemove', (e)=>{
+        if (!isDown) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        const stageRect = document.getElementById('stage').getBoundingClientRect();
+        let newLeft = origX + dx - stageRect.left;
+        let newTop = origY + dy - stageRect.top;
+        // keep inside stage
+        newLeft = Math.max(8, Math.min(newLeft, stageRect.width - 240));
+        newTop = Math.max(8, Math.min(newTop, stageRect.height - 120));
+        el.style.left = newLeft + 'px';
+        el.style.top = newTop + 'px';
+        updateEdges();
+      });
+      window.addEventListener('mouseup', ()=>{ isDown=false; el.style.transition='box-shadow 0.2s'; });
+    }
+
+    // ping-button: highlight path from VD -> Avdelningschef -> Team
+    document.getElementById('pingBtn').addEventListener('click', ()=>{
+      // clear previous
+      document.querySelectorAll('.edge').forEach(e=>e.classList.remove('active'));
+      // activate edges e-vd-vvd1, e-vvd1-avd, e-avd-team (choose a path)
+      const path = ['e-vd-vvd1','e-vvd1-avd','e-avd-team'];
+      let i=0;
+      function step(){
+        if (i>0) {
+          const prev = document.getElementById(path[i-1]);
+          if (prev) prev.classList.remove('active');
+        }
+        if (i >= path.length) return;
+        const cur = document.getElementById(path[i]);
+        if (cur) cur.classList.add('active');
+        i++;
+        setTimeout(step, 500);
+      }
+      step();
+    });
+
+    // update edges periodically for smoothness (or on drag)
+    setInterval(updateEdges, 200);
+  }
+
+  window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
