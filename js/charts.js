@@ -86,8 +86,10 @@ const ChartRenderer = (() => {
       .range([0, chartWidth])
       .padding(0.1);
 
+    // Calculate the maximum value from the data
+    const maxValue = Math.max(...entries.map(d => d.value));
     const yScale = d3.scaleLinear()
-      .domain([0, 100])
+      .domain([0, maxValue])
       .range([chartHeight, 0]);
 
     // Bars
@@ -97,9 +99,9 @@ const ChartRenderer = (() => {
       .enter()
       .append("rect")
       .attr("x", d => xScale(d.key))
-      .attr("y", d => yScale((d.value / total) * 100))
+      .attr("y", d => yScale(d.value))
       .attr("width", xScale.bandwidth())
-      .attr("height", d => chartHeight - yScale((d.value / total) * 100))
+      .attr("height", d => chartHeight - yScale(d.value))
       .attr("fill", (d, i) => getMetricColor(d.key, i))
       .attr("stroke", "#fff")
       .attr("stroke-width", 1);
@@ -118,7 +120,7 @@ const ChartRenderer = (() => {
     // Y-axis
     group
       .append("g")
-      .call(d3.axisLeft(yScale).tickFormat(d => d + unit));
+      .call(d3.axisLeft(yScale).tickFormat(d => d + " " + unit));
 
     // Value labels on bars
     group
@@ -128,7 +130,7 @@ const ChartRenderer = (() => {
       .append("text")
       .attr("class", "bar-label")
       .attr("x", d => xScale(d.key) + xScale.bandwidth() / 2)
-      .attr("y", d => yScale((d.value / total) * 100) - 5)
+      .attr("y", d => yScale(d.value) - 5)
       .attr("text-anchor", "middle")
       .style("font-size", "12px")
       .style("font-weight", "bold")
@@ -165,14 +167,16 @@ const ChartRenderer = (() => {
       .range([0, chartWidth])
       .padding(0.1);
 
+    // Calculate the maximum value from the data
+    const maxValue = Math.max(...entries.map(d => d.value));
     const yScale = d3.scaleLinear()
-      .domain([0, 100])
+      .domain([0, maxValue])
       .range([chartHeight, 0]);
 
     // Line generator
     const line = d3.line()
       .x((d, i) => xScale(d.key) + xScale.bandwidth() / 2)
-      .y(d => yScale((d.value / total) * 100))
+      .y(d => yScale(d.value))
       .curve(d3.curveMonotoneX);
 
     // Line
@@ -192,7 +196,7 @@ const ChartRenderer = (() => {
       .append("circle")
       .attr("class", "dot")
       .attr("cx", d => xScale(d.key) + xScale.bandwidth() / 2)
-      .attr("cy", d => yScale((d.value / total) * 100))
+      .attr("cy", d => yScale(d.value))
       .attr("r", 5)
       .attr("fill", colorPalette[0])
       .attr("stroke", "#fff")
@@ -212,7 +216,7 @@ const ChartRenderer = (() => {
     // Y-axis
     group
       .append("g")
-      .call(d3.axisLeft(yScale).tickFormat(d => d + unit));
+      .call(d3.axisLeft(yScale).tickFormat(d => d + " " + unit));
   };
 
   // Table View
