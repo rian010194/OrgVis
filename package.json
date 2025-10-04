@@ -1,0 +1,29 @@
+{
+  "name": "jumpyard-org-chart",
+  "version": "1.0.0",
+  "description": "JumpYard Organization Chart with Supabase Backend",
+  "main": "index.html",
+  "scripts": {
+    "dev": "supabase start",
+    "stop": "supabase stop",
+    "reset": "supabase db reset",
+    "migrate": "supabase db push",
+    "seed": "supabase db seed",
+    "build": "echo 'Frontend build completed'",
+    "deploy": "supabase db push && supabase functions deploy"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.4"
+  },
+  "devDependencies": {
+    "supabase": "^1.123.4"
+  },
+  "keywords": [
+    "organization-chart",
+    "supabase",
+    "jumpyard",
+    "d3"
+  ],
+  "author": "JumpYard Team",
+  "license": "MIT"
+}

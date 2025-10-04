@@ -1,9 +1,8 @@
 const ChartRenderer = (() => {
   
-  // Color palette for consistent styling across all charts
+  // Color palette for consistent styling across all charts - matches ui.js metricPalette
   const colorPalette = [
-    '#ff5a00', '#e53e3e', '#38a169', '#3182ce', '#805ad5', 
-    '#d69e2e', '#dd6b20', '#38b2ac', '#ed64a6', '#9f7aea'
+    '#ff5a00', '#ff8b3d', '#ffb266', '#ffd6ad', '#ffe6d5', '#ffc9ae'
   ];
 
   const getMetricColor = (key, index) => {
@@ -11,7 +10,7 @@ const ChartRenderer = (() => {
   };
 
   // Pie Chart (existing functionality enhanced)
-  const renderPieChart = (container, entries, total, title = "Time spent on:") => {
+  const renderPieChart = (container, entries, total, title = "Time spent on:", unit = "%") => {
     if (!container || !d3 || !d3.pie) {
       container.textContent = "Enable D3.js to show the diagram.";
       return;
@@ -58,7 +57,7 @@ const ChartRenderer = (() => {
   };
 
   // Bar Chart
-  const renderBarChart = (container, entries, total, title = "Time spent on:") => {
+  const renderBarChart = (container, entries, total, title = "Time spent on:", unit = "%") => {
     if (!container || !d3 || !d3.scaleBand) {
       container.textContent = "Enable D3.js to show the diagram.";
       return;
@@ -98,9 +97,9 @@ const ChartRenderer = (() => {
       .enter()
       .append("rect")
       .attr("x", d => xScale(d.key))
-      .attr("y", d => yScale(d.value))
+      .attr("y", d => yScale((d.value / total) * 100))
       .attr("width", xScale.bandwidth())
-      .attr("height", d => chartHeight - yScale(d.value))
+      .attr("height", d => chartHeight - yScale((d.value / total) * 100))
       .attr("fill", (d, i) => getMetricColor(d.key, i))
       .attr("stroke", "#fff")
       .attr("stroke-width", 1);
@@ -119,7 +118,7 @@ const ChartRenderer = (() => {
     // Y-axis
     group
       .append("g")
-      .call(d3.axisLeft(yScale).tickFormat(d => d + "%"));
+      .call(d3.axisLeft(yScale).tickFormat(d => d + unit));
 
     // Value labels on bars
     group
@@ -129,15 +128,15 @@ const ChartRenderer = (() => {
       .append("text")
       .attr("class", "bar-label")
       .attr("x", d => xScale(d.key) + xScale.bandwidth() / 2)
-      .attr("y", d => yScale(d.value) - 5)
+      .attr("y", d => yScale((d.value / total) * 100) - 5)
       .attr("text-anchor", "middle")
       .style("font-size", "12px")
       .style("font-weight", "bold")
-      .text(d => d.value + "%");
+      .text(d => d.value + " " + unit);
   };
 
   // Line Chart
-  const renderLineChart = (container, entries, total, title = "Time spent on:") => {
+  const renderLineChart = (container, entries, total, title = "Time spent on:", unit = "%") => {
     if (!container || !d3 || !d3.scaleLinear) {
       container.textContent = "Enable D3.js to show the diagram.";
       return;
@@ -173,7 +172,7 @@ const ChartRenderer = (() => {
     // Line generator
     const line = d3.line()
       .x((d, i) => xScale(d.key) + xScale.bandwidth() / 2)
-      .y(d => yScale(d.value))
+      .y(d => yScale((d.value / total) * 100))
       .curve(d3.curveMonotoneX);
 
     // Line
@@ -193,7 +192,7 @@ const ChartRenderer = (() => {
       .append("circle")
       .attr("class", "dot")
       .attr("cx", d => xScale(d.key) + xScale.bandwidth() / 2)
-      .attr("cy", d => yScale(d.value))
+      .attr("cy", d => yScale((d.value / total) * 100))
       .attr("r", 5)
       .attr("fill", colorPalette[0])
       .attr("stroke", "#fff")
@@ -213,11 +212,11 @@ const ChartRenderer = (() => {
     // Y-axis
     group
       .append("g")
-      .call(d3.axisLeft(yScale).tickFormat(d => d + "%"));
+      .call(d3.axisLeft(yScale).tickFormat(d => d + unit));
   };
 
   // Table View
-  const renderTableView = (container, entries, total, title = "Time spent on:") => {
+  const renderTableView = (container, entries, total, title = "Time spent on:", unit = "%") => {
     if (!container) {
       return;
     }
@@ -236,7 +235,7 @@ const ChartRenderer = (() => {
     thead
       .append("tr")
       .selectAll("th")
-      .data(["Activity", "Time (%)", "Visual"])
+      .data(["Activity", `${unit} (%)`, "Visual"])
       .enter()
       .append("th")
       .text(d => d);
@@ -258,7 +257,7 @@ const ChartRenderer = (() => {
     rows
       .append("td")
       .attr("class", "time-cell")
-      .text(d => d.value + "%");
+      .text(d => d.value + " " + unit + " (" + Math.round((d.value / total) * 100) + "%)");
 
     // Visual bar column
     rows
@@ -266,14 +265,14 @@ const ChartRenderer = (() => {
       .attr("class", "visual-cell")
       .append("div")
       .attr("class", "progress-bar")
-      .style("width", d => d.value + "%")
+      .style("width", d => Math.round((d.value / total) * 100) + "%")
       .style("background-color", (d, i) => getMetricColor(d.key, i))
       .style("height", "20px")
       .style("border-radius", "10px");
   };
 
   // Main render function that switches between chart types
-  const renderChart = (container, entries, total, chartType = "pie", title = "Time spent on:") => {
+  const renderChart = (container, entries, total, chartType = "pie", title = "Time spent on:", unit = "%") => {
     if (!entries || entries.length === 0) {
       container.innerHTML = '<p class="chart-empty">No data available</p>';
       return;
@@ -281,19 +280,19 @@ const ChartRenderer = (() => {
 
     switch (chartType) {
       case "pie":
-        renderPieChart(container, entries, total, title);
+        renderPieChart(container, entries, total, title, unit);
         break;
       case "bar":
-        renderBarChart(container, entries, total, title);
+        renderBarChart(container, entries, total, title, unit);
         break;
       case "line":
-        renderLineChart(container, entries, total, title);
+        renderLineChart(container, entries, total, title, unit);
         break;
       case "table":
-        renderTableView(container, entries, total, title);
+        renderTableView(container, entries, total, title, unit);
         break;
       default:
-        renderPieChart(container, entries, total, title);
+        renderPieChart(container, entries, total, title, unit);
     }
   };
 

@@ -1,4 +1,7 @@
-﻿const OrgStore = (() => {
+// Supabase-powered OrgStore
+import { orgDb, convertSupabaseToFrontend, convertFrontendToSupabase } from './supabase.js';
+
+const OrgStore = (() => {
   const state = {
     nodesById: new Map(),
     rootIds: [],
@@ -23,6 +26,7 @@
       desc: relation.desc ? String(relation.desc) : ""
     };
   };
+
   const normaliseMetrics = (metrics) => {
     if (!metrics) {
       return [];
@@ -94,6 +98,7 @@
     
     return [];
   };
+
   const normaliseStringList = (value) => {
     if (value === null || value === undefined) {
       return [];
@@ -110,6 +115,7 @@
       .map((item) => String(item).trim())
       .filter(Boolean);
   };
+
   const normaliseNode = (rawNode) => {
     const node = {
       id: String(rawNode.id),
@@ -131,36 +137,21 @@
             .filter(Boolean)
         : []
     };
-    // Handle old format with metricsName and metricsType
-    if (rawNode.metricsName || rawNode.metricsType) {
-      const oldMetrics = rawNode.metrics || {};
-      const newMetrics = [{
-        id: Date.now() + Math.random(),
-        name: rawNode.metricsName || "Time spent on:",
-        type: rawNode.metricsType || "pie",
-        unit: "%",
-        data: oldMetrics
-      }];
-      node.metrics = normaliseMetrics(newMetrics);
-    } else if (rawNode.metrics && typeof rawNode.metrics === "object" && !Array.isArray(rawNode.metrics)) {
-      // Handle old format without metricsName/metricsType
-      const newMetrics = [{
-        id: Date.now() + Math.random(),
-        name: "Time spent on:",
-        type: "pie",
-        unit: "%",
-        data: rawNode.metrics
-      }];
-      node.metrics = normaliseMetrics(newMetrics);
-    } else {
+
+    // Handle metrics from Supabase
+    if (rawNode.metrics && Array.isArray(rawNode.metrics)) {
       node.metrics = normaliseMetrics(rawNode.metrics);
+    } else {
+      node.metrics = [];
     }
+
     node.responsibilities = normaliseStringList(rawNode.responsibilities);
     node.outcomes = normaliseStringList(rawNode.outcomes);
     node.supportOffice = rawNode.supportOffice ? String(rawNode.supportOffice) : null;
 
     return node;
   };
+
   const rebuildIndexes = () => {
     const childSets = new Map();
     state.nodesById.forEach((node) => {
@@ -188,6 +179,7 @@
       node.children = Array.from(childSets.get(node.id));
     });
   };
+
   const notify = () => {
     subscribers.forEach((listener) => {
       try {
@@ -197,6 +189,7 @@
       }
     });
   };
+
   const ensureLoaded = async () => {
     if (state.isLoaded) {
       return;
@@ -207,7 +200,8 @@
     }
     await load();
   };
-  const load = async (url = "mock/org.json") => {
+
+  const load = async () => {
     if (state.isLoaded) {
       return getSnapshot();
     }
@@ -215,39 +209,54 @@
       return state.loadPromise;
     }
 
-    state.loadPromise = fetch(url)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Kunde inte ladda organisationsdata: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then((payload) => {
-        if (!Array.isArray(payload.nodes)) {
-          throw new Error("Ogiltigt svar: nodes saknas");
-        }
+    state.loadPromise = (async () => {
+      try {
+        // Load nodes with metrics from Supabase
+        const supabaseData = await orgDb.getNodesWithMetrics();
+        
         state.nodesById.clear();
-        payload.nodes.forEach((rawNode) => {
+        supabaseData.forEach((rawNode) => {
           const node = normaliseNode(rawNode);
           state.nodesById.set(node.id, node);
         });
+
+        // Load relations from Supabase
+        const relations = await orgDb.getRelations();
+        
+        // Add relations to nodes
+        relations.forEach((relation) => {
+          const fromNode = state.nodesById.get(relation.from_node_id);
+          const toNode = state.nodesById.get(relation.to_node_id);
+          
+          if (fromNode && toNode) {
+            fromNode.outputs.push({
+              to: relation.to_node_id,
+              desc: relation.description || ""
+            });
+            toNode.inputs.push({
+              from: relation.from_node_id,
+              desc: relation.description || ""
+            });
+          }
+        });
+
         rebuildIndexes();
         state.isLoaded = true;
         state.lastError = null;
         notify();
         return getSnapshot();
-      })
-      .catch((error) => {
+      } catch (error) {
         state.lastError = error;
-        console.error("OrgStore kunde inte ladda data", error);
+        console.error("OrgStore kunde inte ladda data från Supabase", error);
         throw error;
-      })
-      .finally(() => {
+      } finally {
         state.loadPromise = null;
-      });
+      }
+    })();
 
     return state.loadPromise;
   };
+
   const getSnapshot = () => ({
     nodes: Array.from(state.nodesById.values()).map((node) => clone(node)),
     roots: state.rootIds.map((id) => clone(state.nodesById.get(id)))
@@ -257,6 +266,7 @@
     const node = state.nodesById.get(id);
     return node ? clone(node) : null;
   };
+
   const getChildren = (id) => {
     const node = state.nodesById.get(id);
     if (!node) {
@@ -267,6 +277,7 @@
       .filter(Boolean)
       .map((child) => clone(child));
   };
+
   const getRoots = () => state.rootIds.map((id) => clone(state.nodesById.get(id)));
 
   const getAll = () => Array.from(state.nodesById.values()).map((node) => clone(node));
@@ -305,6 +316,7 @@
       state.rootIds.push(nodeId);
     }
   };
+
   const isDescendant = (potentialParentId, nodeId) => {
     const queue = [...(state.nodesById.get(nodeId)?.children || [])];
     while (queue.length) {
@@ -319,119 +331,180 @@
     }
     return false;
   };
-  const addNode = (nodeInput) => {
-    const node = normaliseNode(nodeInput);
-    if (state.nodesById.has(node.id)) {
-      throw new Error(`Nod med id ${node.id} finns redan`);
-    }
-    node.children = [];
-    node.inputs = node.inputs || [];
-    node.outputs = node.outputs || [];
-    node.metrics = normaliseMetrics(node.metrics) || [];
-    node.responsibilities = node.responsibilities || [];
-    node.outcomes = node.outcomes || [];
-    node.supportOffice = node.supportOffice ? String(node.supportOffice) : null;
 
-    state.nodesById.set(node.id, node);
-    if (node.parent) {
-      setParent(node.id, node.parent);
-    } else {
-      state.rootIds.push(node.id);
-    }
-    notify();
-    return clone(node);
-  };
-  const updateNode = (id, updates) => {
-    const node = state.nodesById.get(id);
-    if (!node) {
-      throw new Error(`Nod med id ${id} saknas`);
-    }
-    if (updates.name !== undefined) {
-      node.name = String(updates.name);
-    }
-    if (updates.type !== undefined) {
-      node.type = String(updates.type);
-    }
-    if (updates.role !== undefined) {
-      node.role = String(updates.role);
-    }
-    if (updates.metrics !== undefined) {
-      node.metrics = normaliseMetrics(updates.metrics) || [];
-    }
-    if (updates.responsibilities !== undefined) {
-      node.responsibilities = normaliseStringList(updates.responsibilities);
-    }
-    if (updates.outcomes !== undefined) {
-      node.outcomes = normaliseStringList(updates.outcomes);
-    }
-    if (updates.supportOffice !== undefined) {
-      const value = updates.supportOffice;
-      node.supportOffice = value === null || value === undefined || value === "" ? null : String(value);
-    }
-    if (updates.parent !== undefined) {
-      setParent(id, updates.parent ? String(updates.parent) : null);
-    }
-    notify();
-    return clone(node);
-  };
-  const removeNode = (id) => {
-    const node = state.nodesById.get(id);
-    if (!node) {
-      throw new Error(`Nod med id ${id} saknas`);
-    }
-    if (node.children.length > 0) {
-      throw new Error("Ta bort eller flytta barnnoder först");
-    }
-
-    if (node.parent) {
-      const parent = state.nodesById.get(node.parent);
-      if (parent) {
-        parent.children = parent.children.filter((childId) => childId !== id);
+  const addNode = async (nodeInput) => {
+    try {
+      const node = normaliseNode(nodeInput);
+      if (state.nodesById.has(node.id)) {
+        throw new Error(`Nod med id ${node.id} finns redan`);
       }
+      
+      node.children = [];
+      node.inputs = node.inputs || [];
+      node.outputs = node.outputs || [];
+      node.metrics = normaliseMetrics(node.metrics) || [];
+      node.responsibilities = node.responsibilities || [];
+      node.outcomes = node.outcomes || [];
+      node.supportOffice = node.supportOffice ? String(node.supportOffice) : null;
+
+      // Save to Supabase
+      const supabaseData = convertFrontendToSupabase(node);
+      await orgDb.createNode(supabaseData);
+
+      state.nodesById.set(node.id, node);
+      if (node.parent) {
+        setParent(node.id, node.parent);
+      } else {
+        state.rootIds.push(node.id);
+      }
+      
+      notify();
+      return clone(node);
+    } catch (error) {
+      console.error("Kunde inte skapa nod i Supabase", error);
+      throw error;
     }
-
-    state.nodesById.delete(id);
-    state.rootIds = state.rootIds.filter((rootId) => rootId !== id);
-
-    state.nodesById.forEach((otherNode) => {
-      otherNode.inputs = otherNode.inputs.filter((relation) => relation.from !== id);
-      otherNode.outputs = otherNode.outputs.filter((relation) => relation.to !== id);
-    });
-
-    notify();
   };
-  const addLink = ({ from, to, desc }) => {
-    if (!from || !to) {
-      throw new Error("Både from och to måste anges");
-    }
-    if (!state.nodesById.has(from) || !state.nodesById.has(to)) {
-      throw new Error("Relationen refererar till okänd nod");
-    }
-    const fromNode = state.nodesById.get(from);
-    const toNode = state.nodesById.get(to);
 
-    if (!fromNode.outputs.some((relation) => relation.to === to && relation.desc === desc)) {
-      fromNode.outputs.push({ to, desc: desc || "" });
-    }
+  const updateNode = async (id, updates) => {
+    try {
+      const node = state.nodesById.get(id);
+      if (!node) {
+        throw new Error(`Nod med id ${id} saknas`);
+      }
 
-    if (!toNode.inputs.some((relation) => relation.from === from && relation.desc === desc)) {
-      toNode.inputs.push({ from, desc: desc || "" });
+      // Update local state
+      if (updates.name !== undefined) {
+        node.name = String(updates.name);
+      }
+      if (updates.type !== undefined) {
+        node.type = String(updates.type);
+      }
+      if (updates.role !== undefined) {
+        node.role = String(updates.role);
+      }
+      if (updates.metrics !== undefined) {
+        node.metrics = normaliseMetrics(updates.metrics) || [];
+      }
+      if (updates.responsibilities !== undefined) {
+        node.responsibilities = normaliseStringList(updates.responsibilities);
+      }
+      if (updates.outcomes !== undefined) {
+        node.outcomes = normaliseStringList(updates.outcomes);
+      }
+      if (updates.supportOffice !== undefined) {
+        const value = updates.supportOffice;
+        node.supportOffice = value === null || value === undefined || value === "" ? null : String(value);
+      }
+      if (updates.parent !== undefined) {
+        setParent(id, updates.parent ? String(updates.parent) : null);
+      }
+
+      // Update in Supabase
+      const supabaseData = convertFrontendToSupabase(node);
+      await orgDb.updateNode(id, supabaseData);
+
+      notify();
+      return clone(node);
+    } catch (error) {
+      console.error("Kunde inte uppdatera nod i Supabase", error);
+      throw error;
     }
-    notify();
   };
-  const removeLink = ({ from, to }) => {
-    if (!from || !to) {
-      throw new Error("Både from och to måste anges för att ta bort relationen");
+
+  const removeNode = async (id) => {
+    try {
+      const node = state.nodesById.get(id);
+      if (!node) {
+        throw new Error(`Nod med id ${id} saknas`);
+      }
+      if (node.children.length > 0) {
+        throw new Error("Ta bort eller flytta barnnoder först");
+      }
+
+      // Remove from Supabase
+      await orgDb.deleteNode(id);
+
+      if (node.parent) {
+        const parent = state.nodesById.get(node.parent);
+        if (parent) {
+          parent.children = parent.children.filter((childId) => childId !== id);
+        }
+      }
+
+      state.nodesById.delete(id);
+      state.rootIds = state.rootIds.filter((rootId) => rootId !== id);
+
+      state.nodesById.forEach((otherNode) => {
+        otherNode.inputs = otherNode.inputs.filter((relation) => relation.from !== id);
+        otherNode.outputs = otherNode.outputs.filter((relation) => relation.to !== id);
+      });
+
+      notify();
+    } catch (error) {
+      console.error("Kunde inte ta bort nod från Supabase", error);
+      throw error;
     }
-    const fromNode = state.nodesById.get(from);
-    const toNode = state.nodesById.get(to);
-    if (!fromNode || !toNode) {
-      throw new Error("Relationen refererar till okänd nod");
-    }
-    fromNode.outputs = fromNode.outputs.filter((relation) => relation.to !== to);
-    toNode.inputs = toNode.inputs.filter((relation) => relation.from !== from);
-    notify();
   };
+
+  const addLink = async ({ from, to, desc }) => {
+    try {
+      if (!from || !to) {
+        throw new Error("Både from och to måste anges");
+      }
+      if (!state.nodesById.has(from) || !state.nodesById.has(to)) {
+        throw new Error("Relationen refererar till okänd nod");
+      }
+
+      // Add to Supabase
+      await orgDb.createRelation({
+        from_node_id: from,
+        to_node_id: to,
+        description: desc || ""
+      });
+
+      const fromNode = state.nodesById.get(from);
+      const toNode = state.nodesById.get(to);
+
+      if (!fromNode.outputs.some((relation) => relation.to === to && relation.desc === desc)) {
+        fromNode.outputs.push({ to, desc: desc || "" });
+      }
+
+      if (!toNode.inputs.some((relation) => relation.from === from && relation.desc === desc)) {
+        toNode.inputs.push({ from, desc: desc || "" });
+      }
+      
+      notify();
+    } catch (error) {
+      console.error("Kunde inte skapa relation i Supabase", error);
+      throw error;
+    }
+  };
+
+  const removeLink = async ({ from, to }) => {
+    try {
+      if (!from || !to) {
+        throw new Error("Både from och to måste anges för att ta bort relationen");
+      }
+
+      // Remove from Supabase
+      await orgDb.deleteRelation(from, to);
+
+      const fromNode = state.nodesById.get(from);
+      const toNode = state.nodesById.get(to);
+      if (!fromNode || !toNode) {
+        throw new Error("Relationen refererar till okänd nod");
+      }
+      fromNode.outputs = fromNode.outputs.filter((relation) => relation.to !== to);
+      toNode.inputs = toNode.inputs.filter((relation) => relation.from !== from);
+      
+      notify();
+    } catch (error) {
+      console.error("Kunde inte ta bort relation från Supabase", error);
+      throw error;
+    }
+  };
+
   const getRelations = () => {
     const seen = new Set();
     const relations = [];
@@ -446,6 +519,7 @@
     });
     return relations.map((relation) => clone(relation));
   };
+
   const subscribe = (listener) => {
     if (typeof listener !== "function") {
       throw new Error("Listener måste vara en funktion");
@@ -453,10 +527,47 @@
     subscribers.add(listener);
     return () => subscribers.delete(listener);
   };
+
   const getState = () => ({
     isLoaded: state.isLoaded,
     lastError: state.lastError ? String(state.lastError) : null
   });
+
+  // Setup real-time subscriptions
+  const setupRealtimeSubscriptions = () => {
+    // Subscribe to node changes
+    orgDb.subscribeToNodes((payload) => {
+      console.log('Node changed:', payload);
+      // Reload data when nodes change
+      load();
+    });
+
+    // Subscribe to metrics changes
+    orgDb.subscribeToMetrics((payload) => {
+      console.log('Metric changed:', payload);
+      // Reload data when metrics change
+      load();
+    });
+
+    // Subscribe to relations changes
+    orgDb.subscribeToRelations((payload) => {
+      console.log('Relation changed:', payload);
+      // Reload data when relations change
+      load();
+    });
+  };
+
+  // Initialize real-time subscriptions when store is first loaded
+  let subscriptionsInitialized = false;
+  const originalLoad = load;
+  load = async (...args) => {
+    const result = await originalLoad(...args);
+    if (!subscriptionsInitialized && state.isLoaded) {
+      setupRealtimeSubscriptions();
+      subscriptionsInitialized = true;
+    }
+    return result;
+  };
 
   return {
     load,
@@ -477,7 +588,4 @@
   };
 })();
 
-
-
-
-
+export default OrgStore;

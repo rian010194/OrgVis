@@ -140,6 +140,7 @@
                       <option value="table">Tabell</option>
                     </select>
                     <input type="text" id="adminVisualizationName" placeholder="Namn på visualisering (t.ex. 'Time spent on: Q1')" class="visualization-name-input">
+                    <input type="text" id="adminVisualizationUnit" placeholder="Enhet (t.ex. 'timmar', '%', 'dagar')" class="visualization-unit-input">
                     <button type="button" id="adminCreatePieButton" class="secondary">Skapa Visualisering</button>
                     <button type="button" id="adminAddMetricButton" class="secondary" style="display: none;">Add Metric</button>
                   </div>
@@ -204,7 +205,13 @@
   </section>
 
   <script src="js/d3.v7.min.js"></script>
+  <!-- Temporarily use mock data while setting up Supabase -->
   <script src="js/data.js"></script>
+  <!-- Uncomment these when Supabase is configured:
+  <script type="module" src="js/config.js"></script>
+  <script type="module" src="js/supabase.js"></script>
+  <script type="module" src="js/data-supabase.js"></script>
+  -->
   <script src="js/charts.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/map.js"></script>

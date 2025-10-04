@@ -10,3 +10,12 @@ Book meeting with client
 
 Add placeholder text and metrics for placeholder piecharts in all of the nodes
     - 
+
+Add different colour schemes, maybe ability for the admin to change colours of the app
+typografy etc of the site, also be able to add their own logo. 
+
+
+
+Backend
+    - Fix backend
+    - fix user/admin rights, find a sollution for 

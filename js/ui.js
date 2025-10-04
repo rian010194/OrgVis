@@ -94,6 +94,8 @@ const OrgUI = (() => {
 
     visualizationNameInput: null,
 
+    visualizationUnitInput: null,
+
     existingMetrics: null,
 
     createTypeSelect: null,
@@ -454,6 +456,8 @@ const OrgUI = (() => {
     elements.visualizationTypeSelect = document.getElementById("adminVisualizationType");
 
     elements.visualizationNameInput = document.getElementById("adminVisualizationName");
+
+    elements.visualizationUnitInput = document.getElementById("adminVisualizationUnit");
 
     elements.existingMetrics = document.getElementById("adminExistingMetrics");
 
@@ -1028,9 +1032,18 @@ const OrgUI = (() => {
 
     }
 
-    container.appendChild(buildRelationList("Inputs", node.inputs, "from"));
-
-    container.appendChild(buildRelationList("Outputs", node.outputs, "to"));
+    // Create a container for inputs and outputs to display them side by side
+    const inputsOutputsContainer = document.createElement("div");
+    inputsOutputsContainer.classList.add("detail-section");
+    inputsOutputsContainer.setAttribute("data-section-type", "inputs-outputs");
+    
+    const inputsSection = buildRelationList("Inputs", node.inputs, "from");
+    const outputsSection = buildRelationList("Outputs", node.outputs, "to");
+    
+    inputsOutputsContainer.appendChild(inputsSection);
+    inputsOutputsContainer.appendChild(outputsSection);
+    
+    container.appendChild(inputsOutputsContainer);
 
     elements.detailPanel.appendChild(container);
 
@@ -1056,7 +1069,7 @@ const OrgUI = (() => {
 
     const section = document.createElement("section");
 
-    section.classList.add("detail-section");
+    // Don't add detail-section class here since it will be added by the parent container
 
     const heading = document.createElement("h3");
 
@@ -1575,13 +1588,19 @@ const OrgUI = (() => {
     if (elements.metricsList) {
       delete elements.metricsList.dataset.editingIndex;
     }
+    if (elements.metricsSection) {
+      elements.metricsSection.classList.remove("editing-metric");
+    }
 
-    // Clear visualization type and name for new metrics
+    // Clear visualization type, name and unit for new metrics
     if (elements.visualizationTypeSelect) {
       elements.visualizationTypeSelect.value = "";
     }
     if (elements.visualizationNameInput) {
       elements.visualizationNameInput.value = "";
+    }
+    if (elements.visualizationUnitInput) {
+      elements.visualizationUnitInput.value = "";
     }
 
     renderMetricsEditor(node);
@@ -1915,7 +1934,12 @@ const OrgUI = (() => {
         const editBtn = document.createElement("button");
         editBtn.classList.add("edit-metric-btn");
         editBtn.textContent = "Edit";
-        editBtn.onclick = () => editExistingMetric(metric, index);
+        editBtn.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log("Edit button clicked for metric:", metric, "index:", index);
+          editExistingMetric(metric, index);
+        };
 
         const deleteBtn = document.createElement("button");
         deleteBtn.classList.add("delete-metric-btn");
@@ -1935,29 +1959,70 @@ const OrgUI = (() => {
   };
 
   const editExistingMetric = (metric, index) => {
+    console.log("editExistingMetric called with:", { metric, index });
+    console.log("elements.editNodeSelect:", elements.editNodeSelect);
+    console.log("elements.editNodeSelect.value:", elements.editNodeSelect?.value);
+    
+    // Check if we have a node selected
+    if (!elements.editNodeSelect || !elements.editNodeSelect.value) {
+      console.log("No node selected, showing error message");
+      displayAdminMessage("Välj en nod först för att redigera metrics.", "error");
+      return;
+    }
+
+    console.log("Node selected:", elements.editNodeSelect.value);
+
     // Populate the form with existing metric data
     if (elements.visualizationTypeSelect) {
       elements.visualizationTypeSelect.value = metric.type || "pie";
+      console.log("Set visualization type to:", metric.type || "pie");
     }
     if (elements.visualizationNameInput) {
       elements.visualizationNameInput.value = metric.name || "Time spent on:";
+      console.log("Set visualization name to:", metric.name || "Time spent on:");
+    }
+    if (elements.visualizationUnitInput) {
+      elements.visualizationUnitInput.value = metric.unit || "%";
+      console.log("Set visualization unit to:", metric.unit || "%");
     }
 
     // Clear current metrics list and populate with existing data
-    elements.metricsList.innerHTML = "";
-    
-    const entries = Object.entries(metric.data || {});
-    entries.forEach(([key, value]) => {
-      elements.metricsList.appendChild(createMetricRow(key, value));
-    });
+    if (elements.metricsList) {
+      elements.metricsList.innerHTML = "";
+      
+      const entries = Object.entries(metric.data || {});
+      console.log("Metric entries:", entries);
+      
+      entries.forEach(([key, value]) => {
+        const row = createMetricRow(key, value);
+        elements.metricsList.appendChild(row);
+        console.log("Added metric row:", key, value);
+      });
+
+      // Store the index for updating
+      elements.metricsList.dataset.editingIndex = index;
+      console.log("Set editing index to:", index);
+    }
 
     // Show Add Metric button
     if (elements.metricsAddButton) {
       elements.metricsAddButton.style.display = "inline-block";
+      console.log("Show Add Metric button");
     }
 
-    // Store the index for updating
-    elements.metricsList.dataset.editingIndex = index;
+    // Scroll to the metrics section
+    if (elements.metricsSection) {
+      elements.metricsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    displayAdminMessage("Redigerar metric. Ändra värdena och klicka på 'Save Metrics'.", "info");
+    
+    // Add visual indicator that we're in edit mode
+    if (elements.metricsSection) {
+      elements.metricsSection.classList.add("editing-metric");
+    }
+    
+    console.log("Edit metric function completed successfully");
   };
 
   const deleteExistingMetric = (index) => {
@@ -2150,9 +2215,10 @@ const OrgUI = (() => {
 
     try {
 
-      // Get visualization type and name
+      // Get visualization type, name and unit
       const visualizationType = elements.visualizationTypeSelect?.value;
       const visualizationName = elements.visualizationNameInput?.value;
+      const visualizationUnit = elements.visualizationUnitInput?.value || "%";
 
       if (!visualizationType || !visualizationName) {
         displayAdminMessage("Välj visualiseringstyp och namn först.", "error");
@@ -2174,6 +2240,7 @@ const OrgUI = (() => {
           ...updatedMetrics[parseInt(editingIndex)],
           name: visualizationName,
           type: visualizationType,
+          unit: visualizationUnit,
           data: metrics
         };
       } else {
@@ -2182,6 +2249,7 @@ const OrgUI = (() => {
           id: Date.now() + Math.random(),
           name: visualizationName,
           type: visualizationType,
+          unit: visualizationUnit,
           data: metrics
         };
 
@@ -2196,6 +2264,9 @@ const OrgUI = (() => {
       // Clear editing state
       if (elements.metricsList) {
         delete elements.metricsList.dataset.editingIndex;
+      }
+      if (elements.metricsSection) {
+        elements.metricsSection.classList.remove("editing-metric");
       }
 
       const refreshedNode = OrgStore.getNode(nodeId);
@@ -2406,8 +2477,9 @@ const OrgUI = (() => {
           const value = document.createElement("span");
           value.classList.add("detail-metrics-value");
 
+          const unit = metric.unit || "%";
           const percent = total > 0 ? Math.round((entry.value / total) * 100) : 0;
-          value.textContent = entry.value + " (" + percent + "%)";
+          value.textContent = entry.value + " " + unit + " (" + percent + "%)";
 
           item.appendChild(swatch);
           item.appendChild(label);
@@ -2419,7 +2491,7 @@ const OrgUI = (() => {
 
         requestAnimationFrame(() => {
           if (typeof ChartRenderer !== "undefined") {
-            ChartRenderer.renderChart(chartContainer, entries, total, metric.type || "pie", metric.name || "Time spent on:");
+            ChartRenderer.renderChart(chartContainer, entries, total, metric.type || "pie", metric.name || "Time spent on:", metric.unit || "%");
           } else {
             renderMetricsChart(chartContainer, entries, total);
           }
@@ -2443,7 +2515,7 @@ const OrgUI = (() => {
 
     // Use new ChartRenderer if available, otherwise fallback to old implementation
     if (typeof ChartRenderer !== "undefined") {
-      ChartRenderer.renderChart(container, entries, total, "pie", "Time spent on:");
+      ChartRenderer.renderChart(container, entries, total, "pie", "Time spent on:", "%");
       return;
     }
 

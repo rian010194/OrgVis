@@ -2541,6 +2541,61 @@
         "Säkra pass",
         "Nöjd kund-index"
       ]
+    },
+    {
+      "id": "test_unit_examples",
+      "name": "Test Unit - Olika Enheter",
+      "type": "Unit",
+      "role": "Testnod för att demonstrera olika enheter i diagram",
+      "parent": null,
+      "children": [],
+      "inputs": [],
+      "outputs": [],
+      "responsibilities": [
+        "Testa olika enheter i visualiseringar"
+      ],
+      "outcomes": [
+        "Fungerande diagram med olika enheter"
+      ],
+      "metrics": [
+        {
+          "id": "test_percent",
+          "name": "Tid fördelning",
+          "type": "line",
+          "unit": "%",
+          "data": {
+            "Planering": 40,
+            "Utveckling": 35,
+            "Testning": 20,
+            "Dokumentation": 5
+          }
+        },
+        {
+          "id": "test_kronor",
+          "name": "Budget fördelning",
+          "type": "line", 
+          "unit": " kr",
+          "data": {
+            "Personal": 500000,
+            "Utveckling": 200000,
+            "Marknadsföring": 100000,
+            "Administration": 50000
+          }
+        },
+        {
+          "id": "test_timmar",
+          "name": "Arbetstid per vecka",
+          "type": "line",
+          "unit": " timmar",
+          "data": {
+            "Måndag": 8,
+            "Tisdag": 8,
+            "Onsdag": 6,
+            "Torsdag": 8,
+            "Fredag": 6
+          }
+        }
+      ]
     }
   ]
 }
