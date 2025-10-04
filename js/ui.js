@@ -94,11 +94,12 @@ const OrgUI = (() => {
 
     visualizationNameInput: null,
 
+    existingMetrics: null,
+
     createTypeSelect: null,
 
     createResponsibilities: null,
 
-    createActivities: null,
 
     createOutcomes: null,
 
@@ -108,7 +109,6 @@ const OrgUI = (() => {
 
     editResponsibilities: null,
 
-    editActivities: null,
 
     editOutcomes: null,
 
@@ -455,11 +455,12 @@ const OrgUI = (() => {
 
     elements.visualizationNameInput = document.getElementById("adminVisualizationName");
 
+    elements.existingMetrics = document.getElementById("adminExistingMetrics");
+
     elements.createTypeSelect = document.getElementById("adminCreateType");
 
     elements.createResponsibilities = document.getElementById("adminCreateResponsibilities");
 
-    elements.createActivities = document.getElementById("adminCreateActivities");
 
     elements.createOutcomes = document.getElementById("adminCreateOutcomes");
 
@@ -469,7 +470,6 @@ const OrgUI = (() => {
 
     elements.editResponsibilities = document.getElementById("adminEditResponsibilities");
 
-    elements.editActivities = document.getElementById("adminEditActivities");
 
     elements.editOutcomes = document.getElementById("adminEditOutcomes");
 
@@ -807,13 +807,11 @@ const OrgUI = (() => {
 
     selectedNodeId = nodeId;
 
-    if (elements.detailPanel) {
-
-      elements.detailPanel.classList.remove("expanded");
-
-    }
-
-    document.body.classList.remove("detail-expanded");
+    // Keep detail panel expanded by default
+    // if (elements.detailPanel) {
+    //   elements.detailPanel.classList.remove("expanded");
+    // }
+    // document.body.classList.remove("detail-expanded");
 
     expandAncestors(nodeId);
 
@@ -897,9 +895,9 @@ const OrgUI = (() => {
 
     if (elements.detailPanel.dataset.nodeId !== node.id) {
 
-      elements.detailPanel.classList.remove("expanded");
+      elements.detailPanel.classList.add("expanded");
 
-      document.body.classList.remove("detail-expanded");
+      document.body.classList.add("detail-expanded");
 
     }
 
@@ -959,7 +957,6 @@ const OrgUI = (() => {
 
     appendDetailList(container, "Macro Responsibilities", node.responsibilities);
 
-    appendDetailList(container, "Spending time on", node.activities);
 
     // Add pie chart for time spent if data exists
     if (node.timeSpent && node.timeSpent.length > 0) {
@@ -1495,7 +1492,6 @@ const OrgUI = (() => {
 
     const responsibilitiesInput = elements.editResponsibilities || elements.editForm.querySelector("textarea[name='responsibilities']");
 
-    const activitiesInput = elements.editActivities || elements.editForm.querySelector("textarea[name='activities']");
 
     const outcomesInput = elements.editOutcomes || elements.editForm.querySelector("textarea[name='outcomes']");
 
@@ -1511,7 +1507,6 @@ const OrgUI = (() => {
 
       if (responsibilitiesInput) responsibilitiesInput.value = "";
 
-      if (activitiesInput) activitiesInput.value = "";
 
       if (outcomesInput) outcomesInput.value = "";
 
@@ -1565,7 +1560,6 @@ const OrgUI = (() => {
 
     if (responsibilitiesInput) responsibilitiesInput.value = formatMultiline(node.responsibilities);
 
-    if (activitiesInput) activitiesInput.value = formatMultiline(node.activities);
 
     if (outcomesInput) outcomesInput.value = formatMultiline(node.outcomes);
 
@@ -1577,12 +1571,17 @@ const OrgUI = (() => {
 
     }
 
-    // Populate visualization type and name
+    // Clear editing state when switching nodes
+    if (elements.metricsList) {
+      delete elements.metricsList.dataset.editingIndex;
+    }
+
+    // Clear visualization type and name for new metrics
     if (elements.visualizationTypeSelect) {
-      elements.visualizationTypeSelect.value = node.metricsType || "";
+      elements.visualizationTypeSelect.value = "";
     }
     if (elements.visualizationNameInput) {
-      elements.visualizationNameInput.value = node.metricsName || "";
+      elements.visualizationNameInput.value = "";
     }
 
     renderMetricsEditor(node);
@@ -1611,7 +1610,6 @@ const OrgUI = (() => {
 
     const responsibilities = parseMultiline(data.get("responsibilities"));
 
-    const activities = parseMultiline(data.get("activities"));
 
     const outcomes = parseMultiline(data.get("outcomes"));
 
@@ -1625,7 +1623,7 @@ const OrgUI = (() => {
 
     try {
 
-      OrgStore.addNode({ id, name, type, parent, role, supportOffice, responsibilities, activities, outcomes });
+      OrgStore.addNode({ id, name, type, parent, role, supportOffice, responsibilities, outcomes });
 
       form.reset();
 
@@ -1685,7 +1683,6 @@ const OrgUI = (() => {
 
       responsibilities: parseMultiline(data.get("responsibilities")),
 
-      activities: parseMultiline(data.get("activities")),
 
       outcomes: parseMultiline(data.get("outcomes"))
 
@@ -1867,13 +1864,14 @@ const OrgUI = (() => {
 
     elements.metricsSection.classList.remove("disabled");
 
-    const entries = node.metrics
+    // Clear existing metrics display
+    if (elements.existingMetrics) {
+      elements.existingMetrics.innerHTML = "";
+    }
 
-      ? Object.entries(node.metrics).filter(([key, value]) => key && Number.isFinite(Number(value)))
+    const metrics = node.metrics || [];
 
-      : [];
-
-    if (!entries.length) {
+    if (!metrics.length) {
 
       elements.metricsList.appendChild(createMetricsEmpty());
 
@@ -1881,12 +1879,111 @@ const OrgUI = (() => {
 
     }
 
+    // Display existing metrics
+    if (elements.existingMetrics) {
+      const existingHeading = document.createElement("h5");
+      existingHeading.textContent = "Befintliga Metrics:";
+      existingHeading.style.marginBottom = "0.5rem";
+      existingHeading.style.color = "var(--brand-orange)";
+      elements.existingMetrics.appendChild(existingHeading);
+
+      metrics.forEach((metric, index) => {
+        const metricElement = document.createElement("div");
+        metricElement.classList.add("existing-metric");
+
+        const info = document.createElement("div");
+        info.classList.add("existing-metric-info");
+
+        const name = document.createElement("span");
+        name.classList.add("existing-metric-name");
+        name.textContent = metric.name || "Time spent on:";
+
+        const type = document.createElement("span");
+        type.classList.add("existing-metric-type");
+        type.textContent = metric.type || "pie";
+
+        const count = document.createElement("span");
+        count.textContent = `(${Object.keys(metric.data || {}).length} items)`;
+
+        info.appendChild(name);
+        info.appendChild(type);
+        info.appendChild(count);
+
+        const actions = document.createElement("div");
+        actions.classList.add("existing-metric-actions");
+
+        const editBtn = document.createElement("button");
+        editBtn.classList.add("edit-metric-btn");
+        editBtn.textContent = "Edit";
+        editBtn.onclick = () => editExistingMetric(metric, index);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.classList.add("delete-metric-btn");
+        deleteBtn.textContent = "Delete";
+        deleteBtn.onclick = () => deleteExistingMetric(index);
+
+        actions.appendChild(editBtn);
+        actions.appendChild(deleteBtn);
+
+        metricElement.appendChild(info);
+        metricElement.appendChild(actions);
+
+        elements.existingMetrics.appendChild(metricElement);
+      });
+    }
+
+  };
+
+  const editExistingMetric = (metric, index) => {
+    // Populate the form with existing metric data
+    if (elements.visualizationTypeSelect) {
+      elements.visualizationTypeSelect.value = metric.type || "pie";
+    }
+    if (elements.visualizationNameInput) {
+      elements.visualizationNameInput.value = metric.name || "Time spent on:";
+    }
+
+    // Clear current metrics list and populate with existing data
+    elements.metricsList.innerHTML = "";
+    
+    const entries = Object.entries(metric.data || {});
     entries.forEach(([key, value]) => {
-
       elements.metricsList.appendChild(createMetricRow(key, value));
-
     });
 
+    // Show Add Metric button
+    if (elements.metricsAddButton) {
+      elements.metricsAddButton.style.display = "inline-block";
+    }
+
+    // Store the index for updating
+    elements.metricsList.dataset.editingIndex = index;
+  };
+
+  const deleteExistingMetric = (index) => {
+    if (!confirm("Är du säker på att du vill ta bort denna metric?")) {
+      return;
+    }
+
+    const nodeId = elements.editNodeSelect?.value;
+    if (!nodeId) return;
+
+    const node = OrgStore.getNode(nodeId);
+    if (!node) return;
+
+    const metrics = [...(node.metrics || [])];
+    metrics.splice(index, 1);
+
+    OrgStore.updateNode(nodeId, { metrics });
+
+    displayAdminMessage("Metric deleted.", "success");
+
+    const refreshedNode = OrgStore.getNode(nodeId);
+    renderMetricsEditor(refreshedNode);
+
+    if (selectedNodeId === nodeId) {
+      renderDetailPanel();
+    }
   };
 
   const handleCreatePieChart = () => {
@@ -2057,19 +2154,49 @@ const OrgUI = (() => {
       const visualizationType = elements.visualizationTypeSelect?.value;
       const visualizationName = elements.visualizationNameInput?.value;
 
-      const updateData = { metrics };
-
-      // Add visualization metadata if available
-      if (visualizationType) {
-        updateData.metricsType = visualizationType;
-      }
-      if (visualizationName) {
-        updateData.metricsName = visualizationName;
+      if (!visualizationType || !visualizationName) {
+        displayAdminMessage("Välj visualiseringstyp och namn först.", "error");
+        return;
       }
 
-      OrgStore.updateNode(nodeId, updateData);
+      // Get existing metrics
+      const node = OrgStore.getNode(nodeId);
+      const existingMetrics = node?.metrics || [];
+
+      // Check if we're editing an existing metric
+      const editingIndex = elements.metricsList.dataset.editingIndex;
+      
+      let updatedMetrics;
+      if (editingIndex !== undefined && editingIndex !== "") {
+        // Update existing metric
+        updatedMetrics = [...existingMetrics];
+        updatedMetrics[parseInt(editingIndex)] = {
+          ...updatedMetrics[parseInt(editingIndex)],
+          name: visualizationName,
+          type: visualizationType,
+          data: metrics
+        };
+      } else {
+        // Create new metric object
+        const newMetric = {
+          id: Date.now() + Math.random(),
+          name: visualizationName,
+          type: visualizationType,
+          data: metrics
+        };
+
+        // Add new metric to existing ones
+        updatedMetrics = [...existingMetrics, newMetric];
+      }
+
+      OrgStore.updateNode(nodeId, { metrics: updatedMetrics });
 
       displayAdminMessage("Metrics saved.", "success");
+
+      // Clear editing state
+      if (elements.metricsList) {
+        delete elements.metricsList.dataset.editingIndex;
+      }
 
       const refreshedNode = OrgStore.getNode(nodeId);
 
@@ -2217,9 +2344,7 @@ const OrgUI = (() => {
 
     const heading = document.createElement("h3");
 
-    // Use custom visualization name if available, otherwise default to "Time spent on:"
-    const visualizationName = node.metricsName || "Time spent on:";
-    heading.textContent = visualizationName;
+    heading.textContent = "Metrics";
 
     section.appendChild(heading);
 
@@ -2229,19 +2354,9 @@ const OrgUI = (() => {
 
     section.appendChild(body);
 
-    const metrics = node.metrics || null;
+    const metrics = node.metrics || [];
 
-    const entries = metrics
-
-      ? Object.entries(metrics)
-
-          .map(([key, value]) => ({ key, value: Number(value) || 0 }))
-
-          .filter((entry) => entry.value > 0)
-
-      : [];
-
-    if (!entries.length) {
+    if (!metrics.length) {
 
       const empty = document.createElement("p");
 
@@ -2255,56 +2370,63 @@ const OrgUI = (() => {
 
     }
 
-    const chartContainer = document.createElement("div");
+    // Create a container for each metric
+    metrics.forEach((metric, index) => {
+      const metricContainer = document.createElement("div");
+      metricContainer.classList.add("metric-container");
+      
+      const metricHeading = document.createElement("h4");
+      metricHeading.textContent = metric.name || "Time spent on:";
+      metricContainer.appendChild(metricHeading);
 
-    chartContainer.classList.add("detail-metrics-chart");
+      const chartContainer = document.createElement("div");
+      chartContainer.classList.add("detail-metrics-chart");
+      metricContainer.appendChild(chartContainer);
 
-    body.appendChild(chartContainer);
+      const entries = Object.entries(metric.data || {})
+        .map(([key, value]) => ({ key, value: Number(value) || 0 }))
+        .filter((entry) => entry.value > 0);
 
-    const total = entries.reduce((sum, entry) => sum + entry.value, 0);
+      if (entries.length > 0) {
+        const total = entries.reduce((sum, entry) => sum + entry.value, 0);
 
-    const legend = document.createElement("ul");
+        const legend = document.createElement("ul");
+        legend.classList.add("detail-metrics-legend");
 
-    legend.classList.add("detail-metrics-legend");
+        entries.forEach((entry) => {
+          const item = document.createElement("li");
 
-    entries.forEach((entry) => {
+          const swatch = document.createElement("span");
+          swatch.classList.add("detail-metrics-swatch");
+          swatch.style.backgroundColor = getMetricColor(entry.key);
 
-      const item = document.createElement("li");
+          const label = document.createElement("span");
+          label.textContent = entry.key;
 
-      const swatch = document.createElement("span");
+          const value = document.createElement("span");
+          value.classList.add("detail-metrics-value");
 
-      swatch.classList.add("detail-metrics-swatch");
+          const percent = total > 0 ? Math.round((entry.value / total) * 100) : 0;
+          value.textContent = entry.value + " (" + percent + "%)";
 
-      swatch.style.backgroundColor = getMetricColor(entry.key);
+          item.appendChild(swatch);
+          item.appendChild(label);
+          item.appendChild(value);
+          legend.appendChild(item);
+        });
 
-      const label = document.createElement("span");
+        metricContainer.appendChild(legend);
 
-      label.textContent = entry.key;
+        requestAnimationFrame(() => {
+          if (typeof ChartRenderer !== "undefined") {
+            ChartRenderer.renderChart(chartContainer, entries, total, metric.type || "pie", metric.name || "Time spent on:");
+          } else {
+            renderMetricsChart(chartContainer, entries, total);
+          }
+        });
+      }
 
-      const value = document.createElement("span");
-
-      value.classList.add("detail-metrics-value");
-
-      const percent = total > 0 ? Math.round((entry.value / total) * 100) : 0;
-
-            value.textContent = entry.value + " (" + percent + "%)";
-
-      item.appendChild(swatch);
-
-      item.appendChild(label);
-
-      item.appendChild(value);
-
-      legend.appendChild(item);
-
-    });
-
-    body.appendChild(legend);
-
-    requestAnimationFrame(() => {
-
-      renderMetricsChart(chartContainer, entries, total);
-
+      body.appendChild(metricContainer);
     });
 
     return section;
@@ -2317,6 +2439,12 @@ const OrgUI = (() => {
 
       return;
 
+    }
+
+    // Use new ChartRenderer if available, otherwise fallback to old implementation
+    if (typeof ChartRenderer !== "undefined") {
+      ChartRenderer.renderChart(container, entries, total, "pie", "Time spent on:");
+      return;
     }
 
     if (typeof d3 === "undefined" || !d3.pie) {
@@ -2387,7 +2515,7 @@ const OrgUI = (() => {
 
         .attr("dy", "0.35em")
 
-        .text(String(total));
+        .text("100%");
 
     }
 

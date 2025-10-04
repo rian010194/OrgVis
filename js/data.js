@@ -24,21 +24,62 @@
     };
   };
   const normaliseMetrics = (metrics) => {
-    if (!metrics || typeof metrics !== "object") {
-      return null;
+    if (!metrics) {
+      return [];
     }
-    const result = {};
-    Object.entries(metrics).forEach(([key, value]) => {
-      if (key === undefined || key === null) {
-        return;
-      }
-      const numeric = Number(value);
-      if (!Number.isFinite(numeric)) {
-        return;
-      }
-      result[String(key)] = numeric;
-    });
-    return Object.keys(result).length ? result : null;
+    
+    // Handle both old format (single metrics object) and new format (array of metrics)
+    if (Array.isArray(metrics)) {
+      return metrics.map(metric => {
+        if (!metric || typeof metric !== "object") {
+          return null;
+        }
+        const result = {
+          id: metric.id || Date.now() + Math.random(),
+          name: metric.name || "Time spent on:",
+          type: metric.type || "pie",
+          data: {}
+        };
+        
+        if (metric.data && typeof metric.data === "object") {
+          Object.entries(metric.data).forEach(([key, value]) => {
+            if (key === undefined || key === null) {
+              return;
+            }
+            const numeric = Number(value);
+            if (Number.isFinite(numeric)) {
+              result.data[String(key)] = numeric;
+            }
+          });
+        }
+        
+        return Object.keys(result.data).length ? result : null;
+      }).filter(Boolean);
+    }
+    
+    // Convert old format to new format
+    if (typeof metrics === "object") {
+      const result = {
+        id: Date.now() + Math.random(),
+        name: "Time spent on:",
+        type: "pie",
+        data: {}
+      };
+      
+      Object.entries(metrics).forEach(([key, value]) => {
+        if (key === undefined || key === null) {
+          return;
+        }
+        const numeric = Number(value);
+        if (Number.isFinite(numeric)) {
+          result.data[String(key)] = numeric;
+        }
+      });
+      
+      return Object.keys(result.data).length ? [result] : [];
+    }
+    
+    return [];
   };
   const normaliseStringList = (value) => {
     if (value === null || value === undefined) {
@@ -79,11 +120,8 @@
     };
     node.metrics = normaliseMetrics(rawNode.metrics);
     node.responsibilities = normaliseStringList(rawNode.responsibilities);
-    node.activities = normaliseStringList(rawNode.activities);
     node.outcomes = normaliseStringList(rawNode.outcomes);
     node.supportOffice = rawNode.supportOffice ? String(rawNode.supportOffice) : null;
-    node.metricsType = rawNode.metricsType ? String(rawNode.metricsType) : null;
-    node.metricsName = rawNode.metricsName ? String(rawNode.metricsName) : null;
 
     return node;
   };
@@ -253,13 +291,10 @@
     node.children = [];
     node.inputs = node.inputs || [];
     node.outputs = node.outputs || [];
-    node.metrics = normaliseMetrics(node.metrics) || null;
+    node.metrics = normaliseMetrics(node.metrics) || [];
     node.responsibilities = node.responsibilities || [];
-    node.activities = node.activities || [];
     node.outcomes = node.outcomes || [];
     node.supportOffice = node.supportOffice ? String(node.supportOffice) : null;
-    node.metricsType = node.metricsType ? String(node.metricsType) : null;
-    node.metricsName = node.metricsName ? String(node.metricsName) : null;
 
     state.nodesById.set(node.id, node);
     if (node.parent) {
@@ -285,13 +320,10 @@
       node.role = String(updates.role);
     }
     if (updates.metrics !== undefined) {
-      node.metrics = normaliseMetrics(updates.metrics) || null;
+      node.metrics = normaliseMetrics(updates.metrics) || [];
     }
     if (updates.responsibilities !== undefined) {
       node.responsibilities = normaliseStringList(updates.responsibilities);
-    }
-    if (updates.activities !== undefined) {
-      node.activities = normaliseStringList(updates.activities);
     }
     if (updates.outcomes !== undefined) {
       node.outcomes = normaliseStringList(updates.outcomes);
@@ -299,12 +331,6 @@
     if (updates.supportOffice !== undefined) {
       const value = updates.supportOffice;
       node.supportOffice = value === null || value === undefined || value === "" ? null : String(value);
-    }
-    if (updates.metricsType !== undefined) {
-      node.metricsType = updates.metricsType ? String(updates.metricsType) : null;
-    }
-    if (updates.metricsName !== undefined) {
-      node.metricsName = updates.metricsName ? String(updates.metricsName) : null;
     }
     if (updates.parent !== undefined) {
       setParent(id, updates.parent ? String(updates.parent) : null);
