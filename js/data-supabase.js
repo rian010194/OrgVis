@@ -248,7 +248,35 @@ const OrgStore = (() => {
       } catch (error) {
         state.lastError = error;
         console.error("OrgStore kunde inte ladda data från Supabase", error);
-        throw error;
+        
+        // Fallback to mock data if Supabase fails
+        console.log("Falling back to mock data...");
+        try {
+          const response = await fetch('mock/org.json');
+          if (!response.ok) {
+            throw new Error(`Kunde inte ladda mock data: ${response.status}`);
+          }
+          const payload = await response.json();
+          
+          if (!Array.isArray(payload.nodes)) {
+            throw new Error("Ogiltigt mock data: nodes saknas");
+          }
+          
+          state.nodesById.clear();
+          payload.nodes.forEach((rawNode) => {
+            const node = normaliseNode(rawNode);
+            state.nodesById.set(node.id, node);
+          });
+          
+          rebuildIndexes();
+          state.isLoaded = true;
+          state.lastError = null;
+          notify();
+          return getSnapshot();
+        } catch (fallbackError) {
+          console.error("Fallback to mock data failed", fallbackError);
+          throw error; // Throw original Supabase error
+        }
       } finally {
         state.loadPromise = null;
       }
@@ -362,7 +390,15 @@ const OrgStore = (() => {
       return clone(node);
     } catch (error) {
       console.error("Kunde inte skapa nod i Supabase", error);
-      throw error;
+      // In memory-only mode, still add the node locally
+      state.nodesById.set(node.id, node);
+      if (node.parent) {
+        setParent(node.id, node.parent);
+      } else {
+        state.rootIds.push(node.id);
+      }
+      notify();
+      return clone(node);
     }
   };
 
@@ -408,7 +444,9 @@ const OrgStore = (() => {
       return clone(node);
     } catch (error) {
       console.error("Kunde inte uppdatera nod i Supabase", error);
-      throw error;
+      // In memory-only mode, still update the node locally
+      notify();
+      return clone(node);
     }
   };
 
@@ -443,7 +481,23 @@ const OrgStore = (() => {
       notify();
     } catch (error) {
       console.error("Kunde inte ta bort nod från Supabase", error);
-      throw error;
+      // In memory-only mode, still remove the node locally
+      if (node.parent) {
+        const parent = state.nodesById.get(node.parent);
+        if (parent) {
+          parent.children = parent.children.filter((childId) => childId !== id);
+        }
+      }
+
+      state.nodesById.delete(id);
+      state.rootIds = state.rootIds.filter((rootId) => rootId !== id);
+
+      state.nodesById.forEach((otherNode) => {
+        otherNode.inputs = otherNode.inputs.filter((relation) => relation.from !== id);
+        otherNode.outputs = otherNode.outputs.filter((relation) => relation.to !== id);
+      });
+
+      notify();
     }
   };
 
@@ -477,7 +531,19 @@ const OrgStore = (() => {
       notify();
     } catch (error) {
       console.error("Kunde inte skapa relation i Supabase", error);
-      throw error;
+      // In memory-only mode, still add the relation locally
+      const fromNode = state.nodesById.get(from);
+      const toNode = state.nodesById.get(to);
+
+      if (!fromNode.outputs.some((relation) => relation.to === to && relation.desc === desc)) {
+        fromNode.outputs.push({ to, desc: desc || "" });
+      }
+
+      if (!toNode.inputs.some((relation) => relation.from === from && relation.desc === desc)) {
+        toNode.inputs.push({ from, desc: desc || "" });
+      }
+      
+      notify();
     }
   };
 
@@ -501,7 +567,16 @@ const OrgStore = (() => {
       notify();
     } catch (error) {
       console.error("Kunde inte ta bort relation från Supabase", error);
-      throw error;
+      // In memory-only mode, still remove the relation locally
+      const fromNode = state.nodesById.get(from);
+      const toNode = state.nodesById.get(to);
+      if (!fromNode || !toNode) {
+        throw new Error("Relationen refererar till okänd nod");
+      }
+      fromNode.outputs = fromNode.outputs.filter((relation) => relation.to !== to);
+      toNode.inputs = toNode.inputs.filter((relation) => relation.from !== from);
+      
+      notify();
     }
   };
 
