@@ -24,7 +24,16 @@
       "outcomes": [
         "Affärsplaner per region",
         "Beslut om investeringar och expansion"
-      ]
+      ],
+      "metrics": {
+        "Strategisk planering": 35,
+        "Ledningsmöten": 25,
+        "Resursallokering": 20,
+        "Riskanalys": 15,
+        "Extern kommunikation": 5
+      },
+      "metricsName": "Time spent on:",
+      "metricsType": "pie"
     },
     {
       "id": "ceo",
@@ -225,7 +234,16 @@
       "outcomes": [
         "Gemensamma arbetssätt",
         "Årsplaner per region"
-      ]
+      ],
+      "metrics": {
+        "Regionala driftsforum": 30,
+        "Incidentuppföljningar": 25,
+        "Strategi till operation": 20,
+        "Resursfördelning": 15,
+        "Best practice delning": 10
+      },
+      "metricsName": "Time spent on:",
+      "metricsType": "pie"
     },
     {
       "id": "support_office_global",
@@ -293,7 +311,16 @@
         "Konsoliderade KPI-ramar",
         "Governance-modell",
         "Gemensamma utbildningspaket"
-      ]
+      ],
+      "metrics": {
+        "Utveckla globala manualer": 35,
+        "Cross-region projekt": 25,
+        "Koordinera utbildningar": 20,
+        "Governance & standarder": 15,
+        "Expertstöd till regioner": 5
+      },
+      "metricsName": "Time spent on:",
+      "metricsType": "pie"
     },
     {
       "id": "marketing_sales_global",
@@ -868,7 +895,16 @@
       "outcomes": [
         "Nöjda gäster",
         "Stabila driftprocesser"
-      ]
+      ],
+      "metrics": {
+        "Regionala kampanjer": 35,
+        "Sitechefstöd": 25,
+        "Lokal marknadsanpassning": 20,
+        "Budgetuppföljning": 15,
+        "Eventplanering": 5
+      },
+      "metricsName": "Time spent on:",
+      "metricsType": "pie"
     },
     {
       "id": "iberia_lisbon_site",
@@ -1433,7 +1469,16 @@
       "outcomes": [
         "Nöjda gäster",
         "Stabila driftprocesser"
-      ]
+      ],
+      "metrics": {
+        "Regionala kampanjer": 35,
+        "Sitechefstöd": 25,
+        "Lokal marknadsanpassning": 20,
+        "Budgetuppföljning": 15,
+        "Eventplanering": 5
+      },
+      "metricsName": "Time spent on:",
+      "metricsType": "pie"
     },
     {
       "id": "germany_berlin_site",
@@ -1899,7 +1944,16 @@
       "outcomes": [
         "Nöjda gäster",
         "Stabila driftprocesser"
-      ]
+      ],
+      "metrics": {
+        "Regionala kampanjer": 35,
+        "Sitechefstöd": 25,
+        "Lokal marknadsanpassning": 20,
+        "Budgetuppföljning": 15,
+        "Eventplanering": 5
+      },
+      "metricsName": "Time spent on:",
+      "metricsType": "pie"
     },
     {
       "id": "nordics_stockholm_site",

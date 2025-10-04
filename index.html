@@ -140,8 +140,16 @@
                 <div class="metrics-header">
                   <h4>Metrics</h4>
                   <div class="metrics-actions">
-                    <button type="button" id="adminCreatePieButton" class="secondary">Create Pie Chart</button>
-                    <button type="button" id="adminAddMetricButton" class="secondary">Add Metric</button>
+                    <select id="adminVisualizationType" class="visualization-type-select">
+                      <option value="">Välj visualiseringstyp...</option>
+                      <option value="pie">Cirkeldiagram</option>
+                      <option value="bar">Stapeldiagram</option>
+                      <option value="line">Linjediagram</option>
+                      <option value="table">Tabell</option>
+                    </select>
+                    <input type="text" id="adminVisualizationName" placeholder="Namn på visualisering (t.ex. 'Time spent on: Q1')" class="visualization-name-input">
+                    <button type="button" id="adminCreatePieButton" class="secondary">Skapa Visualisering</button>
+                    <button type="button" id="adminAddMetricButton" class="secondary" style="display: none;">Add Metric</button>
                   </div>
                 </div>
                 <div id="adminMetricsList" class="metrics-list"></div>

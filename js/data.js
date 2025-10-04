@@ -82,6 +82,8 @@
     node.activities = normaliseStringList(rawNode.activities);
     node.outcomes = normaliseStringList(rawNode.outcomes);
     node.supportOffice = rawNode.supportOffice ? String(rawNode.supportOffice) : null;
+    node.metricsType = rawNode.metricsType ? String(rawNode.metricsType) : null;
+    node.metricsName = rawNode.metricsName ? String(rawNode.metricsName) : null;
 
     return node;
   };
@@ -256,6 +258,8 @@
     node.activities = node.activities || [];
     node.outcomes = node.outcomes || [];
     node.supportOffice = node.supportOffice ? String(node.supportOffice) : null;
+    node.metricsType = node.metricsType ? String(node.metricsType) : null;
+    node.metricsName = node.metricsName ? String(node.metricsName) : null;
 
     state.nodesById.set(node.id, node);
     if (node.parent) {
@@ -295,6 +299,12 @@
     if (updates.supportOffice !== undefined) {
       const value = updates.supportOffice;
       node.supportOffice = value === null || value === undefined || value === "" ? null : String(value);
+    }
+    if (updates.metricsType !== undefined) {
+      node.metricsType = updates.metricsType ? String(updates.metricsType) : null;
+    }
+    if (updates.metricsName !== undefined) {
+      node.metricsName = updates.metricsName ? String(updates.metricsName) : null;
     }
     if (updates.parent !== undefined) {
       setParent(id, updates.parent ? String(updates.parent) : null);

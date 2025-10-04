@@ -90,6 +90,10 @@ const OrgUI = (() => {
 
     metricsSaveButton: null,
 
+    visualizationTypeSelect: null,
+
+    visualizationNameInput: null,
+
     createTypeSelect: null,
 
     createResponsibilities: null,
@@ -447,6 +451,10 @@ const OrgUI = (() => {
 
     elements.metricsSaveButton = document.getElementById("adminSaveMetricsButton");
 
+    elements.visualizationTypeSelect = document.getElementById("adminVisualizationType");
+
+    elements.visualizationNameInput = document.getElementById("adminVisualizationName");
+
     elements.createTypeSelect = document.getElementById("adminCreateType");
 
     elements.createResponsibilities = document.getElementById("adminCreateResponsibilities");
@@ -564,6 +572,12 @@ const OrgUI = (() => {
     if (elements.metricsSaveButton) {
 
       elements.metricsSaveButton.addEventListener("click", handleSaveMetrics);
+
+    }
+
+    if (elements.visualizationTypeSelect) {
+
+      elements.visualizationTypeSelect.addEventListener("change", handleVisualizationTypeChange);
 
     }
 
@@ -1563,6 +1577,14 @@ const OrgUI = (() => {
 
     }
 
+    // Populate visualization type and name
+    if (elements.visualizationTypeSelect) {
+      elements.visualizationTypeSelect.value = node.metricsType || "";
+    }
+    if (elements.visualizationNameInput) {
+      elements.visualizationNameInput.value = node.metricsName || "";
+    }
+
     renderMetricsEditor(node);
 
   };
@@ -1875,7 +1897,26 @@ const OrgUI = (() => {
 
     }
 
+    const visualizationType = elements.visualizationTypeSelect?.value;
+
+    const visualizationName = elements.visualizationNameInput?.value || "Time spent on:";
+
+    if (!visualizationType) {
+
+      displayAdminMessage("Välj en visualiseringstyp först.", "error");
+
+      return;
+
+    }
+
     removeMetricsEmpty();
+
+    // Show Add Metric button when visualization is created
+    if (elements.metricsAddButton) {
+
+      elements.metricsAddButton.style.display = "inline-block";
+
+    }
 
     let row = elements.metricsList.querySelector(".metrics-row");
 
@@ -1892,6 +1933,41 @@ const OrgUI = (() => {
     if (keyInput) {
 
       keyInput.focus();
+
+    }
+
+    displayAdminMessage(`Visualisering "${visualizationName}" av typ "${visualizationType}" skapad. Lägg till metrics nedan.`, "success");
+
+  };
+
+  const handleVisualizationTypeChange = () => {
+
+    const visualizationType = elements.visualizationTypeSelect?.value;
+
+    // Update button text based on visualization type
+    if (elements.metricsCreateButton) {
+
+      if (visualizationType === "pie") {
+
+        elements.metricsCreateButton.textContent = "Skapa Cirkeldiagram";
+
+      } else if (visualizationType === "bar") {
+
+        elements.metricsCreateButton.textContent = "Skapa Stapeldiagram";
+
+      } else if (visualizationType === "line") {
+
+        elements.metricsCreateButton.textContent = "Skapa Linjediagram";
+
+      } else if (visualizationType === "table") {
+
+        elements.metricsCreateButton.textContent = "Skapa Tabell";
+
+      } else {
+
+        elements.metricsCreateButton.textContent = "Skapa Visualisering";
+
+      }
 
     }
 
@@ -1977,7 +2053,21 @@ const OrgUI = (() => {
 
     try {
 
-      OrgStore.updateNode(nodeId, { metrics });
+      // Get visualization type and name
+      const visualizationType = elements.visualizationTypeSelect?.value;
+      const visualizationName = elements.visualizationNameInput?.value;
+
+      const updateData = { metrics };
+
+      // Add visualization metadata if available
+      if (visualizationType) {
+        updateData.metricsType = visualizationType;
+      }
+      if (visualizationName) {
+        updateData.metricsName = visualizationName;
+      }
+
+      OrgStore.updateNode(nodeId, updateData);
 
       displayAdminMessage("Metrics saved.", "success");
 
@@ -2127,7 +2217,9 @@ const OrgUI = (() => {
 
     const heading = document.createElement("h3");
 
-    heading.textContent = "Nyckeltal";
+    // Use custom visualization name if available, otherwise default to "Time spent on:"
+    const visualizationName = node.metricsName || "Time spent on:";
+    heading.textContent = visualizationName;
 
     section.appendChild(heading);
 
@@ -2155,7 +2247,7 @@ const OrgUI = (() => {
 
       empty.classList.add("detail-empty");
 
-      empty.textContent = "No metrics defined yet.";
+      empty.textContent = "Inga metrics definierade ännu.";
 
       body.appendChild(empty);
 
