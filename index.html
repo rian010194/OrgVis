@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>JumpYard Organization Chart</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <img src="img/jumpyard-logo.svg" alt="JumpYard" class="logo">
+    <span>JumpYard Organization Structure</span>
+  </header>
+
+  <div class="app-toolbar" role="toolbar" aria-label="View and admin controls">
+    <div class="toolbar-group view-switch" role="group" aria-label="Select view">
+      <button type="button" data-view="tree" class="view-button active" aria-pressed="true">Tree View</button>
+      <button type="button" data-view="map" class="view-button" aria-pressed="false">Map View</button>
+    </div>
+    <button id="toggleAdmin" type="button" class="admin-toggle" aria-pressed="false" aria-controls="adminPanel">Admin Mode</button>
+  </div>
+
+  <main class="app-layout">
+    <section class="org-section">
+      <div id="appStatus" class="app-status"></div>
+      <div id="orgchart" class="tree-container"></div>
+      <div id="mapView" class="map-view hidden"></div>
+    </section>
+
+    <aside class="side-section">
+      <div id="detailPanel" class="detail-panel"></div>
+      <div id="adminPanel" class="admin-panel">
+        <div class="admin-tabs" role="tablist" aria-label="Admin views">
+          <button type="button" class="admin-tab" id="adminTab-create" data-admin-tab="create" role="tab" aria-selected="false" tabindex="-1" aria-controls="adminPanel-create">Create Node</button>
+          <button type="button" class="admin-tab" id="adminTab-edit" data-admin-tab="edit" role="tab" aria-selected="true" tabindex="0" aria-controls="adminPanel-edit">Edit Node</button>
+          <button type="button" class="admin-tab" id="adminTab-relations" data-admin-tab="relations" role="tab" aria-selected="false" tabindex="-1" aria-controls="adminPanel-relations">Relations</button>
+        </div>
+        <p class="admin-hint">Changes are saved in memory during the session. API connection will be added later.</p>
+        <div id="adminMessage" class="admin-message"></div>
+
+        <div class="admin-tab-panels">
+          <div class="admin-tab-panel" id="adminPanel-create" data-admin-panel="create" role="tabpanel" aria-labelledby="adminTab-create" hidden>
+            <form id="adminCreateForm" class="admin-form">
+              <h3>Create New Node</h3>
+              <label>
+                ID
+                <input name="id" type="text" required placeholder="e.g. new_node" />
+              </label>
+              <label>
+                Name
+                <input name="name" type="text" required placeholder="Node name" />
+              </label>
+              <label>
+                Type
+                <select name="type" id="adminCreateType">
+                  <option value="Unit">Unit</option>
+                  <option value="Group">Group</option>
+                  <option value="Department">Department</option>
+                  <option value="Individual">Individual</option>
+                  <option value="Cluster">Cluster</option>
+                  <option value="PO">PO</option>
+                  <option value="PA">PA</option>
+                  <option value="SupportOffice">SupportOffice</option>
+                </select>
+              </label>
+              <label>
+                Parent
+                <select name="parent" id="adminCreateParent"></select>
+              </label>
+              <label>
+                Support Office (ID)
+                <input name="supportOffice" id="adminCreateSupportOffice" type="text" placeholder="e.g. support_office_iberia" />
+              </label>
+              <label>
+                Role Description
+                <textarea name="role" rows="3" placeholder="Describe the node's mission"></textarea>
+              </label>
+              <label>
+                Responsibilities (one point per line)
+                <textarea name="responsibilities" id="adminCreateResponsibilities" rows="3" placeholder="One point per line"></textarea>
+              </label>
+              <label>
+                Activities (Spending time on)
+                <textarea name="activities" id="adminCreateActivities" rows="3" placeholder="One point per line"></textarea>
+              </label>
+              <label>
+                Outcomes (deliverables)
+                <textarea name="outcomes" id="adminCreateOutcomes" rows="3" placeholder="One point per line"></textarea>
+              </label>
+              <button type="submit" class="primary">Create Node</button>
+            </form>
+          </div>
+
+          <div class="admin-tab-panel" id="adminPanel-edit" data-admin-panel="edit" role="tabpanel" aria-labelledby="adminTab-edit">
+            <form id="adminEditForm" class="admin-form">
+              <h3>Edit Node</h3>
+              <label>
+                Select Node
+                <select name="nodeId" id="adminEditNodeSelect"></select>
+              </label>
+              <label>
+                Name
+                <input name="name" type="text" placeholder="Name" />
+              </label>
+              <label>
+                Type
+                <select name="type" id="adminEditType">
+                  <option value="Unit">Unit</option>
+                  <option value="Group">Group</option>
+                  <option value="Department">Department</option>
+                  <option value="Individual">Individual</option>
+                  <option value="Cluster">Cluster</option>
+                  <option value="PO">PO</option>
+                  <option value="PA">PA</option>
+                  <option value="SupportOffice">SupportOffice</option>
+                </select>
+              </label>
+              <label>
+                Parent
+                <select name="parent" id="adminEditParent"></select>
+              </label>
+              <label>
+                Support Office (ID)
+                <input name="supportOffice" id="adminEditSupportOffice" type="text" placeholder="Connected support office" />
+              </label>
+              <label>
+                Role Description
+                <textarea name="role" rows="3" placeholder="Description"></textarea>
+              </label>
+              <label>
+                Responsibilities (one point per line)
+                <textarea name="responsibilities" id="adminEditResponsibilities" rows="3" placeholder="One point per line"></textarea>
+              </label>
+              <label>
+                Activities (Spending time on)
+                <textarea name="activities" id="adminEditActivities" rows="3" placeholder="One point per line"></textarea>
+              </label>
+              <label>
+                Outcomes (deliverables)
+                <textarea name="outcomes" id="adminEditOutcomes" rows="3" placeholder="One point per line"></textarea>
+              </label>
+              <div id="adminMetricsSection" class="admin-metrics">
+                <div class="metrics-header">
+                  <h4>Metrics</h4>
+                  <div class="metrics-actions">
+                    <button type="button" id="adminCreatePieButton" class="secondary">Create Pie Chart</button>
+                    <button type="button" id="adminAddMetricButton" class="secondary">Add Metric</button>
+                  </div>
+                </div>
+                <div id="adminMetricsList" class="metrics-list"></div>
+                <button type="button" id="adminSaveMetricsButton" class="primary metrics-save">Save Metrics</button>
+              </div>
+              <div class="admin-actions">
+                <button type="submit" class="primary">Save Changes</button>
+                <button type="button" id="adminDeleteNodeButton" class="danger">Delete Node</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="admin-tab-panel" id="adminPanel-relations" data-admin-panel="relations" role="tabpanel" aria-labelledby="adminTab-relations" hidden>
+            <form id="adminAddRelationForm" class="admin-form horizontal">
+              <h3>New Relation</h3>
+              <div class="horizontal-row">
+                <label>
+                  From
+                  <select name="from"></select>
+                </label>
+                <span class="arrow">&rarr;</span>
+                <label>
+                  To
+                  <select name="to"></select>
+                </label>
+              </div>
+              <label>
+                Description
+                <input name="desc" type="text" placeholder="What is delivered?" />
+              </label>
+              <button type="submit" class="primary">Add Relation</button>
+            </form>
+
+            <form id="adminRemoveRelationForm" class="admin-form horizontal">
+              <h3>Remove Relation</h3>
+              <div class="horizontal-row">
+                <label>
+                  From
+                  <select name="from"></select>
+                </label>
+                <span class="arrow">&rarr;</span>
+                <label>
+                  To
+                  <select name="to"></select>
+                </label>
+              </div>
+              <button type="submit" class="danger">Remove Relation</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <section class="relations-section">
+    <h2>Relations View</h2>
+    <p class="relations-hint">Shows the first version of flows between nodes. Click to navigate.</p>
+    <div id="relationView" class="relation-view"></div>
+  </section>
+
+  <script src="js/d3.v7.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

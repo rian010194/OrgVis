@@ -1,0 +1,2492 @@
+{
+  "nodes": [
+    {
+      "id": "leadership_team",
+      "name": "Leadership Team",
+      "type": "Unit",
+      "role": "Sätter riktningen och säkrar att hela verksamheten arbetar mot samma mål.",
+      "parent": null,
+      "children": [
+        "ceo",
+        "coo",
+        "cfo"
+      ],
+      "inputs": [],
+      "outputs": [],
+      "responsibilities": [
+        "Definiera bolagets strategiska prioriteringar",
+        "Tilldela resurser mellan regioner och supportorganisation"
+      ],
+      "activities": [
+        "Månatliga ledningsmöten",
+        "Uppföljning av nyckeltal och risker"
+      ],
+      "outcomes": [
+        "Affärsplaner per region",
+        "Beslut om investeringar och expansion"
+      ]
+    },
+    {
+      "id": "ceo",
+      "name": "CEO",
+      "type": "Individual",
+      "role": "Driver kund- och expansionsagenda globalt.",
+      "parent": "leadership_team",
+      "children": [
+        "brand_experience"
+      ],
+      "inputs": [
+        {
+          "from": "support_office_global",
+          "desc": "Globala standards"
+        },
+        {
+          "from": "global_operations",
+          "desc": "Operativa rapporter"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "global_operations",
+          "desc": "Strategisk riktning"
+        }
+      ],
+      "responsibilities": [
+        "Kommunicera vision och värderingar",
+        "Prioritera marknadsexpansion"
+      ],
+      "activities": [
+        "Träffa regionledningar",
+        "Ledningsgruppsmöten"
+      ],
+      "outcomes": [
+        "Godkänd expansionsplan",
+        "Uppdaterad kundstrategi"
+      ]
+    },
+    {
+      "id": "brand_experience",
+      "name": "Brand & Experience",
+      "type": "Department",
+      "role": "Säkerställer varumärkesupplevelsen globalt.",
+      "parent": "ceo",
+      "children": [],
+      "inputs": [
+        {
+          "from": "support_office_global",
+          "desc": "Varumärkesramverk"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "support_office_global",
+          "desc": "Kundinsikter"
+        }
+      ],
+      "responsibilities": [
+        "Utveckla JumpYards kundlöfte",
+        "Samordna upplevelsedesign"
+      ],
+      "activities": [
+        "Workshops med regionerna",
+        "Analys av gästfeedback"
+      ],
+      "outcomes": [
+        "Globala konceptmanualer"
+      ]
+    },
+    {
+      "id": "coo",
+      "name": "COO",
+      "type": "Individual",
+      "role": "Driver den globala driften och utvecklar regionernas kapacitet.",
+      "parent": "leadership_team",
+      "children": [
+        "global_operations"
+      ],
+      "inputs": [
+        {
+          "from": "global_operations",
+          "desc": "Operativa resultat"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "global_operations",
+          "desc": "Prioriteringar för driften"
+        }
+      ],
+      "responsibilities": [
+        "Skala best practice mellan regioner",
+        "Säkra att supportfunktionerna levererar"
+      ],
+      "activities": [
+        "Operativa reviews",
+        "Sitebesök"
+      ],
+      "outcomes": [
+        "Driftplaner per region",
+        "Beslut om nya supportinitiativ"
+      ]
+    },
+    {
+      "id": "cfo",
+      "name": "CFO",
+      "type": "Individual",
+      "role": "Övergripande finansiellt ansvar.",
+      "parent": "leadership_team",
+      "children": [],
+      "inputs": [
+        {
+          "from": "finance_global",
+          "desc": "Rapporter & prognoser"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "finance_global",
+          "desc": "Finansiella ramar"
+        },
+        {
+          "to": "support_office_global",
+          "desc": "Kapitalprioriteringar"
+        }
+      ],
+      "responsibilities": [
+        "Kapitalstruktur och kassaflöde",
+        "Styrning av investeringar"
+      ],
+      "activities": [
+        "Budget- och prognosmöten",
+        "Analys av KPI:er"
+      ],
+      "outcomes": [
+        "Godkända budgetar",
+        "Finansiella rapporter"
+      ]
+    },
+    {
+      "id": "global_operations",
+      "name": "Global Operations",
+      "type": "PO",
+      "role": "Samordnar regioner och supportorganisation globalt.",
+      "parent": "coo",
+      "children": [
+        "support_office_global",
+        "region_iberia",
+        "region_germany",
+        "region_nordics"
+      ],
+      "supportOffice": "support_office_global",
+      "inputs": [
+        {
+          "from": "support_office_global",
+          "desc": "Governance och standarder"
+        },
+        {
+          "from": "region_iberia",
+          "desc": "Regionala resultat"
+        },
+        {
+          "from": "region_germany",
+          "desc": "Regionala resultat"
+        },
+        {
+          "from": "region_nordics",
+          "desc": "Regionala resultat"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "support_office_global",
+          "desc": "Operativa behov"
+        },
+        {
+          "to": "region_iberia",
+          "desc": "Prioriteringar & mål"
+        },
+        {
+          "to": "region_germany",
+          "desc": "Prioriteringar & mål"
+        },
+        {
+          "to": "region_nordics",
+          "desc": "Prioriteringar & mål"
+        }
+      ],
+      "responsibilities": [
+        "Översätta strategi till operativ plan",
+        "Fördela resurser mellan regioner"
+      ],
+      "activities": [
+        "Regionala driftsforum",
+        "Incidentuppföljningar"
+      ],
+      "outcomes": [
+        "Gemensamma arbetssätt",
+        "Årsplaner per region"
+      ]
+    },
+    {
+      "id": "support_office_global",
+      "name": "Support Office Global",
+      "type": "SupportOffice",
+      "role": "Sätter globala standarder och ger expertis till regionerna.",
+      "parent": "global_operations",
+      "children": [
+        "marketing_sales_global",
+        "expansion_global",
+        "finance_global",
+        "it_global",
+        "hr_training_global",
+        "safety_global",
+        "maintenance_global",
+        "operations_global"
+      ],
+      "inputs": [
+        {
+          "from": "cfo",
+          "desc": "Finansiella ramar"
+        },
+        {
+          "from": "coo",
+          "desc": "Operativa prioriteringar"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "support_office_iberia",
+          "desc": "Strategiska ramar"
+        },
+        {
+          "to": "support_office_iberia",
+          "desc": "Globala standards"
+        },
+        {
+          "to": "support_office_germany",
+          "desc": "Strategiska ramar"
+        },
+        {
+          "to": "support_office_germany",
+          "desc": "Globala standards"
+        },
+        {
+          "to": "support_office_nordics",
+          "desc": "Strategiska ramar"
+        },
+        {
+          "to": "support_office_nordics",
+          "desc": "Globala standards"
+        }
+      ],
+      "responsibilities": [
+        "Definiera policys och processer",
+        "Stötta regionerna med expertteam",
+        "Vakta varumärke och säkerhetsnivå"
+      ],
+      "activities": [
+        "Utvecklar globala manualer",
+        "Driver cross-region projekt",
+        "Koordinerar utbildningar"
+      ],
+      "outcomes": [
+        "Konsoliderade KPI-ramar",
+        "Governance-modell",
+        "Gemensamma utbildningspaket"
+      ]
+    },
+    {
+      "id": "marketing_sales_global",
+      "name": "Marketing & Sales Global",
+      "type": "Department",
+      "role": "Drive guest flow and campaigns to maximize park utilization and revenue.",
+      "parent": "support_office_global",
+      "children": [],
+      "inputs": [
+        {
+          "from": "it_global",
+          "desc": "Support with marketing systems and analytics platforms"
+        },
+        {
+          "from": "finance_global",
+          "desc": "Budget allocation and financial targets"
+        },
+        {
+          "from": "global_operations",
+          "desc": "Operational capacity and constraints data"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "support_office_iberia",
+          "desc": "Marketing campaigns and sales strategies"
+        },
+        {
+          "to": "support_office_germany",
+          "desc": "Marketing campaigns and sales strategies"
+        },
+        {
+          "to": "support_office_nordics",
+          "desc": "Marketing campaigns and sales strategies"
+        }
+      ],
+      "responsibilities": [
+        "Develop and maintain global marketing & sales framework",
+        "Create compelling campaigns that drive guest acquisition and retention",
+        "Ensure consistent brand messaging across all markets",
+        "Optimize pricing strategies to maximize revenue",
+        "Analyze market trends and competitive landscape",
+        "Support regional teams with marketing expertise and resources"
+      ],
+      "activities": [
+        "Coordinating global marketing initiatives and campaigns",
+        "Developing brand guidelines and marketing materials",
+        "Managing digital marketing platforms and social media presence",
+        "Conducting market research and competitive analysis",
+        "Training regional teams on marketing best practices",
+        "Monitoring campaign performance and ROI",
+        "Collaborating with operations on capacity planning"
+      ],
+      "outcomes": [
+        "Global marketing guidelines and brand standards",
+        "Effective marketing campaigns that drive guest traffic",
+        "Optimized pricing strategies across all markets",
+        "Trained regional marketing teams",
+        "Comprehensive market intelligence and insights",
+        "Increased brand awareness and guest acquisition",
+        "Improved revenue per guest and overall profitability"
+      ],
+      "timeSpent": [
+        {"activity": "Campaign development", "percentage": 30},
+        {"activity": "Market research & analysis", "percentage": 20},
+        {"activity": "Digital marketing management", "percentage": 15},
+        {"activity": "Regional team support", "percentage": 15},
+        {"activity": "Brand management", "percentage": 10},
+        {"activity": "Performance monitoring", "percentage": 10}
+      ],
+      "timeSpentChartName": "Marketing & Sales Time Distribution"
+    },
+    {
+      "id": "expansion_global",
+      "name": "Expansion Global",
+      "type": "Department",
+      "role": "Plan and develop new parks and concepts to drive business growth and market expansion.",
+      "parent": "support_office_global",
+      "children": [],
+      "inputs": [
+        {
+          "from": "finance_global",
+          "desc": "Investment budgets and financial feasibility analysis"
+        },
+        {
+          "from": "marketing_sales_global",
+          "desc": "Market research and demand forecasting"
+        },
+        {
+          "from": "operations_global",
+          "desc": "Operational requirements and capacity planning"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "support_office_iberia",
+          "desc": "Expansion projects and new park development"
+        },
+        {
+          "to": "support_office_germany",
+          "desc": "Expansion projects and new park development"
+        },
+        {
+          "to": "support_office_nordics",
+          "desc": "Expansion projects and new park development"
+        }
+      ],
+      "responsibilities": [
+        "Develop and maintain global expansion framework and strategies",
+        "Identify and evaluate new market opportunities and locations",
+        "Plan and design new park concepts and attractions",
+        "Manage expansion projects from concept to opening",
+        "Ensure new parks meet brand standards and operational requirements",
+        "Support regional teams with expansion expertise and resources"
+      ],
+      "activities": [
+        "Coordinating global expansion initiatives and market analysis",
+        "Conducting market research and feasibility studies",
+        "Developing new park concepts and attraction designs",
+        "Managing expansion project timelines and budgets",
+        "Collaborating with architects, contractors, and vendors",
+        "Training regional teams on new park operations",
+        "Supporting grand opening events and marketing campaigns"
+      ],
+      "outcomes": [
+        "Global expansion guidelines and strategic framework",
+        "Successful new park openings and market entries",
+        "Innovative park concepts and attraction designs",
+        "Trained regional expansion teams",
+        "Strong market presence and brand expansion",
+        "Profitable new locations and revenue growth",
+        "Scalable expansion processes and best practices"
+      ]
+    },
+    {
+      "id": "finance_global",
+      "name": "Finance Global",
+      "type": "Department",
+      "role": "Support budget, forecasting and controlling to ensure financial health and growth.",
+      "parent": "support_office_global",
+      "children": [],
+      "inputs": [
+        {
+          "from": "global_operations",
+          "desc": "Operational data and performance metrics"
+        },
+        {
+          "from": "marketing_sales_global",
+          "desc": "Revenue forecasts and campaign ROI data"
+        },
+        {
+          "from": "expansion_global",
+          "desc": "Investment requirements and expansion budgets"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "support_office_iberia",
+          "desc": "Financial support and budget allocation"
+        },
+        {
+          "to": "support_office_germany",
+          "desc": "Financial support and budget allocation"
+        },
+        {
+          "to": "support_office_nordics",
+          "desc": "Financial support and budget allocation"
+        }
+      ],
+      "responsibilities": [
+        "Develop and maintain global finance framework",
+        "Provide accurate financial reporting and analysis",
+        "Support budget planning and forecasting processes",
+        "Ensure compliance with financial regulations and standards",
+        "Optimize cash flow and working capital management",
+        "Support investment decisions and capital allocation"
+      ],
+      "activities": [
+        "Coordinating global financial planning and budgeting",
+        "Preparing consolidated financial statements and reports",
+        "Conducting financial analysis and performance monitoring",
+        "Managing treasury operations and cash flow",
+        "Supporting regional teams with financial expertise",
+        "Ensuring compliance with accounting standards and regulations",
+        "Collaborating with operations on cost optimization"
+      ],
+      "outcomes": [
+        "Global financial guidelines and reporting standards",
+        "Accurate and timely financial reporting across all regions",
+        "Effective budget planning and resource allocation",
+        "Trained regional finance teams",
+        "Optimized financial performance and profitability",
+        "Compliance with financial regulations and standards",
+        "Strong financial controls and risk management"
+      ]
+    },
+    {
+      "id": "it_global",
+      "name": "IT Global",
+      "type": "Department",
+      "role": "Own and manage systems and digital infrastructure to support business operations.",
+      "parent": "support_office_global",
+      "children": [],
+      "inputs": [
+        {
+          "from": "finance_global",
+          "desc": "IT budget and investment approvals"
+        },
+        {
+          "from": "global_operations",
+          "desc": "Operational requirements and system needs"
+        },
+        {
+          "from": "marketing_sales_global",
+          "desc": "Marketing system requirements and analytics needs"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "support_office_iberia",
+          "desc": "IT systems and technical support"
+        },
+        {
+          "to": "support_office_germany",
+          "desc": "IT systems and technical support"
+        },
+        {
+          "to": "support_office_nordics",
+          "desc": "IT systems and technical support"
+        }
+      ],
+      "responsibilities": [
+        "Develop and maintain global IT framework and standards",
+        "Ensure reliable and secure IT infrastructure across all regions",
+        "Support digital transformation and innovation initiatives",
+        "Maintain data security and compliance with regulations",
+        "Provide technical support and training to regional teams",
+        "Manage IT vendors and service providers"
+      ],
+      "activities": [
+        "Coordinating global IT initiatives and system implementations",
+        "Managing IT infrastructure and cloud services",
+        "Developing and maintaining business applications",
+        "Ensuring cybersecurity and data protection",
+        "Supporting regional teams with technical expertise",
+        "Managing IT budgets and vendor relationships",
+        "Conducting system maintenance and updates"
+      ],
+      "outcomes": [
+        "Global IT guidelines and technical standards",
+        "Reliable and secure IT infrastructure across all regions",
+        "Efficient business applications and systems",
+        "Trained regional IT teams and technical support",
+        "Compliance with data security and privacy regulations",
+        "Optimized IT costs and vendor relationships",
+        "Innovative digital solutions and automation"
+      ]
+    },
+    {
+      "id": "hr_training_global",
+      "name": "HR & Training Global",
+      "type": "Department",
+      "role": "Ensure competence through comprehensive training and development programs.",
+      "parent": "support_office_global",
+      "children": [],
+      "inputs": [
+        {
+          "from": "safety_global",
+          "desc": "Safety training requirements and standards"
+        },
+        {
+          "from": "operations_global",
+          "desc": "Operational training needs and best practices"
+        },
+        {
+          "from": "finance_global",
+          "desc": "Training budget and resource allocation"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "support_office_iberia",
+          "desc": "Training programs and HR support"
+        },
+        {
+          "to": "support_office_germany",
+          "desc": "Training programs and HR support"
+        },
+        {
+          "to": "support_office_nordics",
+          "desc": "Training programs and HR support"
+        }
+      ],
+      "responsibilities": [
+        "Develop and maintain global HR & training framework",
+        "Ensure all staff receive proper safety and operational training",
+        "Create standardized training programs across all regions",
+        "Support talent acquisition and retention strategies",
+        "Maintain compliance with local labor laws and regulations",
+        "Develop leadership and management training programs"
+      ],
+      "activities": [
+        "Coordinating global training initiatives and programs",
+        "Developing training materials and e-learning platforms",
+        "Conducting train-the-trainer sessions for regional teams",
+        "Managing performance evaluation and development processes",
+        "Supporting recruitment and onboarding processes",
+        "Monitoring training effectiveness and compliance",
+        "Collaborating with safety and operations on specialized training"
+      ],
+      "outcomes": [
+        "Global training guidelines and standardized programs",
+        "Well-trained staff across all regions and functions",
+        "Comprehensive onboarding and development processes",
+        "Trained regional HR and training teams",
+        "Compliance with safety and operational standards",
+        "Improved staff retention and satisfaction",
+        "Strong leadership pipeline and succession planning"
+      ],
+      "timeSpent": [
+        {"activity": "Training program development", "percentage": 25},
+        {"activity": "Conducting training sessions", "percentage": 20},
+        {"activity": "Recruitment & onboarding", "percentage": 15},
+        {"activity": "Performance management", "percentage": 15},
+        {"activity": "Regional team support", "percentage": 10},
+        {"activity": "Compliance & documentation", "percentage": 10},
+        {"activity": "Leadership development", "percentage": 5}
+      ],
+      "timeSpentChartName": "HR & Training Time Allocation"
+    },
+    {
+      "id": "safety_global",
+      "name": "Safety Global",
+      "type": "Department",
+      "role": "24/7 guest safety above and beyond what could be expected",
+      "parent": "support_office_global",
+      "children": [],
+      "inputs": [
+        {
+          "from": "hr_training_global",
+          "desc": "Support with training of local organization"
+        },
+        {
+          "from": "it_global",
+          "desc": "Support with systems (e.g., self-check, document handling)"
+        },
+        {
+          "from": "maintenance_global",
+          "desc": "Support with safety work implementation (e.g., preventive and corrective maintenance)"
+        },
+        {
+          "from": "global_operations",
+          "desc": "Support with follow-up and execution of some activities from regional managers in operations"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "support_office_iberia",
+          "desc": "Safety ways of working framework"
+        },
+        {
+          "to": "support_office_germany",
+          "desc": "Safety ways of working framework"
+        },
+        {
+          "to": "support_office_nordics",
+          "desc": "Safety ways of working framework"
+        }
+      ],
+      "responsibilities": [
+        "Ensuring operations follow all applicable guest safety standards",
+        "Being one step safer than required standards",
+        "Continuously improving safety through structured analysis and quick implementation",
+        "Training operations in safety 'ways of working'",
+        "Controlling operations to follow safety 'ways of working'",
+        "Ensuring safety work 'never miss a beat'",
+        "Documenting and following up on all activities in the safety area"
+      ],
+      "activities": [
+        "Upholding and updating the safety 'ways of working' framework (including risk analysis, safety information, guest supervision, maintenance, injury analysis, injury management)",
+        "Training operations in safety 'ways of working'",
+        "Controlling operations in safety 'ways of working'",
+        "Managing the overall safety annual plan and execution (inspections, analysis, reviews)",
+        "Documenting and following up on actions in the safety area",
+        "Handling interactions with suppliers and local bodies",
+        "Handling interactions with seriously injured guests",
+        "Handling interactions with standards bodies and consumer agencies"
+      ],
+      "outcomes": [
+        "Providing easy-to-understand and follow 'ways of working' for the local organization",
+        "Serving as a center of excellence for training and coaching in safety 'ways of working'",
+        "Securing safety by being a 'pain in the ass' for the local organization to ensure 'never miss a beat'",
+        "Securing safety by ensuring certification and inspection",
+        "Providing input to activity and operational design to minimize injuries in existing and new parks (including redesign), driving change projects",
+        "Providing structured analysis and business intelligence in the safety area (e.g., KPIs)",
+        "Managing all external communication in the safety area (e.g., bad press, CA's, suppliers)"
+      ],
+      "timeSpent": [
+        {"activity": "Training operations", "percentage": 25},
+        {"activity": "Controlling operations", "percentage": 20},
+        {"activity": "Framework maintenance", "percentage": 15},
+        {"activity": "Documentation & follow-up", "percentage": 15},
+        {"activity": "Stakeholder interactions", "percentage": 10},
+        {"activity": "Analysis & improvement", "percentage": 10},
+        {"activity": "Emergency response", "percentage": 5}
+      ],
+      "timeSpentChartName": "Safety Department Time Allocation"
+    },
+    {
+      "id": "maintenance_global",
+      "name": "Maintenance Global",
+      "type": "Department",
+      "role": "Maintain attractions and facilities to ensure optimal guest experience and safety.",
+      "parent": "support_office_global",
+      "children": [],
+      "inputs": [
+        {
+          "from": "safety_global",
+          "desc": "Safety requirements and maintenance standards"
+        },
+        {
+          "from": "operations_global",
+          "desc": "Operational maintenance needs and schedules"
+        },
+        {
+          "from": "finance_global",
+          "desc": "Maintenance budget and cost optimization requirements"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "support_office_iberia",
+          "desc": "Maintenance support and technical expertise"
+        },
+        {
+          "to": "support_office_germany",
+          "desc": "Maintenance support and technical expertise"
+        },
+        {
+          "to": "support_office_nordics",
+          "desc": "Maintenance support and technical expertise"
+        }
+      ],
+      "responsibilities": [
+        "Develop and maintain global maintenance framework and standards",
+        "Ensure all attractions and facilities meet safety and operational requirements",
+        "Optimize maintenance schedules to minimize downtime and costs",
+        "Support preventive and corrective maintenance across all regions",
+        "Manage maintenance vendors and service providers",
+        "Ensure compliance with safety regulations and manufacturer requirements"
+      ],
+      "activities": [
+        "Coordinating global maintenance initiatives and best practices",
+        "Developing maintenance schedules and procedures",
+        "Managing preventive and corrective maintenance programs",
+        "Training regional teams on maintenance procedures",
+        "Managing maintenance budgets and vendor relationships",
+        "Conducting equipment inspections and safety audits",
+        "Supporting emergency maintenance and repairs"
+      ],
+      "outcomes": [
+        "Global maintenance guidelines and standardized procedures",
+        "Well-maintained attractions and facilities across all regions",
+        "Optimized maintenance schedules and reduced downtime",
+        "Trained regional maintenance teams",
+        "Compliance with safety and operational standards",
+        "Cost-effective maintenance operations",
+        "Reliable equipment performance and guest satisfaction"
+      ]
+    },
+    {
+      "id": "operations_global",
+      "name": "Operations Global",
+      "type": "Department",
+      "role": "Support daily park operations to ensure exceptional guest experience and operational excellence.",
+      "parent": "support_office_global",
+      "children": [],
+      "inputs": [
+        {
+          "from": "safety_global",
+          "desc": "Safety procedures and operational guidelines"
+        },
+        {
+          "from": "marketing_sales_global",
+          "desc": "Guest flow forecasts and capacity planning data"
+        },
+        {
+          "from": "hr_training_global",
+          "desc": "Staff training programs and operational procedures"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "support_office_iberia",
+          "desc": "Operational support and best practices"
+        },
+        {
+          "to": "support_office_germany",
+          "desc": "Operational support and best practices"
+        },
+        {
+          "to": "support_office_nordics",
+          "desc": "Operational support and best practices"
+        }
+      ],
+      "responsibilities": [
+        "Develop and maintain global operations framework and standards",
+        "Ensure consistent operational excellence across all park locations",
+        "Support daily park operations and guest experience delivery",
+        "Optimize operational efficiency and resource utilization",
+        "Monitor and improve operational performance metrics",
+        "Support regional teams with operational expertise and guidance"
+      ],
+      "activities": [
+        "Coordinating global operational initiatives and best practices",
+        "Developing operational procedures and standard operating practices",
+        "Monitoring daily operations and performance across all regions",
+        "Training regional teams on operational excellence",
+        "Analyzing operational data and identifying improvement opportunities",
+        "Supporting capacity planning and resource allocation",
+        "Managing operational budgets and cost optimization"
+      ],
+      "outcomes": [
+        "Global operational guidelines and standardized procedures",
+        "Consistent operational excellence across all park locations",
+        "Optimized operational efficiency and resource utilization",
+        "Trained regional operational teams",
+        "Improved guest experience and satisfaction",
+        "Cost-effective operations and improved profitability",
+        "Strong operational performance metrics and KPIs"
+      ]
+    },
+    {
+      "id": "region_iberia",
+      "name": "Iberia",
+      "type": "PA",
+      "role": "Driver parkerna i Iberia och säkrar lokalt kundlöfte.",
+      "parent": "global_operations",
+      "children": [
+        "support_office_iberia",
+        "iberia_sites"
+      ],
+      "supportOffice": "support_office_iberia",
+      "inputs": [
+        {
+          "from": "support_office_iberia",
+          "desc": "Operativt stöd"
+        },
+        {
+          "from": "global_operations",
+          "desc": "Mål & förväntningar"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "global_operations",
+          "desc": "Regionala resultat"
+        },
+        {
+          "to": "support_office_iberia",
+          "desc": "Lokala behov"
+        }
+      ],
+      "responsibilities": [
+        "Leverera resultat enligt budget",
+        "Anpassa globala standards till lokala marknader"
+      ],
+      "activities": [
+        "Planerar kampanjer och events",
+        "Stödjer sitechefer"
+      ],
+      "outcomes": [
+        "Nöjda gäster",
+        "Stabila driftprocesser"
+      ]
+    },
+    {
+      "id": "iberia_lisbon_site",
+      "name": "Site Lisbon",
+      "type": "Unit",
+      "role": "Driver JumpYard Lisbon.",
+      "parent": "iberia_sites",
+      "children": [],
+      "inputs": [
+        {
+          "from": "support_office_iberia",
+          "desc": "Support & riktlinjer"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "region_iberia",
+          "desc": "Prestationsdata"
+        }
+      ],
+      "responsibilities": [
+        "Leverera gästupplevelse enligt koncept",
+        "Rapportera KPI:er"
+      ],
+      "activities": [
+        "Planerar daglig drift",
+        "Tränar teamet"
+      ],
+      "outcomes": [
+        "Säkra pass",
+        "Nöjd kund-index"
+      ]
+    },
+    {
+      "id": "iberia_madrid_oasiz_site",
+      "name": "Site Madrid Oasiz",
+      "type": "Unit",
+      "role": "Driver JumpYard Madrid Oasiz.",
+      "parent": "iberia_sites",
+      "children": [],
+      "inputs": [
+        {
+          "from": "support_office_iberia",
+          "desc": "Support & riktlinjer"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "region_iberia",
+          "desc": "Prestationsdata"
+        }
+      ],
+      "responsibilities": [
+        "Leverera gästupplevelse enligt koncept",
+        "Rapportera KPI:er"
+      ],
+      "activities": [
+        "Planerar daglig drift",
+        "Tränar teamet"
+      ],
+      "outcomes": [
+        "Säkra pass",
+        "Nöjd kund-index"
+      ]
+    },
+    {
+      "id": "iberia_barcelona_site",
+      "name": "Site Barcelona",
+      "type": "Unit",
+      "role": "Driver JumpYard Barcelona.",
+      "parent": "iberia_sites",
+      "children": [],
+      "inputs": [
+        {
+          "from": "support_office_iberia",
+          "desc": "Support & riktlinjer"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "region_iberia",
+          "desc": "Prestationsdata"
+        }
+      ],
+      "responsibilities": [
+        "Leverera gästupplevelse enligt koncept",
+        "Rapportera KPI:er"
+      ],
+      "activities": [
+        "Planerar daglig drift",
+        "Tränar teamet"
+      ],
+      "outcomes": [
+        "Säkra pass",
+        "Nöjd kund-index"
+      ]
+    },
+    {
+      "id": "iberia_porto_site",
+      "name": "Site Porto",
+      "type": "Unit",
+      "role": "Driver JumpYard Porto.",
+      "parent": "iberia_sites",
+      "children": [],
+      "inputs": [
+        {
+          "from": "support_office_iberia",
+          "desc": "Support & riktlinjer"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "region_iberia",
+          "desc": "Prestationsdata"
+        }
+      ],
+      "responsibilities": [
+        "Leverera gästupplevelse enligt koncept",
+        "Rapportera KPI:er"
+      ],
+      "activities": [
+        "Planerar daglig drift",
+        "Tränar teamet"
+      ],
+      "outcomes": [
+        "Säkra pass",
+        "Nöjd kund-index"
+      ]
+    },
+    {
+      "id": "iberia_bilbao_site",
+      "name": "Site Bilbao",
+      "type": "Unit",
+      "role": "Driver JumpYard Bilbao.",
+      "parent": "iberia_sites",
+      "children": [],
+      "inputs": [
+        {
+          "from": "support_office_iberia",
+          "desc": "Support & riktlinjer"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "region_iberia",
+          "desc": "Prestationsdata"
+        }
+      ],
+      "responsibilities": [
+        "Leverera gästupplevelse enligt koncept",
+        "Rapportera KPI:er"
+      ],
+      "activities": [
+        "Planerar daglig drift",
+        "Tränar teamet"
+      ],
+      "outcomes": [
+        "Säkra pass",
+        "Nöjd kund-index"
+      ]
+    },
+    {
+      "id": "iberia_sevilla_site",
+      "name": "Site Sevilla",
+      "type": "Unit",
+      "role": "Driver JumpYard Sevilla.",
+      "parent": "iberia_sites",
+      "children": [],
+      "inputs": [
+        {
+          "from": "support_office_iberia",
+          "desc": "Support & riktlinjer"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "region_iberia",
+          "desc": "Prestationsdata"
+        }
+      ],
+      "responsibilities": [
+        "Leverera gästupplevelse enligt koncept",
+        "Rapportera KPI:er"
+      ],
+      "activities": [
+        "Planerar daglig drift",
+        "Tränar teamet"
+      ],
+      "outcomes": [
+        "Säkra pass",
+        "Nöjd kund-index"
+      ]
+    },
+    {
+      "id": "iberia_sites",
+      "name": "Iberia Sites",
+      "type": "Group",
+      "role": "Samlar parkerna i Iberia.",
+      "parent": "region_iberia",
+      "children": [
+        "iberia_lisbon_site",
+        "iberia_madrid_oasiz_site",
+        "iberia_barcelona_site",
+        "iberia_porto_site",
+        "iberia_bilbao_site",
+        "iberia_sevilla_site"
+      ],
+      "inputs": [
+        {
+          "from": "support_office_iberia",
+          "desc": "Operativt stöd"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "region_iberia",
+          "desc": "Siteperformance"
+        }
+      ],
+      "responsibilities": [
+        "Delar erfarenheter mellan parker"
+      ],
+      "activities": [
+        "Regionmöten"
+      ],
+      "outcomes": [
+        "Samordnad drift"
+      ]
+    },
+    {
+      "id": "marketing_sales_iberia",
+      "name": "Marketing & Sales Iberia",
+      "type": "Department",
+      "role": "Driver gästflöde och kampanjer.",
+      "parent": "support_office_iberia",
+      "children": [],
+      "inputs": [
+        {
+          "from": "marketing_sales_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "iberia_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa marketing & sales-ramverk till Iberia"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "expansion_iberia",
+      "name": "Expansion Iberia",
+      "type": "Department",
+      "role": "Planerar nya parker och koncept.",
+      "parent": "support_office_iberia",
+      "children": [],
+      "inputs": [
+        {
+          "from": "expansion_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "iberia_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa expansion-ramverk till Iberia"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "finance_iberia",
+      "name": "Finance Iberia",
+      "type": "Department",
+      "role": "Stödjer budget, prognos och controlling.",
+      "parent": "support_office_iberia",
+      "children": [],
+      "inputs": [
+        {
+          "from": "finance_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "iberia_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa finance-ramverk till Iberia"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "it_iberia",
+      "name": "IT Iberia",
+      "type": "Department",
+      "role": "Äger system och digital infrastruktur.",
+      "parent": "support_office_iberia",
+      "children": [],
+      "inputs": [
+        {
+          "from": "it_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "iberia_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa it-ramverk till Iberia"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "hr_training_iberia",
+      "name": "HR & Training Iberia",
+      "type": "Department",
+      "role": "Säkrar kompetens genom utbildning.",
+      "parent": "support_office_iberia",
+      "children": [],
+      "inputs": [
+        {
+          "from": "hr_training_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "iberia_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa hr & training-ramverk till Iberia"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "safety_iberia",
+      "name": "Safety Iberia",
+      "type": "Department",
+      "role": "Sätter säkerhetsstandard och följer upp incidenter.",
+      "parent": "support_office_iberia",
+      "children": [],
+      "inputs": [
+        {
+          "from": "safety_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "iberia_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa safety-ramverk till Iberia"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "maintenance_iberia",
+      "name": "Maintenance Iberia",
+      "type": "Department",
+      "role": "Underhåller attraktioner och anläggningar.",
+      "parent": "support_office_iberia",
+      "children": [],
+      "inputs": [
+        {
+          "from": "maintenance_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "iberia_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa maintenance-ramverk till Iberia"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "operations_iberia",
+      "name": "Operations Iberia",
+      "type": "Department",
+      "role": "Supportar driften i parkerna dagligen.",
+      "parent": "support_office_iberia",
+      "children": [],
+      "inputs": [
+        {
+          "from": "operations_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "iberia_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa operations-ramverk till Iberia"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "support_office_iberia",
+      "name": "Support Office Iberia",
+      "type": "SupportOffice",
+      "role": "Ger dagligt stöd till parkerna i Iberia.",
+      "parent": "region_iberia",
+      "children": [
+        "marketing_sales_iberia",
+        "expansion_iberia",
+        "finance_iberia",
+        "it_iberia",
+        "hr_training_iberia",
+        "safety_iberia",
+        "maintenance_iberia",
+        "operations_iberia"
+      ],
+      "inputs": [
+        {
+          "from": "support_office_global",
+          "desc": "Strategiska ramar"
+        },
+        {
+          "from": "support_office_global",
+          "desc": "Globala standards"
+        },
+        {
+          "from": "region_iberia",
+          "desc": "Lokala behov"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "iberia_sites",
+          "desc": "Operativt stöd"
+        },
+        {
+          "to": "region_iberia",
+          "desc": "Status & rekommendationer"
+        }
+      ],
+      "responsibilities": [
+        "Översätta globala policies till lokal plan",
+        "Stötta sitechefer med expertteam"
+      ],
+      "activities": [
+        "Koordinerar utbildningar",
+        "Följer upp incidenter och upplevelse"
+      ],
+      "outcomes": [
+        "Snabbt stöd vid frågor",
+        "Lokala förbättringsplaner"
+      ]
+    },
+    {
+      "id": "region_germany",
+      "name": "Germany",
+      "type": "PA",
+      "role": "Driver parkerna i Germany och säkrar lokalt kundlöfte.",
+      "parent": "global_operations",
+      "children": [
+        "support_office_germany",
+        "germany_sites"
+      ],
+      "supportOffice": "support_office_germany",
+      "inputs": [
+        {
+          "from": "support_office_germany",
+          "desc": "Operativt stöd"
+        },
+        {
+          "from": "global_operations",
+          "desc": "Mål & förväntningar"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "global_operations",
+          "desc": "Regionala resultat"
+        },
+        {
+          "to": "support_office_germany",
+          "desc": "Lokala behov"
+        }
+      ],
+      "responsibilities": [
+        "Leverera resultat enligt budget",
+        "Anpassa globala standards till lokala marknader"
+      ],
+      "activities": [
+        "Planerar kampanjer och events",
+        "Stödjer sitechefer"
+      ],
+      "outcomes": [
+        "Nöjda gäster",
+        "Stabila driftprocesser"
+      ]
+    },
+    {
+      "id": "germany_berlin_site",
+      "name": "Site Berlin",
+      "type": "Unit",
+      "role": "Driver JumpYard Berlin.",
+      "parent": "germany_sites",
+      "children": [],
+      "inputs": [
+        {
+          "from": "support_office_germany",
+          "desc": "Support & riktlinjer"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "region_germany",
+          "desc": "Prestationsdata"
+        }
+      ],
+      "responsibilities": [
+        "Leverera gästupplevelse enligt koncept",
+        "Rapportera KPI:er"
+      ],
+      "activities": [
+        "Planerar daglig drift",
+        "Tränar teamet"
+      ],
+      "outcomes": [
+        "Säkra pass",
+        "Nöjd kund-index"
+      ]
+    },
+    {
+      "id": "germany_hamburg_site",
+      "name": "Site Hamburg",
+      "type": "Unit",
+      "role": "Driver JumpYard Hamburg.",
+      "parent": "germany_sites",
+      "children": [],
+      "inputs": [
+        {
+          "from": "support_office_germany",
+          "desc": "Support & riktlinjer"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "region_germany",
+          "desc": "Prestationsdata"
+        }
+      ],
+      "responsibilities": [
+        "Leverera gästupplevelse enligt koncept",
+        "Rapportera KPI:er"
+      ],
+      "activities": [
+        "Planerar daglig drift",
+        "Tränar teamet"
+      ],
+      "outcomes": [
+        "Säkra pass",
+        "Nöjd kund-index"
+      ]
+    },
+    {
+      "id": "germany_munich_site",
+      "name": "Site Munich",
+      "type": "Unit",
+      "role": "Driver JumpYard Munich.",
+      "parent": "germany_sites",
+      "children": [],
+      "inputs": [
+        {
+          "from": "support_office_germany",
+          "desc": "Support & riktlinjer"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "region_germany",
+          "desc": "Prestationsdata"
+        }
+      ],
+      "responsibilities": [
+        "Leverera gästupplevelse enligt koncept",
+        "Rapportera KPI:er"
+      ],
+      "activities": [
+        "Planerar daglig drift",
+        "Tränar teamet"
+      ],
+      "outcomes": [
+        "Säkra pass",
+        "Nöjd kund-index"
+      ]
+    },
+    {
+      "id": "germany_sites",
+      "name": "Germany Sites",
+      "type": "Group",
+      "role": "Samlar parkerna i Germany.",
+      "parent": "region_germany",
+      "children": [
+        "germany_berlin_site",
+        "germany_hamburg_site",
+        "germany_munich_site"
+      ],
+      "inputs": [
+        {
+          "from": "support_office_germany",
+          "desc": "Operativt stöd"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "region_germany",
+          "desc": "Siteperformance"
+        }
+      ],
+      "responsibilities": [
+        "Delar erfarenheter mellan parker"
+      ],
+      "activities": [
+        "Regionmöten"
+      ],
+      "outcomes": [
+        "Samordnad drift"
+      ]
+    },
+    {
+      "id": "marketing_sales_germany",
+      "name": "Marketing & Sales Germany",
+      "type": "Department",
+      "role": "Driver gästflöde och kampanjer.",
+      "parent": "support_office_germany",
+      "children": [],
+      "inputs": [
+        {
+          "from": "marketing_sales_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "germany_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa marketing & sales-ramverk till Germany"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "expansion_germany",
+      "name": "Expansion Germany",
+      "type": "Department",
+      "role": "Planerar nya parker och koncept.",
+      "parent": "support_office_germany",
+      "children": [],
+      "inputs": [
+        {
+          "from": "expansion_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "germany_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa expansion-ramverk till Germany"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "finance_germany",
+      "name": "Finance Germany",
+      "type": "Department",
+      "role": "Stödjer budget, prognos och controlling.",
+      "parent": "support_office_germany",
+      "children": [],
+      "inputs": [
+        {
+          "from": "finance_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "germany_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa finance-ramverk till Germany"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "it_germany",
+      "name": "IT Germany",
+      "type": "Department",
+      "role": "Äger system och digital infrastruktur.",
+      "parent": "support_office_germany",
+      "children": [],
+      "inputs": [
+        {
+          "from": "it_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "germany_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa it-ramverk till Germany"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "hr_training_germany",
+      "name": "HR & Training Germany",
+      "type": "Department",
+      "role": "Säkrar kompetens genom utbildning.",
+      "parent": "support_office_germany",
+      "children": [],
+      "inputs": [
+        {
+          "from": "hr_training_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "germany_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa hr & training-ramverk till Germany"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "safety_germany",
+      "name": "Safety Germany",
+      "type": "Department",
+      "role": "Sätter säkerhetsstandard och följer upp incidenter.",
+      "parent": "support_office_germany",
+      "children": [],
+      "inputs": [
+        {
+          "from": "safety_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "germany_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa safety-ramverk till Germany"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "maintenance_germany",
+      "name": "Maintenance Germany",
+      "type": "Department",
+      "role": "Underhåller attraktioner och anläggningar.",
+      "parent": "support_office_germany",
+      "children": [],
+      "inputs": [
+        {
+          "from": "maintenance_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "germany_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa maintenance-ramverk till Germany"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "operations_germany",
+      "name": "Operations Germany",
+      "type": "Department",
+      "role": "Supportar driften i parkerna dagligen.",
+      "parent": "support_office_germany",
+      "children": [],
+      "inputs": [
+        {
+          "from": "operations_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "germany_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa operations-ramverk till Germany"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "support_office_germany",
+      "name": "Support Office Germany",
+      "type": "SupportOffice",
+      "role": "Ger dagligt stöd till parkerna i Germany.",
+      "parent": "region_germany",
+      "children": [
+        "marketing_sales_germany",
+        "expansion_germany",
+        "finance_germany",
+        "it_germany",
+        "hr_training_germany",
+        "safety_germany",
+        "maintenance_germany",
+        "operations_germany"
+      ],
+      "inputs": [
+        {
+          "from": "support_office_global",
+          "desc": "Strategiska ramar"
+        },
+        {
+          "from": "support_office_global",
+          "desc": "Globala standards"
+        },
+        {
+          "from": "region_germany",
+          "desc": "Lokala behov"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "germany_sites",
+          "desc": "Operativt stöd"
+        },
+        {
+          "to": "region_germany",
+          "desc": "Status & rekommendationer"
+        }
+      ],
+      "responsibilities": [
+        "Översätta globala policies till lokal plan",
+        "Stötta sitechefer med expertteam"
+      ],
+      "activities": [
+        "Koordinerar utbildningar",
+        "Följer upp incidenter och upplevelse"
+      ],
+      "outcomes": [
+        "Snabbt stöd vid frågor",
+        "Lokala förbättringsplaner"
+      ]
+    },
+    {
+      "id": "region_nordics",
+      "name": "Nordics",
+      "type": "PO",
+      "role": "Driver parkerna i Nordics och säkrar lokalt kundlöfte.",
+      "parent": "global_operations",
+      "children": [
+        "support_office_nordics",
+        "nordics_sites"
+      ],
+      "supportOffice": "support_office_nordics",
+      "inputs": [
+        {
+          "from": "support_office_nordics",
+          "desc": "Operativt stöd"
+        },
+        {
+          "from": "global_operations",
+          "desc": "Mål & förväntningar"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "global_operations",
+          "desc": "Regionala resultat"
+        },
+        {
+          "to": "support_office_nordics",
+          "desc": "Lokala behov"
+        }
+      ],
+      "responsibilities": [
+        "Leverera resultat enligt budget",
+        "Anpassa globala standards till lokala marknader"
+      ],
+      "activities": [
+        "Planerar kampanjer och events",
+        "Stödjer sitechefer"
+      ],
+      "outcomes": [
+        "Nöjda gäster",
+        "Stabila driftprocesser"
+      ]
+    },
+    {
+      "id": "nordics_stockholm_site",
+      "name": "Site Stockholm",
+      "type": "Unit",
+      "role": "Driver JumpYard Stockholm.",
+      "parent": "nordics_sites",
+      "children": [],
+      "inputs": [
+        {
+          "from": "support_office_nordics",
+          "desc": "Support & riktlinjer"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "region_nordics",
+          "desc": "Prestationsdata"
+        }
+      ],
+      "responsibilities": [
+        "Leverera gästupplevelse enligt koncept",
+        "Rapportera KPI:er"
+      ],
+      "activities": [
+        "Planerar daglig drift",
+        "Tränar teamet"
+      ],
+      "outcomes": [
+        "Säkra pass",
+        "Nöjd kund-index"
+      ]
+    },
+    {
+      "id": "nordics_oslo_site",
+      "name": "Site Oslo",
+      "type": "Unit",
+      "role": "Driver JumpYard Oslo.",
+      "parent": "nordics_sites",
+      "children": [],
+      "inputs": [
+        {
+          "from": "support_office_nordics",
+          "desc": "Support & riktlinjer"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "region_nordics",
+          "desc": "Prestationsdata"
+        }
+      ],
+      "responsibilities": [
+        "Leverera gästupplevelse enligt koncept",
+        "Rapportera KPI:er"
+      ],
+      "activities": [
+        "Planerar daglig drift",
+        "Tränar teamet"
+      ],
+      "outcomes": [
+        "Säkra pass",
+        "Nöjd kund-index"
+      ]
+    },
+    {
+      "id": "nordics_helsingborg_site",
+      "name": "Site Helsingborg",
+      "type": "Unit",
+      "role": "Driver JumpYard Helsingborg.",
+      "parent": "nordics_sites",
+      "children": [],
+      "inputs": [
+        {
+          "from": "support_office_nordics",
+          "desc": "Support & riktlinjer"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "region_nordics",
+          "desc": "Prestationsdata"
+        }
+      ],
+      "responsibilities": [
+        "Leverera gästupplevelse enligt koncept",
+        "Rapportera KPI:er"
+      ],
+      "activities": [
+        "Planerar daglig drift",
+        "Tränar teamet"
+      ],
+      "outcomes": [
+        "Säkra pass",
+        "Nöjd kund-index"
+      ]
+    },
+    {
+      "id": "nordics_barkarby_site",
+      "name": "Site Barkarby",
+      "type": "Unit",
+      "role": "Driver JumpYard Barkarby.",
+      "parent": "nordics_sites",
+      "children": [],
+      "inputs": [
+        {
+          "from": "support_office_nordics",
+          "desc": "Support & riktlinjer"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "region_nordics",
+          "desc": "Prestationsdata"
+        }
+      ],
+      "responsibilities": [
+        "Leverera gästupplevelse enligt koncept",
+        "Rapportera KPI:er"
+      ],
+      "activities": [
+        "Planerar daglig drift",
+        "Tränar teamet"
+      ],
+      "outcomes": [
+        "Säkra pass",
+        "Nöjd kund-index"
+      ]
+    },
+    {
+      "id": "nordics_nacka_site",
+      "name": "Site Nacka",
+      "type": "Unit",
+      "role": "Driver JumpYard Nacka.",
+      "parent": "nordics_sites",
+      "children": [],
+      "inputs": [
+        {
+          "from": "support_office_nordics",
+          "desc": "Support & riktlinjer"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "region_nordics",
+          "desc": "Prestationsdata"
+        }
+      ],
+      "responsibilities": [
+        "Leverera gästupplevelse enligt koncept",
+        "Rapportera KPI:er"
+      ],
+      "activities": [
+        "Planerar daglig drift",
+        "Tränar teamet"
+      ],
+      "outcomes": [
+        "Säkra pass",
+        "Nöjd kund-index"
+      ]
+    },
+    {
+      "id": "nordics_sites",
+      "name": "Nordics Sites",
+      "type": "Group",
+      "role": "Samlar parkerna i Nordics.",
+      "parent": "region_nordics",
+      "children": [
+        "nordics_stockholm_site",
+        "nordics_oslo_site",
+        "nordics_helsingborg_site",
+        "nordics_barkarby_site",
+        "nordics_nacka_site",
+        "sweden_goteborg_site",
+        "sweden_malmo_site",
+        "sweden_uppsala_site"
+      ],
+      "inputs": [
+        {
+          "from": "support_office_nordics",
+          "desc": "Operativt stöd"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "region_nordics",
+          "desc": "Siteperformance"
+        }
+      ],
+      "responsibilities": [
+        "Delar erfarenheter mellan parker"
+      ],
+      "activities": [
+        "Regionmöten"
+      ],
+      "outcomes": [
+        "Samordnad drift"
+      ]
+    },
+    {
+      "id": "marketing_sales_nordics",
+      "name": "Marketing & Sales Nordics",
+      "type": "Department",
+      "role": "Driver gästflöde och kampanjer.",
+      "parent": "support_office_nordics",
+      "children": [],
+      "inputs": [
+        {
+          "from": "marketing_sales_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "nordics_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa marketing & sales-ramverk till Nordics"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "expansion_nordics",
+      "name": "Expansion Nordics",
+      "type": "Department",
+      "role": "Planerar nya parker och koncept.",
+      "parent": "support_office_nordics",
+      "children": [],
+      "inputs": [
+        {
+          "from": "expansion_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "nordics_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa expansion-ramverk till Nordics"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "finance_nordics",
+      "name": "Finance Nordics",
+      "type": "Department",
+      "role": "Stödjer budget, prognos och controlling.",
+      "parent": "support_office_nordics",
+      "children": [],
+      "inputs": [
+        {
+          "from": "finance_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "nordics_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa finance-ramverk till Nordics"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "it_nordics",
+      "name": "IT Nordics",
+      "type": "Department",
+      "role": "Äger system och digital infrastruktur.",
+      "parent": "support_office_nordics",
+      "children": [],
+      "inputs": [
+        {
+          "from": "it_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "nordics_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa it-ramverk till Nordics"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "hr_training_nordics",
+      "name": "HR & Training Nordics",
+      "type": "Department",
+      "role": "Säkrar kompetens genom utbildning.",
+      "parent": "support_office_nordics",
+      "children": [],
+      "inputs": [
+        {
+          "from": "hr_training_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "nordics_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa hr & training-ramverk till Nordics"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "safety_nordics",
+      "name": "Safety Nordics",
+      "type": "Department",
+      "role": "Sätter säkerhetsstandard och följer upp incidenter.",
+      "parent": "support_office_nordics",
+      "children": [],
+      "inputs": [
+        {
+          "from": "safety_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "nordics_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa safety-ramverk till Nordics"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "maintenance_nordics",
+      "name": "Maintenance Nordics",
+      "type": "Department",
+      "role": "Underhåller attraktioner och anläggningar.",
+      "parent": "support_office_nordics",
+      "children": [],
+      "inputs": [
+        {
+          "from": "maintenance_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "nordics_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa maintenance-ramverk till Nordics"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "operations_nordics",
+      "name": "Operations Nordics",
+      "type": "Department",
+      "role": "Supportar driften i parkerna dagligen.",
+      "parent": "support_office_nordics",
+      "children": [],
+      "inputs": [
+        {
+          "from": "operations_global",
+          "desc": "Standards"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "nordics_sites",
+          "desc": "Expertstöd"
+        }
+      ],
+      "responsibilities": [
+        "Anpassa operations-ramverk till Nordics"
+      ],
+      "activities": [
+        "Coacher site-team",
+        "Rapporterar status"
+      ],
+      "outcomes": [
+        "Lokala förbättringar"
+      ]
+    },
+    {
+      "id": "support_office_nordics",
+      "name": "Support Office Nordics",
+      "type": "SupportOffice",
+      "role": "Ger dagligt stöd till parkerna i Nordics.",
+      "parent": "region_nordics",
+      "children": [
+        "marketing_sales_nordics",
+        "expansion_nordics",
+        "finance_nordics",
+        "it_nordics",
+        "hr_training_nordics",
+        "safety_nordics",
+        "maintenance_nordics",
+        "operations_nordics"
+      ],
+      "inputs": [
+        {
+          "from": "support_office_global",
+          "desc": "Strategiska ramar"
+        },
+        {
+          "from": "support_office_global",
+          "desc": "Globala standards"
+        },
+        {
+          "from": "region_nordics",
+          "desc": "Lokala behov"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "nordics_sites",
+          "desc": "Operativt stöd"
+        },
+        {
+          "to": "region_nordics",
+          "desc": "Status & rekommendationer"
+        }
+      ],
+      "responsibilities": [
+        "Översätta globala policies till lokal plan",
+        "Stötta sitechefer med expertteam"
+      ],
+      "activities": [
+        "Koordinerar utbildningar",
+        "Följer upp incidenter och upplevelse"
+      ],
+      "outcomes": [
+        "Snabbt stöd vid frågor",
+        "Lokala förbättringsplaner"
+      ]
+    },
+    {
+      "id": "sweden_goteborg_site",
+      "name": "Site Göteborg",
+      "type": "Unit",
+      "role": "Driver JumpYard Göteborg.",
+      "parent": "nordics_sites",
+      "children": [],
+      "inputs": [
+        {
+          "from": "support_office_nordics",
+          "desc": "Support & riktlinjer"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "region_nordics",
+          "desc": "Prestationsdata"
+        }
+      ],
+      "responsibilities": [
+        "Leverera gästupplevelse enligt koncept",
+        "Rapportera KPI:er"
+      ],
+      "activities": [
+        "Planerar daglig drift",
+        "Tränar teamet"
+      ],
+      "outcomes": [
+        "Säkra pass",
+        "Nöjd kund-index"
+      ]
+    },
+    {
+      "id": "sweden_malmo_site",
+      "name": "Site Malmö",
+      "type": "Unit",
+      "role": "Driver JumpYard Malmö.",
+      "parent": "nordics_sites",
+      "children": [],
+      "inputs": [
+        {
+          "from": "support_office_nordics",
+          "desc": "Support & riktlinjer"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "region_nordics",
+          "desc": "Prestationsdata"
+        }
+      ],
+      "responsibilities": [
+        "Leverera gästupplevelse enligt koncept",
+        "Rapportera KPI:er"
+      ],
+      "activities": [
+        "Planerar daglig drift",
+        "Tränar teamet"
+      ],
+      "outcomes": [
+        "Säkra pass",
+        "Nöjd kund-index"
+      ]
+    },
+    {
+      "id": "sweden_uppsala_site",
+      "name": "Site Uppsala",
+      "type": "Unit",
+      "role": "Driver JumpYard Uppsala.",
+      "parent": "nordics_sites",
+      "children": [],
+      "inputs": [
+        {
+          "from": "support_office_nordics",
+          "desc": "Support & riktlinjer"
+        }
+      ],
+      "outputs": [
+        {
+          "to": "region_nordics",
+          "desc": "Prestationsdata"
+        }
+      ],
+      "responsibilities": [
+        "Leverera gästupplevelse enligt koncept",
+        "Rapportera KPI:er"
+      ],
+      "activities": [
+        "Planerar daglig drift",
+        "Tränar teamet"
+      ],
+      "outcomes": [
+        "Säkra pass",
+        "Nöjd kund-index"
+      ]
+    }
+  ]
+}

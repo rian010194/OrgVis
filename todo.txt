@@ -1,0 +1,12 @@
+Fix logo, colour typogrophi scheme to match client
+
+Frontend
+    - PRIO 
+    - Make it so that you can give a Function/Name to your piechart.
+    - Add a way to display diagram on first click / first expand
+
+Book meeting with client
+    - are we ready to develop backend?
+
+Add placeholder text and metrics for placeholder piecharts in all of the nodes
+    - 
