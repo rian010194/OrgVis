@@ -1,21 +1,72 @@
-Fix logo, colour typogrophi scheme to match client
+# PROJECT TODO LIST
+# Status: TODO | IN_PROGRESS | REVIEW | DONE
+# Priority: HIGH | MEDIUM | LOW
+# Assignee: [Name] | UNASSIGNED
 
-Frontend
-    - PRIO 
-    - Make it so that you can give a Function/Name to your piechart.
-    - Add a way to display diagram on first click / first expand
+## WORKING INSTRUCTIONS
+1. When taking on a task, change Status to "IN_PROGRESS" and add your name to Assignee
+2. When done, change Status to "REVIEW" and add completion date
+3. After review/approval, change Status to "DONE"
+4. Add notes about progress, blockers, or important details
+5. Use [ ] for TODO, [x] for DONE
+6. Update this file frequently to avoid conflicts
 
-Book meeting with client
-    - are we ready to develop backend?
-
-Add placeholder text and metrics for placeholder piecharts in all of the nodes
-    - 
-
-Add different colour schemes, maybe ability for the admin to change colours of the app
-typografy etc of the site, also be able to add their own logo. 
+## HIGH PRIORITY
+[ ] Fix logo, colour typography scheme to match client
+    Status: TODO
+    Priority: HIGH
+    Assignee: UNASSIGNED
+    Notes: Client branding requirements
 
 
+## MEDIUM PRIORITY
+[ ] Book meeting with client
+    Status: TODO
+    Priority: MEDIUM
+    Assignee: UNASSIGNED
+    Notes: Are we ready to develop backend?
 
-Backend
-    - Fix backend
-    - fix user/admin rights, find a sollution for 
+[ ] Add placeholder text and metrics for placeholder piecharts in all nodes
+    Status: TODO
+    Priority: MEDIUM
+    Assignee: UNASSIGNED
+    Notes: Data visualization enhancement
+
+[ ] Add different colour schemes, admin ability to change colours/typography/logo
+    Status: TODO
+    Priority: MEDIUM
+    Assignee: UNASSIGNED
+    Notes: Admin customization features
+
+## LOW PRIORITY
+[ ] Fix backend
+    Status: TODO
+    Priority: LOW
+    Assignee: UNASSIGNED
+    Notes: Backend development needed
+
+[ ] Fix user/admin rights, find a solution
+    Status: TODO
+    Priority: LOW
+    Assignee: UNASSIGNED
+    Notes: Authentication and authorization system
+
+## COMPLETED TASKS
+[x] Fix metrics layout to span full width in detail panel
+    Status: DONE
+    Priority: MEDIUM
+    Assignee: AI Assistant
+    Completed: 2024-12-19
+
+[x] Fix bar chart Y-axis to use actual data values
+    Status: DONE
+    Priority: MEDIUM
+    Assignee: AI Assistant
+    Completed: 2024-12-19
+
+[x] Make tree view more sleek and compact
+    Status: DONE
+    Priority: LOW
+    Assignee: AI Assistant
+    Completed: 2024-12-19
+
