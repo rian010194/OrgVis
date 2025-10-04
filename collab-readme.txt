@@ -27,6 +27,15 @@
 - Pull from main before starting new work
 - Commit and push frequently to avoid conflicts
 
+Copy paste :
+
+[ ] [Uppgiftens namn]
+    Status: TODO
+    Priority: HIGH
+    Assignee: UNASSIGNED
+    Notes: [Beskrivning av vad som ska göras]
+    Branch: feature/[kort-branch-namn]
+
 ## HIGH PRIORITY
 [ ] Fix logo, colour typography scheme to match client
     Status: TODO
