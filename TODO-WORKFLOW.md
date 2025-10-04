@@ -83,3 +83,55 @@ docs: Update README with new features
 2. Ändra status till `TODO` om du inte kan fortsätta
 3. Lägg till `BLOCKED` i notes om något blockerar
 4. Kontakta teamet om du behöver hjälp
+
+## Arbete med 2 personer
+
+### Rekommenderat: Feature Branches
+```bash
+# När du tar på dig en uppgift:
+git checkout -b feature/[uppgift-namn]
+# Exempel: git checkout -b feature/logo-branding
+
+# Jobba på uppgiften:
+git add .
+git commit -m "feat: [beskrivning av ändring]"
+git push origin feature/[uppgift-namn]
+
+# När uppgiften är klar:
+git checkout main
+git pull origin main
+git merge feature/[uppgift-namn]
+git push origin main
+git branch -d feature/[uppgift-namn]  # Ta bort lokalt
+git push origin --delete feature/[uppgift-namn]  # Ta bort på GitHub
+```
+
+### Alternativ: Samma branch (main)
+```bash
+# Innan du börjar jobba:
+git pull origin main
+
+# Jobba och committa ofta:
+git add .
+git commit -m "WIP: [beskrivning]"
+git push origin main
+
+# Upprepa ofta för att undvika konflikter
+```
+
+### Konflikthantering
+```bash
+# Om du får merge conflicts:
+git pull origin main
+# Lös konflikterna manuellt i filerna
+git add .
+git commit -m "resolve merge conflicts"
+git push origin main
+```
+
+## Branch-namngivning
+- `feature/logo-branding`
+- `feature/piechart-naming`
+- `feature/diagram-display`
+- `fix/metrics-layout`
+- `style/tree-view-improvements`
