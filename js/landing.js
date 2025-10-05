@@ -22,41 +22,37 @@ const LandingPage = (() => {
   };
   
   const initializeJumpYardDemo = async () => {
-    const orgList = getOrganizationsList();
+    const jumpyardOrgId = 'demo_org';
     
-    // Only create demo if no organizations exist
-    if (orgList.length === 0) {
-      const jumpyardOrgId = 'demo_org';
-      
-      const jumpyardData = {
-        name: 'Demo',
-        description: 'Demo organization with sample data and structure',
-        type: 'company',
-        password: null, // No password required
-        createdAt: new Date().toISOString(),
-        id: jumpyardOrgId
-      };
-      
-      // Save Demo organization
-      localStorage.setItem(`org_${jumpyardOrgId}`, JSON.stringify(jumpyardData));
-      
-      // Create demo organization structure with some sample data
-      const demoStructure = createJumpYardDemoStructure();
-      localStorage.setItem(`org_structure_${jumpyardOrgId}`, JSON.stringify(demoStructure));
-      
-      // Add to organizations list
-      saveOrganizationToList(jumpyardOrgId, 'Demo');
-      
-      // Set Demo branding
-      const demoBranding = {
-        primaryColor: '#007bff',
-        secondaryColor: '#6c757d',
-        fontFamily: 'system',
-        fontSize: '16',
-        logo: null
-      };
-      localStorage.setItem(`org_branding_${jumpyardOrgId}`, JSON.stringify(demoBranding));
-    }
+    // Always create/update demo organization
+    const jumpyardData = {
+      name: 'Demo',
+      description: 'Demo organization with sample data and structure',
+      type: 'company',
+      password: null, // No password required
+      createdAt: new Date().toISOString(),
+      id: jumpyardOrgId
+    };
+    
+    // Save Demo organization
+    localStorage.setItem(`org_${jumpyardOrgId}`, JSON.stringify(jumpyardData));
+    
+    // Create demo organization structure with some sample data
+    const demoStructure = createJumpYardDemoStructure();
+    localStorage.setItem(`org_structure_${jumpyardOrgId}`, JSON.stringify(demoStructure));
+    
+    // Add to organizations list (will update if exists)
+    saveOrganizationToList(jumpyardOrgId, 'Demo');
+    
+    // Set Demo branding
+    const demoBranding = {
+      primaryColor: '#007bff',
+      secondaryColor: '#6c757d',
+      fontFamily: 'system',
+      fontSize: '16',
+      logo: null
+    };
+    localStorage.setItem(`org_branding_${jumpyardOrgId}`, JSON.stringify(demoBranding));
   };
   
   const createJumpYardDemoStructure = () => {
@@ -419,7 +415,22 @@ const LandingPage = (() => {
         showMainApp();
       }
     } else {
-      showErrorMessage('Demo organization not found. Please refresh the page.');
+      // Demo not found, try to create it
+      console.log('Demo organization not found, creating it...');
+      initializeJumpYardDemo().then(() => {
+        // Try again after creation
+        const newOrgData = JSON.parse(localStorage.getItem(`org_${jumpyardOrgId}`) || '{}');
+        if (newOrgData.id) {
+          localStorage.setItem('current_organization_id', jumpyardOrgId);
+          loadOrganizationBranding(jumpyardOrgId);
+          showMainApp();
+        } else {
+          showErrorMessage('Failed to create demo organization. Please refresh the page.');
+        }
+      }).catch(error => {
+        console.error('Error creating demo organization:', error);
+        showErrorMessage('Failed to create demo organization. Please refresh the page.');
+      });
     }
   };
   
@@ -782,7 +793,15 @@ const LandingPage = (() => {
   
   const saveOrganizationToList = (orgId, orgName) => {
     const orgList = JSON.parse(localStorage.getItem('organizations_list') || '[]');
-    orgList.push({ id: orgId, name: orgName });
+    
+    // Remove existing entry if it exists
+    const existingIndex = orgList.findIndex(org => org.id === orgId);
+    if (existingIndex !== -1) {
+      orgList[existingIndex] = { id: orgId, name: orgName };
+    } else {
+      orgList.push({ id: orgId, name: orgName });
+    }
+    
     localStorage.setItem('organizations_list', JSON.stringify(orgList));
   };
   
