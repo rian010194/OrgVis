@@ -1620,9 +1620,16 @@ const OrgUI = (() => {
         editBtn.type = 'button';
         editBtn.className = 'secondary';
         editBtn.style.cssText = 'font-size: 0.8rem; padding: 0.25rem 0.5rem;';
-        editBtn.addEventListener('click', () => {
+        editBtn.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          
+          console.log('Edit button clicked for metric:', metric);
+          
           // Pre-fill the add form with this metric for editing
           const addForm = elements.addMetricForm;
+          console.log('Add form found:', !!addForm);
+          
           if (addForm) {
             // Clear existing value inputs
             const valuesList = document.getElementById('valuesList');
@@ -1666,16 +1673,34 @@ const OrgUI = (() => {
               };
               
               // Add existing values
-              if (metric.values && metric.values.length > 0) {
+              console.log('Metric data for editing:', metric);
+              console.log('Metric values:', metric.values);
+              console.log('Metric value (single):', metric.value);
+              console.log('Metric data (old format):', metric.data);
+              
+              if (metric.values && Array.isArray(metric.values) && metric.values.length > 0) {
+                console.log('Using new values format');
                 metric.values.forEach((valueData, idx) => {
-                  const valueRow = createValueInput(idx, valueData.label, valueData.value);
+                  console.log(`Adding value ${idx}:`, valueData);
+                  const valueRow = createValueInput(idx, valueData.label || '', valueData.value || '');
                   valuesList.appendChild(valueRow);
                 });
+              } else if (metric.data && typeof metric.data === 'object') {
+                console.log('Using old data format');
+                let idx = 0;
+                Object.entries(metric.data).forEach(([label, value]) => {
+                  console.log(`Adding data ${idx}: ${label} = ${value}`);
+                  const valueRow = createValueInput(idx, label, value);
+                  valuesList.appendChild(valueRow);
+                  idx++;
+                });
               } else if (metric.value !== undefined) {
+                console.log('Using single value format');
                 // Backward compatibility for old single-value metrics
-                const valueRow = createValueInput(0, metric.name || '', metric.value);
+                const valueRow = createValueInput(0, metric.name || 'Value', metric.value);
                 valuesList.appendChild(valueRow);
               } else {
+                console.log('No existing values found, adding empty input');
                 // Add one empty value input
                 const valueRow = createValueInput(0);
                 valuesList.appendChild(valueRow);
