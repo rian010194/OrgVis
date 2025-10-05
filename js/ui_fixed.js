@@ -1158,6 +1158,16 @@ const OrgUI = (() => {
 
     }
 
+    // Show/hide Users button based on admin state
+    const userManagementBtn = document.getElementById('userManagementBtn');
+    if (userManagementBtn) {
+      if (willOpen) {
+        userManagementBtn.classList.remove('hidden');
+      } else {
+        userManagementBtn.classList.add('hidden');
+      }
+    }
+
     if (willOpen) {
 
       updateAdminTabsUI();
