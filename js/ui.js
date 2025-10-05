@@ -1361,11 +1361,19 @@ const OrgUI = (() => {
 
   const updateAdminButtonText = (isAdminOpen) => {
     const adminTextElement = elements.toggleAdmin?.querySelector('.admin-text');
+    const adminIconElement = elements.toggleAdmin?.querySelector('.admin-icon');
+    
     if (adminTextElement) {
       if (isAdminOpen) {
         adminTextElement.textContent = 'Close';
+        if (adminIconElement) {
+          adminIconElement.textContent = '✕';
+        }
       } else {
         adminTextElement.textContent = 'Admin';
+        if (adminIconElement) {
+          adminIconElement.textContent = '⚙️';
+        }
       }
     }
   };

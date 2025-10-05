@@ -127,9 +127,8 @@ header .logo {
     justify-content: center;
   }
   
-  .hamburger-icon {
-    width: 20px;
-    height: 16px;
+  .admin-icon {
+    font-size: 1.2rem;
   }
   
   .admin-text {
@@ -547,43 +546,13 @@ body.detail-expanded .app-layout {
   box-shadow: var(--shadow);
 }
 
-.hamburger-icon {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  width: 16px;
-  height: 12px;
+.admin-icon {
+  font-size: 1.1rem;
+  transition: transform 0.3s ease;
 }
 
-.hamburger-icon span {
-  width: 100%;
-  height: 2px;
-  background-color: currentColor;
-  border-radius: 1px;
-  transition: all 0.3s ease;
-}
-
-.admin-toggle.active .hamburger-icon span:nth-child(1) {
-  transform: rotate(45deg) translate(4px, 4px);
-}
-
-.admin-toggle.active .hamburger-icon span:nth-child(2) {
-  opacity: 0;
-}
-
-.admin-toggle.active .hamburger-icon span:nth-child(3) {
-  transform: rotate(-45deg) translate(4px, -4px);
-}
-
-/* Mobile hamburger improvements */
-@media (max-width: 768px) {
-  .admin-toggle.active .hamburger-icon span:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
-  }
-  
-  .admin-toggle.active .hamburger-icon span:nth-child(3) {
-    transform: rotate(-45deg) translate(5px, -5px);
-  }
+.admin-toggle.active .admin-icon {
+  transform: rotate(90deg);
 }
 
 .admin-text {
@@ -1557,9 +1526,8 @@ button.danger {
     min-height: 52px;
   }
   
-  .hamburger-icon {
-    width: 20px;
-    height: 16px;
+  .admin-icon {
+    font-size: 1.2rem;
   }
   
   .admin-text {
@@ -1648,9 +1616,8 @@ button.danger {
     min-height: 48px;
   }
   
-  .hamburger-icon {
-    width: 18px;
-    height: 14px;
+  .admin-icon {
+    font-size: 1.1rem;
   }
   
   .admin-text {
