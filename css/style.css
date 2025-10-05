@@ -68,8 +68,8 @@ header .logo {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem 2rem;
+  gap: 1.5rem;
+  padding: 1.25rem 2rem;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   position: sticky;
@@ -81,8 +81,19 @@ header .logo {
 /* Mobile toolbar adjustments */
 @media (max-width: 768px) {
   .app-toolbar {
-    padding: 0.75rem 1rem;
-    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    gap: 1rem;
+  }
+  
+  .view-button {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+  
+  .admin-toggle {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    min-width: 120px;
   }
 }
 
@@ -184,11 +195,12 @@ body.detail-expanded .app-layout {
   background: #fff;
   color: var(--muted);
   border-radius: 12px;
-  padding: 0.5rem 1.25rem;
+  padding: 0.75rem 1.5rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  font-size: 0.95rem;
 }
 
 .view-button:hover {
@@ -336,11 +348,13 @@ body.detail-expanded .app-layout {
   background: rgba(255, 90, 0, 0.1);
   color: var(--brand-orange);
   border-radius: 12px;
-  padding: 0.6rem 1.5rem;
+  padding: 0.75rem 1.5rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(255, 90, 0, 0.1);
+  font-size: 0.95rem;
+  min-width: 140px;
 }
 
 .admin-toggle:hover,
@@ -1274,8 +1288,19 @@ button.danger {
   .app-toolbar {
     flex-direction: column;
     align-items: stretch;
-    gap: 0.25rem;
-    padding: 0.25rem;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+  
+  .view-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .admin-toggle {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    min-width: auto;
   }
   
   main.app-layout {
@@ -1327,8 +1352,18 @@ button.danger {
   }
   
   .app-toolbar {
-    padding: 0.25rem;
-    gap: 0.25rem;
+    padding: 0.5rem;
+    gap: 0.375rem;
+  }
+  
+  .view-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+  
+  .admin-toggle {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
   }
 
   .section-header {
