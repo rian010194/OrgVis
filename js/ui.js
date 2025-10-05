@@ -1118,6 +1118,46 @@ const OrgUI = (() => {
 
       container.appendChild(metricsSection);
 
+      // Add admin chart buttons only when admin panel is open
+      if (elements.adminPanel && elements.adminPanel.classList.contains("open")) {
+        const chartTypes = [
+          { type: 'pie', label: 'Add Pie Chart' },
+          { type: 'bar', label: 'Add Bar Chart' },
+          { type: 'line', label: 'Add Line Chart' },
+          { type: 'table', label: 'Add Table' }
+        ];
+        
+        const buttonsContainer = document.createElement("div");
+        buttonsContainer.style.cssText = "margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem;";
+        
+        chartTypes.forEach(chartType => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "secondary";
+          button.textContent = chartType.label;
+          button.style.cssText = "font-size: 0.9rem; padding: 0.5rem 1rem;";
+          button.addEventListener("click", () => {
+            // Pre-fill the chart type in the admin form
+            const chartTypeSelect = elements.addMetricForm?.querySelector('select[name="metricChartType"]');
+            if (chartTypeSelect) {
+              chartTypeSelect.value = chartType.type;
+              // Trigger change event to show/hide values container
+              chartTypeSelect.dispatchEvent(new Event('change'));
+            }
+            
+            // Switch to metrics tab
+            setActiveAdminTab("metrics");
+            // Pre-fill the selected node
+            const nodeSelect = elements.addMetricForm?.querySelector('select[name="nodeId"]');
+            if (nodeSelect && selectedNodeId) {
+              nodeSelect.value = selectedNodeId;
+            }
+          });
+          buttonsContainer.appendChild(button);
+        });
+        
+        metricsSection.appendChild(buttonsContainer);
+      }
     }
 
     // Create a container for inputs and outputs to display them side by side
@@ -1868,6 +1908,13 @@ const OrgUI = (() => {
 
       updateAdminTabsUI();
 
+    } else {
+
+      // When admin panel closes, refresh detail panel to remove admin buttons
+      if (selectedNodeId) {
+        renderDetailPanel();
+      }
+
     }
 
   };
@@ -2573,43 +2620,7 @@ const OrgUI = (() => {
 
       body.appendChild(empty);
 
-      // Add specific chart type buttons (only show in admin mode)
-      if (elements.adminPanel && elements.adminPanel.classList.contains("open")) {
-        const chartTypes = [
-          { type: 'pie', label: 'Add Pie Chart' },
-          { type: 'bar', label: 'Add Bar Chart' },
-          { type: 'line', label: 'Add Line Chart' },
-          { type: 'table', label: 'Add Table' }
-        ];
-        
-        const buttonsContainer = document.createElement("div");
-        buttonsContainer.style.cssText = "margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem;";
-        
-        chartTypes.forEach(chartType => {
-          const btn = document.createElement("button");
-          btn.textContent = chartType.label;
-          btn.className = "secondary";
-          btn.style.cssText = "padding: 0.5rem 1rem; font-size: 0.9rem;";
-          btn.addEventListener("click", () => {
-            // Switch to metrics tab
-            setActiveAdminTab("metrics");
-            // Pre-fill the selected node and chart type
-            const nodeSelect = elements.addMetricForm?.querySelector('select[name="nodeId"]');
-            const chartTypeSelect = elements.addMetricForm?.querySelector('select[name="metricChartType"]');
-            if (nodeSelect && selectedNodeId) {
-              nodeSelect.value = selectedNodeId;
-            }
-            if (chartTypeSelect) {
-              chartTypeSelect.value = chartType.type;
-              // Trigger change event to show/hide values container
-              chartTypeSelect.dispatchEvent(new Event('change'));
-            }
-          });
-          buttonsContainer.appendChild(btn);
-        });
-        
-        body.appendChild(buttonsContainer);
-      }
+      // Admin chart buttons are now added in renderDetailPanel
 
       return section;
 
@@ -2694,43 +2705,7 @@ const OrgUI = (() => {
       body.appendChild(metricContainer);
     });
 
-    // Add specific chart type buttons (only show in admin mode)
-    if (elements.adminPanel && elements.adminPanel.classList.contains("open")) {
-      const chartTypes = [
-        { type: 'pie', label: 'Add Pie Chart' },
-        { type: 'bar', label: 'Add Bar Chart' },
-        { type: 'line', label: 'Add Line Chart' },
-        { type: 'table', label: 'Add Table' }
-      ];
-      
-      const buttonsContainer = document.createElement("div");
-      buttonsContainer.style.cssText = "margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem;";
-      
-      chartTypes.forEach(chartType => {
-        const btn = document.createElement("button");
-        btn.textContent = chartType.label;
-        btn.className = "secondary";
-        btn.style.cssText = "padding: 0.5rem 1rem; font-size: 0.9rem;";
-        btn.addEventListener("click", () => {
-          // Switch to metrics tab
-          setActiveAdminTab("metrics");
-          // Pre-fill the selected node and chart type
-          const nodeSelect = elements.addMetricForm?.querySelector('select[name="nodeId"]');
-          const chartTypeSelect = elements.addMetricForm?.querySelector('select[name="metricChartType"]');
-          if (nodeSelect && selectedNodeId) {
-            nodeSelect.value = selectedNodeId;
-          }
-          if (chartTypeSelect) {
-            chartTypeSelect.value = chartType.type;
-            // Trigger change event to show/hide values container
-            chartTypeSelect.dispatchEvent(new Event('change'));
-          }
-        });
-        buttonsContainer.appendChild(btn);
-      });
-      
-      body.appendChild(buttonsContainer);
-    }
+    // Admin chart buttons are now added in renderDetailPanel
 
     return section;
 
