@@ -215,6 +215,30 @@
       return state.loadPromise;
     }
 
+    // First try to load from localStorage (saved changes)
+    const savedData = localStorage.getItem('orgvis-data');
+    if (savedData) {
+      try {
+        const payload = JSON.parse(savedData);
+        if (Array.isArray(payload.nodes)) {
+          state.nodesById.clear();
+          payload.nodes.forEach((rawNode) => {
+            const node = normaliseNode(rawNode);
+            state.nodesById.set(node.id, node);
+          });
+          rebuildIndexes();
+          state.isLoaded = true;
+          state.lastError = null;
+          notify();
+          return getSnapshot();
+        }
+      } catch (error) {
+        console.warn('Failed to load saved data, falling back to mock data:', error);
+        localStorage.removeItem('orgvis-data');
+      }
+    }
+
+    // Fallback to original mock data
     state.loadPromise = fetch(url)
       .then((response) => {
         if (!response.ok) {
@@ -339,8 +363,19 @@
       state.rootIds.push(node.id);
     }
     notify();
+    saveToLocalStorage(); // Auto-save changes
     return clone(node);
   };
+  const saveToLocalStorage = () => {
+    try {
+      const snapshot = getSnapshot();
+      localStorage.setItem('orgvis-data', JSON.stringify(snapshot));
+      console.log('Data saved to localStorage');
+    } catch (error) {
+      console.error('Failed to save data to localStorage:', error);
+    }
+  };
+
   const updateNode = (id, updates) => {
     const node = state.nodesById.get(id);
     if (!node) {
@@ -372,6 +407,7 @@
       setParent(id, updates.parent ? String(updates.parent) : null);
     }
     notify();
+    saveToLocalStorage(); // Auto-save changes
     return clone(node);
   };
   const removeNode = (id) => {
@@ -399,6 +435,7 @@
     });
 
     notify();
+    saveToLocalStorage(); // Auto-save changes
   };
   const addLink = ({ from, to, desc }) => {
     if (!from || !to) {
@@ -418,6 +455,7 @@
       toNode.inputs.push({ from, desc: desc || "" });
     }
     notify();
+    saveToLocalStorage(); // Auto-save changes
   };
   const removeLink = ({ from, to }) => {
     if (!from || !to) {
@@ -431,6 +469,7 @@
     fromNode.outputs = fromNode.outputs.filter((relation) => relation.to !== to);
     toNode.inputs = toNode.inputs.filter((relation) => relation.from !== from);
     notify();
+    saveToLocalStorage(); // Auto-save changes
   };
   const getRelations = () => {
     const seen = new Set();
@@ -458,6 +497,11 @@
     lastError: state.lastError ? String(state.lastError) : null
   });
 
+  const clearSavedData = () => {
+    localStorage.removeItem('orgvis-data');
+    console.log('Saved data cleared');
+  };
+
   return {
     load,
     ensureLoaded,
@@ -473,7 +517,9 @@
     removeLink,
     getRelations,
     subscribe,
-    getState
+    getState,
+    saveToLocalStorage,
+    clearSavedData
   };
 })();
 

@@ -483,6 +483,8 @@ const OrgUI = (() => {
 
     elements.adminPanels = Array.from(document.querySelectorAll('[data-admin-panel]')) || [];
 
+    elements.clearDataButton = document.getElementById("clearDataButton");
+
   };
 
   const bindStaticListeners = () => {
@@ -582,6 +584,12 @@ const OrgUI = (() => {
     if (elements.visualizationTypeSelect) {
 
       elements.visualizationTypeSelect.addEventListener("change", handleVisualizationTypeChange);
+
+    }
+
+    if (elements.clearDataButton) {
+
+      elements.clearDataButton.addEventListener("click", handleClearData);
 
     }
 
@@ -2591,6 +2599,24 @@ const OrgUI = (() => {
 
     }
 
+  };
+
+  const handleClearData = () => {
+    if (!confirm("Are you sure you want to reset all changes and return to the original data? This cannot be undone.")) {
+      return;
+    }
+
+    try {
+      OrgStore.clearSavedData();
+      displayAdminMessage("Data reset to original. Reloading...", "success");
+      
+      // Reload the page after a short delay to show the message
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error) {
+      displayAdminMessage("Failed to reset data: " + error.message, "error");
+    }
   };
 
   const displayAdminMessage = (message, type) => {
