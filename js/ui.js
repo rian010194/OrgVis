@@ -484,6 +484,7 @@ const OrgUI = (() => {
     elements.adminPanels = Array.from(document.querySelectorAll('[data-admin-panel]')) || [];
 
     elements.clearDataButton = document.getElementById("clearDataButton");
+  elements.testStorageButton = document.getElementById("testStorageButton");
 
   };
 
@@ -590,6 +591,7 @@ const OrgUI = (() => {
     if (elements.clearDataButton) {
 
       elements.clearDataButton.addEventListener("click", handleClearData);
+    elements.testStorageButton.addEventListener("click", handleTestStorage);
 
     }
 
@@ -2616,6 +2618,19 @@ const OrgUI = (() => {
       }, 1000);
     } catch (error) {
       displayAdminMessage("Failed to reset data: " + error.message, "error");
+    }
+  };
+
+  const handleTestStorage = () => {
+    try {
+      const result = OrgStore.testLocalStorage();
+      if (result) {
+        displayAdminMessage("localStorage test: PASSED ✓", "success");
+      } else {
+        displayAdminMessage("localStorage test: FAILED ✗", "error");
+      }
+    } catch (error) {
+      displayAdminMessage("localStorage test error: " + error.message, "error");
     }
   };
 

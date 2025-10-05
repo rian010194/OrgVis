@@ -1,5 +1,6 @@
 [build]
   publish = "."
+  command = "echo 'Frontend-only build'"
 
 [[headers]]
   for = "/*"
@@ -9,22 +10,30 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
 
+# Shorter cache for development
 [[headers]]
   for = "/js/*"
   [headers.values]
-    Cache-Control = "public, max-age=86400"  # 24 hours
+    Cache-Control = "public, max-age=1800"  # 30 minutes
 
 [[headers]]
   for = "/css/*"
   [headers.values]
-    Cache-Control = "public, max-age=86400"  # 24 hours
-
-[[headers]]
-  for = "/img/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000"  # 1 year
+    Cache-Control = "public, max-age=1800"  # 30 minutes
 
 [[headers]]
   for = "*.html"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
+
+# Redirect to production version when backend is ready
+[[redirects]]
+  from = "/"
+  to = "/index.html"
+  status = 200
+
+# API fallback for frontend-only mode
+[[redirects]]
+  from = "/api/*"
+  to = "/index.html"
+  status = 404

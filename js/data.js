@@ -216,26 +216,36 @@
     }
 
     // First try to load from localStorage (saved changes)
-    const savedData = localStorage.getItem('orgvis-data');
-    if (savedData) {
-      try {
-        const payload = JSON.parse(savedData);
-        if (Array.isArray(payload.nodes)) {
-          state.nodesById.clear();
-          payload.nodes.forEach((rawNode) => {
-            const node = normaliseNode(rawNode);
-            state.nodesById.set(node.id, node);
+    if (typeof(Storage) !== "undefined") {
+      const savedData = localStorage.getItem('orgvis-data');
+      if (savedData) {
+        try {
+          const payload = JSON.parse(savedData);
+          console.log('Found saved data in localStorage:', {
+            nodesCount: payload.nodes ? payload.nodes.length : 0,
+            rootsCount: payload.roots ? payload.roots.length : 0
           });
-          rebuildIndexes();
-          state.isLoaded = true;
-          state.lastError = null;
-          notify();
-          return getSnapshot();
+          if (Array.isArray(payload.nodes)) {
+            state.nodesById.clear();
+            payload.nodes.forEach((rawNode) => {
+              const node = normaliseNode(rawNode);
+              state.nodesById.set(node.id, node);
+            });
+            rebuildIndexes();
+            state.isLoaded = true;
+            state.lastError = null;
+            notify();
+            return getSnapshot();
+          }
+        } catch (error) {
+          console.warn('Failed to load saved data, falling back to mock data:', error);
+          localStorage.removeItem('orgvis-data');
         }
-      } catch (error) {
-        console.warn('Failed to load saved data, falling back to mock data:', error);
-        localStorage.removeItem('orgvis-data');
+      } else {
+        console.log('No saved data found in localStorage, loading mock data');
       }
+    } else {
+      console.warn('localStorage not available, loading mock data');
     }
 
     // Fallback to original mock data
@@ -368,9 +378,20 @@
   };
   const saveToLocalStorage = () => {
     try {
+      // Check if localStorage is available
+      if (typeof(Storage) === "undefined") {
+        console.warn('localStorage not available');
+        return;
+      }
+      
       const snapshot = getSnapshot();
-      localStorage.setItem('orgvis-data', JSON.stringify(snapshot));
-      console.log('Data saved to localStorage');
+      const dataString = JSON.stringify(snapshot);
+      localStorage.setItem('orgvis-data', dataString);
+      console.log('Data saved to localStorage:', {
+        nodesCount: snapshot.nodes.length,
+        rootsCount: snapshot.roots.length,
+        dataSize: dataString.length + ' characters'
+      });
     } catch (error) {
       console.error('Failed to save data to localStorage:', error);
     }
@@ -498,8 +519,38 @@
   });
 
   const clearSavedData = () => {
-    localStorage.removeItem('orgvis-data');
-    console.log('Saved data cleared');
+    if (typeof(Storage) !== "undefined") {
+      localStorage.removeItem('orgvis-data');
+      console.log('Saved data cleared');
+    } else {
+      console.warn('localStorage not available');
+    }
+  };
+
+  const testLocalStorage = () => {
+    if (typeof(Storage) !== "undefined") {
+      try {
+        const testKey = 'orgvis-test';
+        const testValue = 'test-data';
+        localStorage.setItem(testKey, testValue);
+        const retrieved = localStorage.getItem(testKey);
+        localStorage.removeItem(testKey);
+        
+        if (retrieved === testValue) {
+          console.log('localStorage test: PASSED');
+          return true;
+        } else {
+          console.error('localStorage test: FAILED - data mismatch');
+          return false;
+        }
+      } catch (error) {
+        console.error('localStorage test: FAILED - error:', error);
+        return false;
+      }
+    } else {
+      console.warn('localStorage test: FAILED - not available');
+      return false;
+    }
   };
 
   return {
@@ -519,7 +570,8 @@
     subscribe,
     getState,
     saveToLocalStorage,
-    clearSavedData
+    clearSavedData,
+    testLocalStorage
   };
 })();
 
