@@ -244,7 +244,7 @@ const OrgUI = (() => {
 
       justify-content: center;
 
-      margin: 20px 0;
+      margin: 10px 0;
 
     `;
 
@@ -353,9 +353,9 @@ const OrgUI = (() => {
 
       flex-wrap: wrap;
 
-      gap: 10px;
+      gap: 5px;
 
-      margin-top: 20px;
+      margin-top: 10px;
 
       justify-content: center;
 
@@ -371,7 +371,7 @@ const OrgUI = (() => {
 
         align-items: center;
 
-        gap: 8px;
+        gap: 4px;
 
         font-size: 12px;
 
@@ -1902,7 +1902,7 @@ const OrgUI = (() => {
     if (elements.existingMetrics) {
       const existingHeading = document.createElement("h5");
       existingHeading.textContent = "Befintliga Metrics:";
-      existingHeading.style.marginBottom = "0.5rem";
+      existingHeading.style.marginBottom = "0.25rem";
       existingHeading.style.color = "var(--brand-orange)";
       elements.existingMetrics.appendChild(existingHeading);
 
