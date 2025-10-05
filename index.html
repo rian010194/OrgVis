@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Organization Chart</title>
     <link rel="stylesheet" href="css/style.css?v=20241221b">
+    <link rel="stylesheet" href="css/user-management.css?v=20241221">
     <!-- Google Fonts for custom typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -239,6 +240,10 @@
       </div>
     </div>
     <div class="toolbar-actions">
+      <button id="userManagementBtn" type="button" class="user-management-button" title="User Management">
+        <span class="user-icon">👥</span>
+        <span class="user-text">Users</span>
+      </button>
       <button id="toggleAdmin" type="button" class="admin-toggle" aria-pressed="false" aria-controls="adminPanel">
         <span class="admin-icon">⚙️</span>
         <span class="admin-text">Admin</span>
@@ -496,16 +501,18 @@
   </section>
 
     <script src="js/d3.v7.min.js"></script>
-    <!-- DEVELOPMENT: Using mock data for frontend-only development -->
-      <script src="js/data.js?v=20241221b"></script>
-    <!-- PRODUCTION: Uncomment these when deploying with Supabase backend:
+    <!-- PRODUCTION: Using Supabase backend with user management -->
     <script type="module" src="js/config.js?v=20241221"></script>
-    <script type="module" src="js/supabase.js?v=20241221"></script>
-    <script type="module" src="js/data-supabase.js?v=20241221"></script>
-    -->
+    <script type="module" src="js/supabase-multi-org.js?v=20241221"></script>
+    <script type="module" src="js/data-supabase-multi-org.js?v=20241221"></script>
+    <!-- DEVELOPMENT: Using mock data for frontend-only development -->
+    <!-- <script src="js/data.js?v=20241221b"></script> -->
     <script src="js/charts.js?v=20241221b"></script>
       <script src="js/ui.js?v=20241221b"></script>
     <script src="js/map.js?v=20241221b"></script>
+    <!-- User Management System -->
+    <script type="module" src="js/user-management.js?v=20241221"></script>
+    <script type="module" src="js/user-interface.js?v=20241221"></script>
     <script src="js/app.js?v=20241221b"></script>
   </div>
 

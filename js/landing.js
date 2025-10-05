@@ -477,7 +477,27 @@ const LandingPage = (() => {
       }
     }
     
-    // Login successful
+    // Try to use user management system if available
+    if (typeof userManager !== 'undefined') {
+      try {
+        // For now, create a demo admin user for the organization
+        const adminEmail = `admin@${orgName.toLowerCase().replace(/\s+/g, '')}.com`;
+        const result = await userManager.login(adminEmail, password);
+        
+        if (result.success) {
+          // Login successful with user management
+          localStorage.setItem('current_organization_id', org.id);
+          loadOrganizationBranding(org.id);
+          hideLoginModal();
+          showMainApp();
+          return;
+        }
+      } catch (error) {
+        console.log('User management not available, falling back to organization login');
+      }
+    }
+    
+    // Fallback to organization-level login
     localStorage.setItem('current_organization_id', org.id);
     loadOrganizationBranding(org.id);
     hideLoginModal();
@@ -824,7 +844,16 @@ const LandingPage = (() => {
     }, 4000);
   };
   
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // Try to use user management system if available
+    if (typeof userManager !== 'undefined') {
+      try {
+        await userManager.logout();
+      } catch (error) {
+        console.log('User management logout failed, continuing with organization logout');
+      }
+    }
+    
     // Clear current organization
     localStorage.removeItem('current_organization_id');
     
