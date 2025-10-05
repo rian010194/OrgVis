@@ -2,25 +2,45 @@
   let currentView = "tree";
   let treeContainer = null;
   let mapContainer = null;
-  let viewButtons = [];
+  let dropdownToggle = null;
+  let dropdownMenu = null;
+  let viewOptions = [];
 
   const init = () => {
     treeContainer = document.getElementById("orgchart");
     mapContainer = document.getElementById("mapView");
-    viewButtons = Array.from(document.querySelectorAll(".view-button"));
+    dropdownToggle = document.getElementById("viewDropdownToggle");
+    dropdownMenu = document.getElementById("viewDropdownMenu");
+    viewOptions = Array.from(document.querySelectorAll(".view-option"));
 
-    if (!treeContainer || !mapContainer || viewButtons.length === 0) {
+    if (!treeContainer || !mapContainer || !dropdownToggle || !dropdownMenu || viewOptions.length === 0) {
       return;
     }
 
-    viewButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        const targetView = button.dataset.view;
+    // Toggle dropdown
+    dropdownToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleDropdown();
+    });
+
+    // Handle view option clicks
+    viewOptions.forEach((option) => {
+      option.addEventListener("click", () => {
+        const targetView = option.dataset.view;
         if (!targetView || targetView === currentView) {
+          closeDropdown();
           return;
         }
         setView(targetView);
+        closeDropdown();
       });
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!dropdownToggle.contains(e.target) && !dropdownMenu.contains(e.target)) {
+        closeDropdown();
+      }
     });
 
     setView(currentView);
@@ -28,11 +48,19 @@
 
   const setView = (view) => {
     currentView = view === "map" ? "map" : "tree";
-    viewButtons.forEach((button) => {
-      const isActive = button.dataset.view === currentView;
-      button.classList.toggle("active", isActive);
-      button.setAttribute("aria-pressed", String(isActive));
+    
+    // Update view options
+    viewOptions.forEach((option) => {
+      const isActive = option.dataset.view === currentView;
+      option.classList.toggle("active", isActive);
+      option.setAttribute("aria-selected", String(isActive));
     });
+
+    // Update dropdown toggle text
+    const currentText = dropdownToggle.querySelector(".view-current");
+    if (currentText) {
+      currentText.textContent = currentView === "map" ? "Map View" : "Tree View";
+    }
 
     if (currentView === "map") {
       treeContainer.classList.add("hidden");
@@ -49,6 +77,22 @@
       if (typeof OrgMap !== "undefined" && OrgMap && typeof OrgMap.hide === "function") {
         OrgMap.hide();
       }
+    }
+  };
+
+  const toggleDropdown = () => {
+    const dropdown = dropdownToggle.closest(".view-dropdown");
+    if (dropdown) {
+      dropdown.classList.toggle("open");
+      dropdownToggle.setAttribute("aria-expanded", dropdown.classList.contains("open"));
+    }
+  };
+
+  const closeDropdown = () => {
+    const dropdown = dropdownToggle.closest(".view-dropdown");
+    if (dropdown) {
+      dropdown.classList.remove("open");
+      dropdownToggle.setAttribute("aria-expanded", "false");
     }
   };
 

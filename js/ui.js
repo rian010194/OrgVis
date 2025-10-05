@@ -861,6 +861,11 @@ const OrgUI = (() => {
 
     }
 
+    // Update Relations and Metrics dropdowns if admin panel is open
+    if (elements.adminPanel && elements.adminPanel.classList.contains("open")) {
+      updateFormDropdownsWithSelectedNode();
+    }
+
     setActiveAdminTab("edit");
 
     if (typeof OrgMap !== "undefined" && OrgMap && typeof OrgMap.reveal === "function") {
@@ -1407,6 +1412,11 @@ const OrgUI = (() => {
 
     updateAdminTabsUI();
 
+    // Update dropdowns when switching to Relations or Metrics tabs
+    if (tab === "relations" || tab === "metrics") {
+      updateFormDropdownsWithSelectedNode();
+    }
+
   };
 
   const toggleAdminPanel = () => {
@@ -1572,6 +1582,46 @@ const OrgUI = (() => {
       option.textContent = `${metric.name}: ${metric.value} ${metric.unit}`;
       metricSelect.appendChild(option);
     });
+  };
+
+  const updateFormDropdownsWithSelectedNode = () => {
+    // Update Relations form dropdowns
+    if (elements.addRelationForm) {
+      const fromSelect = elements.addRelationForm.querySelector('select[name="from"]');
+      const toSelect = elements.addRelationForm.querySelector('select[name="to"]');
+      
+      if (fromSelect && selectedNodeId) {
+        fromSelect.value = selectedNodeId;
+      }
+    }
+    
+    if (elements.removeRelationForm) {
+      const fromSelect = elements.removeRelationForm.querySelector('select[name="from"]');
+      const toSelect = elements.removeRelationForm.querySelector('select[name="to"]');
+      
+      if (fromSelect && selectedNodeId) {
+        fromSelect.value = selectedNodeId;
+      }
+    }
+    
+    // Update Metrics form dropdowns
+    if (elements.addMetricForm) {
+      const nodeSelect = elements.addMetricForm.querySelector('select[name="nodeId"]');
+      
+      if (nodeSelect && selectedNodeId) {
+        nodeSelect.value = selectedNodeId;
+      }
+    }
+    
+    if (elements.removeMetricForm) {
+      const nodeSelect = elements.removeMetricForm.querySelector('select[name="removeNodeId"]');
+      
+      if (nodeSelect && selectedNodeId) {
+        nodeSelect.value = selectedNodeId;
+        // Also update the metrics dropdown
+        updateMetricsOptions(selectedNodeId);
+      }
+    }
   };
 
   const populateEditForm = () => {

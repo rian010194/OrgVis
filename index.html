@@ -3,18 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <title>JumpYard Organization Chart</title>
-    <link rel="stylesheet" href="css/style.css?v=20241220d">
+    <link rel="stylesheet" href="css/style.css?v=20241220e">
 </head>
 <body>
   <header>
   </header>
 
   <div class="app-toolbar" role="toolbar" aria-label="View and admin controls">
-    <div class="toolbar-group view-switch" role="group" aria-label="Select view">
-      <button type="button" data-view="tree" class="view-button active" aria-pressed="true">Tree View</button>
-      <button type="button" data-view="map" class="view-button" aria-pressed="false">Map View</button>
+    <div class="toolbar-group">
+      <div class="view-dropdown">
+        <button type="button" id="viewDropdownToggle" class="view-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+          <span class="view-current">Tree View</span>
+          <span class="dropdown-arrow">▼</span>
+        </button>
+        <div class="view-dropdown-menu" id="viewDropdownMenu">
+          <button type="button" data-view="tree" class="view-option active" aria-selected="true">
+            <span class="view-icon">🌳</span>
+            <span class="view-label">Tree View</span>
+          </button>
+          <button type="button" data-view="map" class="view-option" aria-selected="false">
+            <span class="view-icon">🗺️</span>
+            <span class="view-label">Map View</span>
+          </button>
+        </div>
+      </div>
     </div>
-    <button id="toggleAdmin" type="button" class="admin-toggle" aria-pressed="false" aria-controls="adminPanel">Admin Mode</button>
+    <button id="toggleAdmin" type="button" class="admin-toggle" aria-pressed="false" aria-controls="adminPanel">
+      <span class="hamburger-icon">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+      <span class="admin-text">Admin</span>
+    </button>
   </div>
 
   <main class="app-layout">
@@ -264,8 +285,8 @@
   <script type="module" src="js/data-supabase.js?v=20241220"></script>
   -->
   <script src="js/charts.js?v=20241220"></script>
-    <script src="js/ui.js?v=20241220c"></script>
+    <script src="js/ui.js?v=20241220d"></script>
   <script src="js/map.js?v=20241220"></script>
-  <script src="js/app.js?v=20241220"></script>
+  <script src="js/app.js?v=20241220a"></script>
 </body>
 </html>
