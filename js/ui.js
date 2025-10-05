@@ -138,6 +138,9 @@ const OrgUI = (() => {
     // Initialize admin button text
     updateAdminButtonText(elements.adminPanel.classList.contains("open"));
 
+    // Set up resize observer for detail panel to sync heights
+    setupDetailPanelResizeObserver();
+
     renderAll();
 
     unsubscribe = OrgStore.subscribe(renderAll);
@@ -1225,6 +1228,9 @@ const OrgUI = (() => {
 
       target.textContent = isExpanded ? "Show less" : "Show more";
 
+      // Sync panel heights when detail panel expands/collapses
+      syncPanelHeights();
+
       if (typeof OrgMap !== "undefined" && OrgMap && typeof OrgMap.refresh === "function") {
 
         requestAnimationFrame(() => OrgMap.refresh());
@@ -1376,6 +1382,67 @@ const OrgUI = (() => {
         }
       }
     }
+  };
+
+  const syncPanelHeights = () => {
+    const detailPanel = elements.detailPanel;
+    const orgSection = document.querySelector('.org-section');
+    const treeContainer = document.querySelector('.tree-container');
+    const mapView = document.querySelector('.map-view');
+    
+    if (!detailPanel || !orgSection) {
+      return;
+    }
+
+    // Wait for layout to update, then sync heights
+    requestAnimationFrame(() => {
+      if (document.body.classList.contains("detail-expanded")) {
+        // Detail panel is expanded - sync heights
+        const detailHeight = detailPanel.offsetHeight;
+        
+        if (detailHeight > 0) {
+          // Set org-section to match detail panel height
+          orgSection.style.height = `${detailHeight}px`;
+          
+          // Update tree-container and map-view to fill the height
+          if (treeContainer) {
+            treeContainer.style.height = '100%';
+            treeContainer.style.minHeight = '100%';
+          }
+          
+          if (mapView) {
+            mapView.style.height = '100%';
+            mapView.style.minHeight = '100%';
+          }
+        }
+      } else {
+        // Detail panel is collapsed - reset heights
+        orgSection.style.height = '';
+        if (treeContainer) {
+          treeContainer.style.height = '';
+          treeContainer.style.minHeight = '';
+        }
+        if (mapView) {
+          mapView.style.height = '';
+          mapView.style.minHeight = '';
+        }
+      }
+    });
+  };
+
+  const setupDetailPanelResizeObserver = () => {
+    if (!elements.detailPanel || !window.ResizeObserver) {
+      return;
+    }
+
+    const resizeObserver = new ResizeObserver(() => {
+      // Only sync if detail panel is expanded
+      if (document.body.classList.contains("detail-expanded")) {
+        syncPanelHeights();
+      }
+    });
+
+    resizeObserver.observe(elements.detailPanel);
   };
 
   const updateAdminTabsUI = () => {

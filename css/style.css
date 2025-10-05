@@ -177,6 +177,17 @@ main.app-layout {
 
 body.detail-expanded .app-layout {
   grid-template-columns: minmax(0, 0.9fr) minmax(520px, 1.8fr);
+  align-items: stretch;
+}
+
+body.detail-expanded .org-section {
+  height: 100%;
+}
+
+body.detail-expanded .tree-container,
+body.detail-expanded .map-view {
+  height: 100%;
+  min-height: 100%;
 }
 
 /* Override detail-expanded for mobile - still stack vertically */
