@@ -533,6 +533,20 @@ const LandingPage = (() => {
       mainApp.classList.remove('hidden');
     }
     
+    // Load organization branding after showing main app
+    const currentOrgId = localStorage.getItem('current_organization_id');
+    if (currentOrgId) {
+      const brandingData = localStorage.getItem(`org_branding_${currentOrgId}`);
+      if (brandingData) {
+        try {
+          const branding = JSON.parse(brandingData);
+          applyBranding(branding);
+        } catch (error) {
+          console.error('Error loading branding:', error);
+        }
+      }
+    }
+    
     // Refresh header with current organization data
     setTimeout(() => {
       if (window.ThemeEditor && window.ThemeEditor.refreshHeader) {
@@ -627,10 +641,10 @@ const LandingPage = (() => {
     
     const formData = new FormData(e.target);
     const customizationData = {
-      primaryColor: formData.get('primaryColor'),
-      secondaryColor: formData.get('secondaryColor'),
-      fontFamily: formData.get('fontFamily'),
-      fontSize: formData.get('fontSize'),
+      primaryColor: formData.get('primaryColor') || '#ff5a00',
+      secondaryColor: formData.get('secondaryColor') || '#e53e3e',
+      fontFamily: formData.get('fontFamily') || 'system',
+      fontSize: formData.get('fontSize') || '16',
       logo: null
     };
     
@@ -657,7 +671,13 @@ const LandingPage = (() => {
       }
       
       // Save customization data for this specific organization
-      localStorage.setItem(`org_branding_${currentOrgId}`, JSON.stringify(customizationData));
+      try {
+        localStorage.setItem(`org_branding_${currentOrgId}`, JSON.stringify(customizationData));
+      } catch (error) {
+        console.error('Error saving customization data:', error);
+        showErrorMessage('Error saving customization data. Please try again.');
+        return;
+      }
       
       // Apply branding to the page
       applyBranding(customizationData);
@@ -688,12 +708,27 @@ const LandingPage = (() => {
       logo: null
     };
     
-    localStorage.setItem(`org_branding_${currentOrgId}`, JSON.stringify(defaultBranding));
+    try {
+      localStorage.setItem(`org_branding_${currentOrgId}`, JSON.stringify(defaultBranding));
+    } catch (error) {
+      console.error('Error saving default branding:', error);
+      showErrorMessage('Error saving default branding. Please try again.');
+      return;
+    }
     hideCustomizationModal();
     showMainApp();
   };
   
   const loadOrganizationBranding = (orgId) => {
+    // Only load branding if we're transitioning to main app or already in main app
+    const landingPage = document.getElementById('landingPage');
+    const mainApp = document.getElementById('mainApp');
+    
+    // If we're still on landing page, don't load branding yet
+    if (landingPage && !landingPage.classList.contains('hidden')) {
+      return;
+    }
+    
     const brandingData = localStorage.getItem(`org_branding_${orgId}`);
     if (brandingData) {
       try {
@@ -706,6 +741,20 @@ const LandingPage = (() => {
   };
   
   const applyBranding = (brandingData) => {
+    // Only apply branding if we're in the main app, not on landing page
+    const landingPage = document.getElementById('landingPage');
+    const mainApp = document.getElementById('mainApp');
+    
+    // If we're on landing page, don't apply organization branding
+    if (landingPage && !landingPage.classList.contains('hidden')) {
+      return; // Don't apply branding to landing page
+    }
+    
+    // Only apply branding to main app
+    if (!mainApp || mainApp.classList.contains('hidden')) {
+      return; // Don't apply branding if main app is not visible
+    }
+    
     // Apply colors to CSS custom properties
     if (brandingData.primaryColor) {
       document.documentElement.style.setProperty('--brand-orange', brandingData.primaryColor);
@@ -799,7 +848,13 @@ const LandingPage = (() => {
   };
   
   const saveOrganizationToList = (orgId, orgName) => {
-    const orgList = JSON.parse(localStorage.getItem('organizations_list') || '[]');
+    let orgList;
+    try {
+      orgList = JSON.parse(localStorage.getItem('organizations_list') || '[]');
+    } catch (error) {
+      console.error('Error parsing organizations list:', error);
+      orgList = [];
+    }
     
     // Remove existing entry if it exists
     const existingIndex = orgList.findIndex(org => org.id === orgId);
@@ -809,11 +864,20 @@ const LandingPage = (() => {
       orgList.push({ id: orgId, name: orgName });
     }
     
-    localStorage.setItem('organizations_list', JSON.stringify(orgList));
+    try {
+      localStorage.setItem('organizations_list', JSON.stringify(orgList));
+    } catch (error) {
+      console.error('Error saving organizations list:', error);
+    }
   };
   
   const getOrganizationsList = () => {
-    return JSON.parse(localStorage.getItem('organizations_list') || '[]');
+    try {
+      return JSON.parse(localStorage.getItem('organizations_list') || '[]');
+    } catch (error) {
+      console.error('Error parsing organizations list:', error);
+      return [];
+    }
   };
   
   const generateOrgId = () => {

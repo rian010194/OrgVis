@@ -26,24 +26,66 @@ export class OrgDatabase {
 
   // Organizations CRUD operations
   async getOrganizations() {
-    const { data, error } = await this.supabase
-      .from('organizations')
-      .select('*')
-      .order('name');
-    
-    if (error) throw error;
-    return data;
+    try {
+      const { data, error } = await this.supabase
+        .from('organizations')
+        .select('*')
+        .order('name');
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      // If organizations table doesn't exist, return fallback organizations
+      if (error.code === '42P01' || error.message.includes('relation "organizations" does not exist')) {
+        console.warn('Organizations table not found, returning fallback organizations');
+        return [
+          {
+            id: 'jumpyard',
+            name: 'JumpYard',
+            description: 'Demo organization showcasing the platform capabilities',
+            type: 'company',
+            password_hash: 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
+            branding: { primaryColor: '#ff5a00', secondaryColor: '#e53e3e', fontFamily: 'inter', fontSize: 16, logo: null },
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        ];
+      }
+      
+      throw error;
+    }
   }
 
   async getOrganization(id) {
-    const { data, error } = await this.supabase
-      .from('organizations')
-      .select('*')
-      .eq('id', id)
-      .single();
-    
-    if (error) throw error;
-    return data;
+    try {
+      const { data, error } = await this.supabase
+        .from('organizations')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      // If organizations table doesn't exist, create a fallback organization
+      if (error.code === '42P01' || error.message.includes('relation "organizations" does not exist')) {
+        console.warn('Organizations table not found, creating fallback organization data');
+        return {
+          id: id,
+          name: id === 'jumpyard' ? 'JumpYard' : 'Organization',
+          description: id === 'jumpyard' ? 'Demo organization showcasing the platform capabilities' : 'Organization created before multi-org support',
+          type: 'company',
+          password_hash: null,
+          branding: id === 'jumpyard' ? 
+            { primaryColor: '#ff5a00', secondaryColor: '#e53e3e', fontFamily: 'inter', fontSize: 16, logo: null } : 
+            { primaryColor: '#ff5a00', secondaryColor: '#e53e3e', fontFamily: 'system', fontSize: 16, logo: null },
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+      }
+      
+      throw error;
+    }
   }
 
   async createOrganization(orgData) {
@@ -103,14 +145,41 @@ export class OrgDatabase {
   }
 
   async createNode(nodeData) {
-    const { data, error } = await this.supabase
-      .from('nodes')
-      .insert([nodeData])
-      .select()
-      .single();
+    // Remove organization_id if the column doesn't exist in the current schema
+    const nodeDataToInsert = { ...nodeData };
     
-    if (error) throw error;
-    return data;
+    try {
+      const { data, error } = await this.supabase
+        .from('nodes')
+        .insert([nodeDataToInsert])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      // If the error is due to organization_id column not existing, try without it
+      if (error.code === '42703' || error.message.includes('column "organization_id" does not exist')) {
+        console.warn('Organization_id column not found, creating node without organization context');
+        delete nodeDataToInsert.organization_id;
+        
+        const { data, error: retryError } = await this.supabase
+          .from('nodes')
+          .insert([nodeDataToInsert])
+          .select()
+          .single();
+        
+        if (retryError) throw retryError;
+        return data;
+      }
+      
+      // If it's a foreign key constraint violation, the organization doesn't exist
+      if (error.code === '23503' && error.message.includes('organization_id_fkey')) {
+        throw new Error(`Organization with ID ${nodeData.organization_id} does not exist in the database. Please create the organization first.`);
+      }
+      
+      throw error;
+    }
   }
 
   async updateNode(id, updates) {

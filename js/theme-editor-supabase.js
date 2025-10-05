@@ -63,44 +63,84 @@ class SupabaseThemeEditor {
         const orgData = await window.orgDb.getOrganization(currentOrgId);
         console.log('SupabaseThemeEditor: Org data from Supabase:', orgData);
         
-        // Update header
-        const orgNameElement = document.getElementById('orgName');
-        const orgDescriptionElement = document.getElementById('orgDescription');
+        // Update header (find elements in main app header)
+        const mainApp = document.getElementById('mainApp');
+        const mainAppHeader = mainApp ? mainApp.querySelector('header') : null;
+        const orgNameElement = mainAppHeader ? mainAppHeader.querySelector('#orgName') : null;
+        const orgDescriptionElement = mainAppHeader ? mainAppHeader.querySelector('#orgDescription') : null;
         
         console.log('SupabaseThemeEditor: Header elements found:', {
+          mainApp: !!mainApp,
+          mainAppHeader: !!mainAppHeader,
           orgName: !!orgNameElement,
-          orgDescription: !!orgDescriptionElement
+          orgDescription: !!orgDescriptionElement,
+          orgData: orgData
         });
         
-        if (orgNameElement && orgData.name) {
+        if (orgNameElement && orgData && orgData.name) {
           console.log('SupabaseThemeEditor: Updating org name from', orgNameElement.textContent, 'to', orgData.name);
           orgNameElement.textContent = orgData.name;
         }
         
-        if (orgDescriptionElement && orgData.description) {
+        if (orgDescriptionElement && orgData && orgData.description) {
           console.log('SupabaseThemeEditor: Updating org description from', orgDescriptionElement.textContent, 'to', orgData.description);
           orgDescriptionElement.textContent = orgData.description;
         }
 
-        // Apply branding if available
+        // Apply branding if available (but only if we're in main app)
         if (orgData.branding && (orgData.branding.primaryColor || orgData.branding.secondaryColor)) {
           this.applyTheme(orgData.branding, orgData);
         }
       } catch (error) {
         console.error('SupabaseThemeEditor: Error loading organization data:', error);
+        
+        // Handle specific "organization not found" error
+        if (error.message.includes('Cannot coerce the result to a single JSON object')) {
+          console.error('SupabaseThemeEditor: Organization does not exist:', currentOrgId);
+          // Clear invalid organization ID
+          localStorage.removeItem('current_organization_id');
+          // Try to load a valid organization
+          await this.loadValidOrganization();
+          return;
+        }
+        
+        // Try fallback to demo organization
+        const demoOrgId = 'demo_org';
+        try {
+          const demoData = await window.orgDb.getOrganization(demoOrgId);
+          if (demoData && demoData.name) {
+            localStorage.setItem('current_organization_id', demoOrgId);
+            this.initializeHeader();
+          }
+        } catch (demoError) {
+          console.error('SupabaseThemeEditor: Error loading demo organization:', demoError);
+          // Try to load any valid organization
+          await this.loadValidOrganization();
+        }
       }
     } else {
-      // If no current org ID, try to set it to demo
-      const demoOrgId = 'demo_org';
-      try {
-        const demoData = await window.orgDb.getOrganization(demoOrgId);
-        if (demoData && demoData.name) {
-          localStorage.setItem('current_organization_id', demoOrgId);
-          this.initializeHeader();
-        }
-      } catch (error) {
-        console.error('SupabaseThemeEditor: Error loading demo organization:', error);
+      // No current org ID, try to load a valid organization
+      await this.loadValidOrganization();
+    }
+  }
+
+  // Helper method to load a valid organization
+  async loadValidOrganization() {
+    try {
+      console.log('SupabaseThemeEditor: Loading valid organization...');
+      const orgList = await window.orgDb.getOrganizations();
+      if (orgList && orgList.length > 0) {
+        const firstOrg = orgList[0];
+        console.log('SupabaseThemeEditor: Setting current org to:', firstOrg.id);
+        localStorage.setItem('current_organization_id', firstOrg.id);
+        this.initializeHeader();
+      } else {
+        console.error('SupabaseThemeEditor: No organizations found in database');
+        this.showErrorMessage('No organizations found. Please create a new organization.');
       }
+    } catch (error) {
+      console.error('SupabaseThemeEditor: Error loading organizations list:', error);
+      this.showErrorMessage('Error loading organizations. Please refresh the page.');
     }
   }
 
@@ -114,8 +154,12 @@ class SupabaseThemeEditor {
   updateHeaderInRealTime() {
     const orgNameInput = document.getElementById('themeOrgName');
     const orgDescriptionInput = document.getElementById('themeOrgDescription');
-    const orgNameElement = document.getElementById('orgName');
-    const orgDescriptionElement = document.getElementById('orgDescription');
+    
+    // Find header elements in main app
+    const mainApp = document.getElementById('mainApp');
+    const mainAppHeader = mainApp ? mainApp.querySelector('header') : null;
+    const orgNameElement = mainAppHeader ? mainAppHeader.querySelector('#orgName') : null;
+    const orgDescriptionElement = mainAppHeader ? mainAppHeader.querySelector('#orgDescription') : null;
     
     if (orgNameInput && orgNameElement) {
       const newName = orgNameInput.value || 'Organization Chart';
@@ -188,6 +232,8 @@ class SupabaseThemeEditor {
     if (panel) {
       panel.classList.remove('hidden');
       this.loadCurrentTheme();
+      // Ensure all color previews are initialized
+      this.initializeColorPreviews();
     }
   }
 
@@ -292,15 +338,46 @@ class SupabaseThemeEditor {
     }
   }
 
+  initializeColorPreviews() {
+    // Initialize all color preview swatches with current values
+    const colorInputs = [
+      { id: 'themePrimaryColor', previewId: 'primaryColorPreview' },
+      { id: 'themeSecondaryColor', previewId: 'secondaryColorPreview' }
+    ];
+    
+    colorInputs.forEach(({ id, previewId }) => {
+      const input = document.getElementById(id);
+      if (input && input.value) {
+        this.updateColorPreview(id, input.value);
+      }
+    });
+  }
+
   updateColorPreview(inputId, colorValue) {
     // Update color preview swatches
-    const previewId = inputId.replace('theme', '').replace('Color', '') + 'ColorPreview';
+    // Convert themePrimaryColor -> primaryColorPreview
+    // Convert themeSecondaryColor -> secondaryColorPreview
+    let previewId;
+    if (inputId === 'themePrimaryColor') {
+      previewId = 'primaryColorPreview';
+    } else if (inputId === 'themeSecondaryColor') {
+      previewId = 'secondaryColorPreview';
+    } else {
+      // For other colors, try to construct the ID
+      previewId = inputId.replace('theme', '').toLowerCase() + 'Preview';
+    }
+    
     const previewElement = document.getElementById(previewId);
     if (previewElement) {
       const swatch = previewElement.querySelector('.preview-swatch');
       if (swatch) {
         swatch.style.backgroundColor = colorValue;
+        console.log('Updated color preview:', previewId, colorValue);
+      } else {
+        console.log('Preview swatch not found for:', previewId);
       }
+    } else {
+      console.log('Preview element not found:', previewId);
     }
   }
 
@@ -410,33 +487,48 @@ class SupabaseThemeEditor {
   async handleThemeSubmit(e) {
     e.preventDefault();
     
+    console.log('SupabaseThemeEditor: Starting theme submit...');
+    
     const currentOrgId = localStorage.getItem('current_organization_id');
     if (!currentOrgId) {
       console.error('SupabaseThemeEditor: No current organization found');
+      this.showErrorMessage('No organization found. Please refresh the page.');
       return;
     }
 
     const formData = new FormData(e.target);
     
+    // Debug: Log all form data
+    console.log('SupabaseThemeEditor: Form data entries:');
+    for (let [key, value] of formData.entries()) {
+      console.log(`  ${key}: ${value}`);
+    }
+    
     try {
-      // Update organization data in Supabase
+      // Update organization data in Supabase - ensure values are valid
       const orgUpdates = {
-        name: formData.get('orgName'),
-        description: formData.get('orgDescription')
+        name: formData.get('orgName') || '',
+        description: formData.get('orgDescription') || ''
       };
 
-      // Update branding data
+      // Update branding data - ensure all values are valid
       const brandingData = {
-        primaryColor: formData.get('primaryColor'),
-        secondaryColor: formData.get('secondaryColor'),
-        backgroundColor: formData.get('backgroundColor'),
-        textColor: formData.get('textColor'),
-        borderColor: formData.get('borderColor'),
-        mutedColor: formData.get('mutedColor'),
-        fontFamily: formData.get('fontFamily'),
-        fontSize: formData.get('fontSize'),
+        primaryColor: formData.get('primaryColor') || '#ff5a00',
+        secondaryColor: formData.get('secondaryColor') || '#e53e3e',
+        backgroundColor: formData.get('backgroundColor') || '#f8fafc',
+        textColor: formData.get('textColor') || '#1a202c',
+        borderColor: formData.get('borderColor') || '#e2e8f0',
+        mutedColor: formData.get('mutedColor') || '#718096',
+        fontFamily: formData.get('fontFamily') || 'system',
+        fontSize: formData.get('fontSize') || '16',
         logo: null
       };
+      
+      console.log('SupabaseThemeEditor: Created objects:', {
+        orgUpdates,
+        brandingData,
+        currentOrgId
+      });
 
       // Handle logo upload
       const logoFile = formData.get('orgLogo');
@@ -466,12 +558,60 @@ class SupabaseThemeEditor {
   async saveThemeAndApply(orgUpdates, brandingData) {
     const currentOrgId = localStorage.getItem('current_organization_id');
     
+    if (!currentOrgId) {
+      console.error('SupabaseThemeEditor: No current organization ID found');
+      this.showErrorMessage('No organization found. Please refresh the page.');
+      return;
+    }
+    
     try {
+      // Validate data before saving
+      if (!orgUpdates || !brandingData) {
+        throw new Error('Invalid theme data');
+      }
+      
+      // Check if orgDb is available
+      if (!window.orgDb || typeof window.orgDb.updateOrganization !== 'function') {
+        throw new Error('Supabase database not available. Please check your configuration.');
+      }
+      
+      // First, check if organization exists
+      try {
+        const existingOrg = await window.orgDb.getOrganization(currentOrgId);
+        if (!existingOrg) {
+          console.error('SupabaseThemeEditor: Organization not found in database:', currentOrgId);
+          this.showErrorMessage('Organization not found. Please create a new organization or refresh the page.');
+          // Clear invalid organization ID
+          localStorage.removeItem('current_organization_id');
+          return;
+        }
+        console.log('SupabaseThemeEditor: Organization found:', existingOrg);
+      } catch (checkError) {
+        if (checkError.message.includes('Cannot coerce the result to a single JSON object')) {
+          console.error('SupabaseThemeEditor: Organization does not exist:', currentOrgId);
+          this.showErrorMessage('Organization not found in database. Please create a new organization or refresh the page.');
+          // Clear invalid organization ID
+          localStorage.removeItem('current_organization_id');
+          return;
+        }
+        throw checkError; // Re-throw if it's a different error
+      }
+      
       // Update organization in Supabase
+      console.log('SupabaseThemeEditor: About to update organization with data:', {
+        currentOrgId,
+        updateData: {
+          ...orgUpdates,
+          branding: brandingData
+        }
+      });
+      
       await window.orgDb.updateOrganization(currentOrgId, {
         ...orgUpdates,
         branding: brandingData
       });
+      
+      console.log('SupabaseThemeEditor: Successfully updated organization');
       
       // Apply theme immediately
       this.applyTheme(brandingData, orgUpdates);
@@ -486,21 +626,63 @@ class SupabaseThemeEditor {
       this.showSuccessMessage('Theme updated successfully!');
     } catch (error) {
       console.error('SupabaseThemeEditor: Error saving theme:', error);
-      this.showErrorMessage('Error saving theme: ' + error.message);
+      console.error('Error details:', {
+        currentOrgId,
+        orgUpdates,
+        brandingData,
+        error: error.message
+      });
+      
+      // Handle specific Supabase errors
+      if (error.message.includes('Cannot coerce the result to a single JSON object')) {
+        this.showErrorMessage('Organization not found in database. Please refresh the page and try again.');
+        // Clear invalid organization ID
+        localStorage.removeItem('current_organization_id');
+      } else {
+        this.showErrorMessage('Error saving theme: ' + error.message);
+      }
     }
   }
 
   applyTheme(brandingData, orgData) {
-    // Update header with organization info
-    const orgNameElement = document.getElementById('orgName');
-    const orgDescriptionElement = document.getElementById('orgDescription');
+    // Only apply branding if we're in the main app, not on landing page
+    const landingPage = document.getElementById('landingPage');
+    const mainApp = document.getElementById('mainApp');
     
-    if (orgNameElement) {
-      orgNameElement.textContent = orgData.name || 'Organization Chart';
+    // If we're on landing page, don't apply organization branding
+    if (landingPage && !landingPage.classList.contains('hidden')) {
+      console.log('SupabaseThemeEditor: Skipping theme application - on landing page');
+      return; // Don't apply branding to landing page
     }
     
-    if (orgDescriptionElement) {
-      orgDescriptionElement.textContent = orgData.description || 'Visualize and manage your organization structure';
+    // Only apply branding to main app
+    if (!mainApp || mainApp.classList.contains('hidden')) {
+      console.log('SupabaseThemeEditor: Skipping theme application - main app not visible');
+      return; // Don't apply branding if main app is not visible
+    }
+    
+    console.log('SupabaseThemeEditor: Applying theme to main app');
+    
+    // Update header with organization info (find elements in main app header)
+    const mainAppHeader = mainApp.querySelector('header');
+    const orgNameElement = mainAppHeader ? mainAppHeader.querySelector('#orgName') : null;
+    const orgDescriptionElement = mainAppHeader ? mainAppHeader.querySelector('#orgDescription') : null;
+    
+    console.log('SupabaseThemeEditor: Header elements found:', {
+      mainAppHeader: !!mainAppHeader,
+      orgNameElement: !!orgNameElement,
+      orgDescriptionElement: !!orgDescriptionElement,
+      orgData: orgData
+    });
+    
+    if (orgNameElement && orgData && orgData.name) {
+      console.log('SupabaseThemeEditor: Updating org name from', orgNameElement.textContent, 'to', orgData.name);
+      orgNameElement.textContent = orgData.name;
+    }
+    
+    if (orgDescriptionElement && orgData && orgData.description) {
+      console.log('SupabaseThemeEditor: Updating org description from', orgDescriptionElement.textContent, 'to', orgData.description);
+      orgDescriptionElement.textContent = orgData.description;
     }
 
     // Apply all CSS custom properties
@@ -534,11 +716,11 @@ class SupabaseThemeEditor {
     document.documentElement.style.setProperty('--base-font-size', `${brandingData.fontSize}px`);
     document.body.style.fontSize = `${brandingData.fontSize}px`;
 
-    // Apply logo
-    if (brandingData.logo) {
-      const headers = document.querySelectorAll('header');
-      headers.forEach(header => {
-        const existingLogo = header.querySelector('.organization-logo');
+    // Apply logo (only to main app header, not landing page)
+    if (brandingData.logo && mainApp) {
+      const mainAppHeader = mainApp.querySelector('header');
+      if (mainAppHeader) {
+        const existingLogo = mainAppHeader.querySelector('.organization-logo');
         if (existingLogo) {
           existingLogo.src = brandingData.logo;
         } else {
@@ -547,9 +729,9 @@ class SupabaseThemeEditor {
           logo.alt = 'Organization Logo';
           logo.className = 'organization-logo';
           logo.style.cssText = 'height: 45px; margin-right: 1rem; filter: brightness(0) invert(1);';
-          header.insertBefore(logo, header.firstChild);
+          mainAppHeader.insertBefore(logo, mainAppHeader.firstChild);
         }
-      });
+      }
     }
   }
 

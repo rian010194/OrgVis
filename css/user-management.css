@@ -4,7 +4,8 @@
   position: fixed;
   top: 0;
   right: 0;
-  width: 600px;
+  width: 95vw;
+  max-width: 1800px;
   height: 100vh;
   background: white;
   box-shadow: -2px 0 15px rgba(0, 0, 0, 0.1);
@@ -107,7 +108,7 @@
 /* Dashboard */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
   margin-bottom: 2rem;
 }
@@ -138,7 +139,7 @@
 
 .dashboard-charts {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
 }
 
@@ -724,13 +725,24 @@
 }
 
 /* Responsive Design */
+@media (max-width: 1200px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .dashboard-charts {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .user-panel {
     width: 100vw;
+    max-width: 100vw;
   }
   
   .dashboard-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
   
   .dashboard-charts {

@@ -57,8 +57,20 @@ class ThemeEditor {
     console.log('ThemeEditor: Initializing header with org ID:', currentOrgId);
     
     if (currentOrgId) {
-      const orgData = JSON.parse(localStorage.getItem(`org_${currentOrgId}`) || '{}');
-      const brandingData = JSON.parse(localStorage.getItem(`org_branding_${currentOrgId}`) || '{}');
+      let orgData, brandingData;
+      try {
+        orgData = JSON.parse(localStorage.getItem(`org_${currentOrgId}`) || '{}');
+      } catch (error) {
+        console.error('Error parsing organization data:', error);
+        orgData = {};
+      }
+      
+      try {
+        brandingData = JSON.parse(localStorage.getItem(`org_branding_${currentOrgId}`) || '{}');
+      } catch (error) {
+        console.error('Error parsing branding data:', error);
+        brandingData = {};
+      }
       
       console.log('ThemeEditor: Org data:', orgData);
       console.log('ThemeEditor: Branding data:', brandingData);
@@ -102,7 +114,37 @@ class ThemeEditor {
   // Public method to refresh header from external calls
   refreshHeader() {
     console.log('ThemeEditor: Refreshing header...');
-    this.initializeHeader();
+    const currentOrgId = localStorage.getItem('current_organization_id');
+    if (currentOrgId) {
+      let orgData, brandingData;
+      try {
+        orgData = JSON.parse(localStorage.getItem(`org_${currentOrgId}`) || '{}');
+      } catch (error) {
+        console.error('Error parsing organization data:', error);
+        orgData = {};
+      }
+      
+      try {
+        brandingData = JSON.parse(localStorage.getItem(`org_branding_${currentOrgId}`) || '{}');
+      } catch (error) {
+        console.error('Error parsing branding data:', error);
+        brandingData = {};
+      }
+      
+      // Update header with latest data
+      const orgNameElement = document.getElementById('orgName');
+      const orgDescriptionElement = document.getElementById('orgDescription');
+      
+      if (orgNameElement && orgData.name) {
+        console.log('ThemeEditor: Refreshing org name to:', orgData.name);
+        orgNameElement.textContent = orgData.name;
+      }
+      
+      if (orgDescriptionElement && orgData.description) {
+        console.log('ThemeEditor: Refreshing org description to:', orgData.description);
+        orgDescriptionElement.textContent = orgData.description;
+      }
+    }
   }
 
   // Update header in real-time as user types
@@ -128,8 +170,23 @@ class ThemeEditor {
   // Debug method to check current state
   debugState() {
     const currentOrgId = localStorage.getItem('current_organization_id');
-    const orgData = currentOrgId ? JSON.parse(localStorage.getItem(`org_${currentOrgId}`) || '{}') : {};
-    const brandingData = currentOrgId ? JSON.parse(localStorage.getItem(`org_branding_${currentOrgId}`) || '{}') : {};
+    let orgData = {}, brandingData = {};
+    
+    if (currentOrgId) {
+      try {
+        orgData = JSON.parse(localStorage.getItem(`org_${currentOrgId}`) || '{}');
+      } catch (error) {
+        console.error('Error parsing organization data:', error);
+        orgData = {};
+      }
+      
+      try {
+        brandingData = JSON.parse(localStorage.getItem(`org_branding_${currentOrgId}`) || '{}');
+      } catch (error) {
+        console.error('Error parsing branding data:', error);
+        brandingData = {};
+      }
+    }
     
     console.log('ThemeEditor Debug State:');
     console.log('- Current Org ID:', currentOrgId);
@@ -229,19 +286,35 @@ class ThemeEditor {
     const currentOrgId = localStorage.getItem('current_organization_id');
     if (!currentOrgId) {
       // If no current org ID, try to get from organizations list
-      const orgList = JSON.parse(localStorage.getItem('organizations_list') || '[]');
-      if (orgList.length > 0) {
-        const firstOrg = orgList[0];
-        localStorage.setItem('current_organization_id', firstOrg.id);
-        this.loadCurrentTheme();
-        return;
+      try {
+        const orgList = JSON.parse(localStorage.getItem('organizations_list') || '[]');
+        if (orgList.length > 0) {
+          const firstOrg = orgList[0];
+          localStorage.setItem('current_organization_id', firstOrg.id);
+          this.loadCurrentTheme();
+          return;
+        }
+      } catch (error) {
+        console.error('Error parsing organizations list:', error);
       }
       return;
     }
 
     // Load organization data
-    const orgData = JSON.parse(localStorage.getItem(`org_${currentOrgId}`) || '{}');
-    const brandingData = JSON.parse(localStorage.getItem(`org_branding_${currentOrgId}`) || '{}');
+    let orgData, brandingData;
+    try {
+      orgData = JSON.parse(localStorage.getItem(`org_${currentOrgId}`) || '{}');
+    } catch (error) {
+      console.error('Error parsing organization data:', error);
+      orgData = {};
+    }
+    
+    try {
+      brandingData = JSON.parse(localStorage.getItem(`org_branding_${currentOrgId}`) || '{}');
+    } catch (error) {
+      console.error('Error parsing branding data:', error);
+      brandingData = {};
+    }
 
     // Update form fields
     const orgNameInput = document.getElementById('themeOrgName');
@@ -438,7 +511,14 @@ class ThemeEditor {
     const formData = new FormData(e.target);
     
     // Update organization data
-    const orgData = JSON.parse(localStorage.getItem(`org_${currentOrgId}`) || '{}');
+    let orgData;
+    try {
+      orgData = JSON.parse(localStorage.getItem(`org_${currentOrgId}`) || '{}');
+    } catch (error) {
+      console.error('Error parsing organization data:', error);
+      orgData = {};
+    }
+    
     const newName = formData.get('orgName');
     const newDescription = formData.get('orgDescription');
     
@@ -449,26 +529,36 @@ class ThemeEditor {
       orgData.description = newDescription;
     }
     
-    localStorage.setItem(`org_${currentOrgId}`, JSON.stringify(orgData));
+    try {
+      localStorage.setItem(`org_${currentOrgId}`, JSON.stringify(orgData));
+    } catch (error) {
+      console.error('Error saving organization data:', error);
+      this.showErrorMessage('Error saving organization data. Please try again.');
+      return;
+    }
     
     // Update the organizations list as well
-    const orgList = JSON.parse(localStorage.getItem('organizations_list') || '[]');
-    const orgIndex = orgList.findIndex(org => org.id === currentOrgId);
-    if (orgIndex !== -1 && newName) {
-      orgList[orgIndex].name = newName;
-      localStorage.setItem('organizations_list', JSON.stringify(orgList));
+    try {
+      const orgList = JSON.parse(localStorage.getItem('organizations_list') || '[]');
+      const orgIndex = orgList.findIndex(org => org.id === currentOrgId);
+      if (orgIndex !== -1 && newName) {
+        orgList[orgIndex].name = newName;
+        localStorage.setItem('organizations_list', JSON.stringify(orgList));
+      }
+    } catch (error) {
+      console.error('Error updating organizations list:', error);
     }
 
-    // Update branding data with all colors
+    // Update branding data with all colors - ensure all values are valid
     const brandingData = {
-      primaryColor: formData.get('primaryColor'),
-      secondaryColor: formData.get('secondaryColor'),
-      backgroundColor: formData.get('backgroundColor'),
-      textColor: formData.get('textColor'),
-      borderColor: formData.get('borderColor'),
-      mutedColor: formData.get('mutedColor'),
-      fontFamily: formData.get('fontFamily'),
-      fontSize: formData.get('fontSize'),
+      primaryColor: formData.get('primaryColor') || '#ff5a00',
+      secondaryColor: formData.get('secondaryColor') || '#e53e3e',
+      backgroundColor: formData.get('backgroundColor') || '#f8fafc',
+      textColor: formData.get('textColor') || '#1a202c',
+      borderColor: formData.get('borderColor') || '#e2e8f0',
+      mutedColor: formData.get('mutedColor') || '#718096',
+      fontFamily: formData.get('fontFamily') || 'system',
+      fontSize: formData.get('fontSize') || '16',
       logo: null
     };
 
@@ -483,8 +573,13 @@ class ThemeEditor {
       reader.readAsDataURL(logoFile);
     } else {
       // Keep existing logo if no new one uploaded
-      const existingBranding = JSON.parse(localStorage.getItem(`org_branding_${currentOrgId}`) || '{}');
-      brandingData.logo = existingBranding.logo;
+      try {
+        const existingBranding = JSON.parse(localStorage.getItem(`org_branding_${currentOrgId}`) || '{}');
+        brandingData.logo = existingBranding.logo;
+      } catch (error) {
+        console.error('Error parsing existing branding data:', error);
+        brandingData.logo = null;
+      }
       this.saveThemeAndApply(brandingData, orgData);
     }
   }
@@ -492,20 +587,45 @@ class ThemeEditor {
   saveThemeAndApply(brandingData, orgData) {
     const currentOrgId = localStorage.getItem('current_organization_id');
     
-    // Save branding data
-    localStorage.setItem(`org_branding_${currentOrgId}`, JSON.stringify(brandingData));
+    if (!currentOrgId) {
+      console.error('No current organization ID found');
+      this.showErrorMessage('No organization found. Please refresh the page.');
+      return;
+    }
     
-    // Apply theme immediately
-    this.applyTheme(brandingData, orgData);
-    
-    // Ensure header is updated with the latest data
-    this.refreshHeader();
-    
-    // Hide modal
-    this.hideEditThemeModal();
-    
-    // Show success message
-    this.showSuccessMessage('Theme updated successfully!');
+    try {
+      // Save branding data
+      localStorage.setItem(`org_branding_${currentOrgId}`, JSON.stringify(brandingData));
+      
+      // Apply theme immediately
+      this.applyTheme(brandingData, orgData);
+      
+      // Update the organizations list with new name if changed
+      if (orgData && orgData.name) {
+        try {
+          const orgList = JSON.parse(localStorage.getItem('organizations_list') || '[]');
+          const orgIndex = orgList.findIndex(org => org.id === currentOrgId);
+          if (orgIndex !== -1) {
+            orgList[orgIndex].name = orgData.name;
+            localStorage.setItem('organizations_list', JSON.stringify(orgList));
+          }
+        } catch (error) {
+          console.error('Error updating organizations list:', error);
+        }
+      }
+      
+      // Ensure header is updated with the latest data
+      this.refreshHeader();
+      
+      // Hide modal
+      this.hideEditThemeModal();
+      
+      // Show success message
+      this.showSuccessMessage('Theme updated successfully!');
+    } catch (error) {
+      console.error('Error saving theme:', error);
+      this.showErrorMessage('Error saving theme. Please try again.');
+    }
   }
 
   applyTheme(brandingData, orgData) {
@@ -513,24 +633,16 @@ class ThemeEditor {
     const orgNameElement = document.getElementById('orgName');
     const orgDescriptionElement = document.getElementById('orgDescription');
     
-    if (orgNameElement) {
-      orgNameElement.textContent = orgData.name || 'Organization Chart';
+    if (orgNameElement && orgData.name) {
+      console.log('ThemeEditor: Updating org name from', orgNameElement.textContent, 'to', orgData.name);
+      orgNameElement.textContent = orgData.name;
     }
     
-    if (orgDescriptionElement) {
-      orgDescriptionElement.textContent = orgData.description || 'Visualize and manage your organization structure';
+    if (orgDescriptionElement && orgData.description) {
+      console.log('ThemeEditor: Updating org description from', orgDescriptionElement.textContent, 'to', orgData.description);
+      orgDescriptionElement.textContent = orgData.description;
     }
 
-    // Also update the organization list in localStorage
-    const currentOrgId = localStorage.getItem('current_organization_id');
-    if (currentOrgId && orgData.name) {
-      const orgList = JSON.parse(localStorage.getItem('organizations_list') || '[]');
-      const orgIndex = orgList.findIndex(org => org.id === currentOrgId);
-      if (orgIndex !== -1) {
-        orgList[orgIndex].name = orgData.name;
-        localStorage.setItem('organizations_list', JSON.stringify(orgList));
-      }
-    }
 
     // Apply all CSS custom properties
     document.documentElement.style.setProperty('--primary-color', brandingData.primaryColor);

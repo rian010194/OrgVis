@@ -412,8 +412,9 @@ const OrgStore = (() => {
   };
 
   const addNode = async (nodeInput) => {
+    const node = normaliseNode(nodeInput);
+    
     try {
-      const node = normaliseNode(nodeInput);
       if (state.nodesById.has(node.id)) {
         throw new Error(`Nod med id ${node.id} finns redan`);
       }

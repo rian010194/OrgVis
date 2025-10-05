@@ -318,7 +318,8 @@ header .logo {
   position: fixed;
   top: 0;
   right: 0;
-  width: 500px;
+  width: 95vw;
+  max-width: 1800px;
   height: 100vh;
   background: white;
   box-shadow: -2px 0 15px rgba(0, 0, 0, 0.1);
@@ -337,6 +338,7 @@ header .logo {
 @media (max-width: 768px) {
   .theme-panel {
     width: 100vw;
+    max-width: 100vw;
     left: 0;
     right: 0;
   }
@@ -478,8 +480,15 @@ header .logo {
 
 .color-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
+}
+
+/* Medium screen color grid */
+@media (max-width: 1200px) {
+  .color-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* Mobile color grid */
@@ -3186,7 +3195,7 @@ button.danger {
 
 .color-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
 }
 
