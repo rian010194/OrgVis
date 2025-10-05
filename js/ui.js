@@ -134,6 +134,9 @@ const OrgUI = (() => {
     if (elements.detailPanel && !elements.adminPanel.classList.contains("open")) {
       elements.detailPanel.style.display = "flex";
     }
+    
+    // Initialize admin button text
+    updateAdminButtonText(elements.adminPanel.classList.contains("open"));
 
     renderAll();
 
@@ -1356,6 +1359,17 @@ const OrgUI = (() => {
 
   };
 
+  const updateAdminButtonText = (isAdminOpen) => {
+    const adminTextElement = elements.toggleAdmin?.querySelector('.admin-text');
+    if (adminTextElement) {
+      if (isAdminOpen) {
+        adminTextElement.textContent = 'Close';
+      } else {
+        adminTextElement.textContent = 'Admin';
+      }
+    }
+  };
+
   const updateAdminTabsUI = () => {
 
     if (!elements.adminTabs || !elements.adminPanels) {
@@ -1446,6 +1460,9 @@ const OrgUI = (() => {
       elements.toggleAdmin.classList.toggle("active", willOpen);
 
       elements.toggleAdmin.setAttribute("aria-pressed", String(willOpen));
+      
+      // Update button text based on admin state
+      updateAdminButtonText(willOpen);
 
     }
 

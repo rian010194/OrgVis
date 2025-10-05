@@ -575,6 +575,17 @@ body.detail-expanded .app-layout {
   transform: rotate(-45deg) translate(4px, -4px);
 }
 
+/* Mobile hamburger improvements */
+@media (max-width: 768px) {
+  .admin-toggle.active .hamburger-icon span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+  }
+  
+  .admin-toggle.active .hamburger-icon span:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+  }
+}
+
 .admin-text {
   font-size: 0.85rem;
   font-weight: 600;
