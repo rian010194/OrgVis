@@ -678,7 +678,7 @@ const LandingPage = (() => {
       }
     }
     
-    // Apply font family globally
+    // Apply font family globally using CSS custom properties
     if (brandingData.fontFamily && brandingData.fontFamily !== 'system') {
       const fontFamilies = {
         'inter': '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -693,12 +693,6 @@ const LandingPage = (() => {
         const fontFamily = fontFamilies[brandingData.fontFamily];
         document.documentElement.style.setProperty('--font-family', fontFamily);
         document.body.style.fontFamily = fontFamily;
-        
-        // Apply to all elements
-        const allElements = document.querySelectorAll('*');
-        allElements.forEach(el => {
-          el.style.fontFamily = fontFamily;
-        });
       }
     } else if (brandingData.fontFamily === 'system') {
       // Reset to system font
@@ -706,20 +700,11 @@ const LandingPage = (() => {
       document.body.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
     }
     
-    // Apply font size globally
+    // Apply font size globally using CSS custom properties
     if (brandingData.fontSize) {
       const fontSize = brandingData.fontSize + 'px';
       document.documentElement.style.setProperty('--base-font-size', fontSize);
       document.body.style.fontSize = fontSize;
-      
-      // Apply to text elements that don't have explicit font sizes set
-      const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div, button, input, select, textarea, label');
-      textElements.forEach(el => {
-        // Only apply if the element doesn't have an inline font-size style
-        if (!el.style.fontSize || el.style.fontSize === '') {
-          el.style.fontSize = fontSize;
-        }
-      });
     } else {
       // If no font size specified, ensure we have a default
       document.documentElement.style.setProperty('--base-font-size', '16px');
@@ -854,7 +839,7 @@ const LandingPage = (() => {
     document.body.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
     document.body.style.fontSize = '16px'; // Set explicit default font size
     
-    // Reset font styles for text elements only (more targeted approach)
+    // Reset any remaining inline font styles (should be minimal now)
     const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div, button, input, select, textarea, label, a');
     textElements.forEach(el => {
       el.style.fontFamily = '';
