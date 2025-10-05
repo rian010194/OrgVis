@@ -81,39 +81,53 @@ header .logo {
 /* Mobile toolbar adjustments */
 @media (max-width: 768px) {
   .app-toolbar {
-    padding: 1rem 1.5rem;
-    gap: 1rem;
+    padding: 0.75rem 1rem;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  
+  .toolbar-group {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .view-dropdown {
+    width: 100%;
   }
   
   .view-dropdown-toggle {
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
-    min-width: 120px;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    min-width: auto;
+    width: 100%;
+    justify-content: space-between;
   }
   
   .view-option {
-    padding: 0.6rem 0.8rem;
-    font-size: 0.85rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
   }
   
   .view-icon {
-    font-size: 1rem;
-    width: 18px;
+    font-size: 1.1rem;
+    width: 20px;
   }
   
   .admin-toggle {
-    padding: 0.5rem 0.8rem;
-    font-size: 0.85rem;
-    gap: 0.4rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    gap: 0.5rem;
+    min-width: 120px;
+    flex-shrink: 0;
   }
   
   .hamburger-icon {
-    width: 14px;
-    height: 10px;
+    width: 16px;
+    height: 12px;
   }
   
   .admin-text {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
   }
 }
 
@@ -271,6 +285,23 @@ body.detail-expanded .app-layout {
   transition: all 0.3s ease;
   margin-top: 0.5rem;
   overflow: hidden;
+}
+
+/* Mobile dropdown improvements */
+@media (max-width: 768px) {
+  .view-dropdown-menu {
+    border-radius: 8px;
+    margin-top: 0.25rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  .view-option {
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .view-option:last-child {
+    border-bottom: none;
+  }
 }
 
 .view-dropdown.open .view-dropdown-menu {
@@ -1425,35 +1456,47 @@ button.danger {
     padding: 0.75rem;
   }
   
+  .toolbar-group {
+    width: 100%;
+  }
+  
+  .view-dropdown {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
   .view-dropdown-toggle {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.8rem;
-    min-width: 100px;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    width: 100%;
+    justify-content: space-between;
   }
   
   .view-option {
-    padding: 0.5rem 0.7rem;
-    font-size: 0.8rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
   }
   
   .view-icon {
-    font-size: 0.9rem;
-    width: 16px;
+    font-size: 1.1rem;
+    width: 20px;
   }
   
   .admin-toggle {
-    padding: 0.4rem 0.7rem;
-    font-size: 0.8rem;
-    gap: 0.3rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    gap: 0.5rem;
+    width: 100%;
+    justify-content: center;
   }
   
   .hamburger-icon {
-    width: 12px;
-    height: 8px;
+    width: 16px;
+    height: 12px;
   }
   
   .admin-text {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
   }
   
   main.app-layout {
@@ -1506,38 +1549,39 @@ button.danger {
   
   .app-toolbar {
     padding: 0.5rem;
-    gap: 0.375rem;
+    gap: 0.5rem;
   }
   
   .view-dropdown-toggle {
-    padding: 0.35rem 0.6rem;
-    font-size: 0.75rem;
-    min-width: 90px;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
+    width: 100%;
   }
   
   .view-option {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.75rem;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.8rem;
   }
   
   .view-icon {
-    font-size: 0.8rem;
-    width: 14px;
+    font-size: 0.9rem;
+    width: 16px;
   }
   
   .admin-toggle {
-    padding: 0.35rem 0.6rem;
-    font-size: 0.75rem;
-    gap: 0.25rem;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
+    gap: 0.4rem;
+    width: 100%;
   }
   
   .hamburger-icon {
-    width: 10px;
-    height: 6px;
+    width: 14px;
+    height: 10px;
   }
   
   .admin-text {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
   }
 
   .section-header {
