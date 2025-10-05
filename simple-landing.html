@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Simple Landing Test</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f8fafc;
+    }
+    .landing-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .landing-header {
+      background: linear-gradient(135deg, #ff5a00 0%, #e53e3e 100%);
+      color: white;
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+    .landing-title {
+      font-size: 3rem;
+      font-weight: 700;
+      margin: 0 0 1rem 0;
+    }
+    .landing-subtitle {
+      font-size: 1.25rem;
+      margin: 0;
+      opacity: 0.9;
+    }
+    .landing-main {
+      flex: 1;
+      padding: 4rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .create-org-button {
+      background: linear-gradient(135deg, #ff5a00 0%, #e53e3e 100%);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      padding: 1.25rem 2.5rem;
+      font-size: 1.125rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin: 2rem 0;
+    }
+    .create-org-button:hover {
+      transform: translateY(-3px);
+    }
+  </style>
+</head>
+<body>
+  <div id="landingPage" class="landing-page">
+    <header class="landing-header">
+      <h1 class="landing-title">JumpYard Organization Chart</h1>
+      <p class="landing-subtitle">Visualize and manage your organization structure with ease</p>
+    </header>
+
+    <main class="landing-main">
+      <h2>Create Your Organization</h2>
+      <p>Get started by creating your organization structure.</p>
+      <button id="createOrgBtn" class="create-org-button">
+        ✨ Create Organization
+      </button>
+    </main>
+  </div>
+
+  <script>
+    document.getElementById('createOrgBtn').addEventListener('click', function() {
+      alert('Create Organization clicked! This is working.');
+    });
+  </script>
+</body>
+</html>

@@ -113,9 +113,15 @@
 })();
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // Check if we're in the main app (not landing page)
+  const mainApp = document.getElementById("mainApp");
+  if (!mainApp || mainApp.classList.contains("hidden")) {
+    return; // Don't initialize if we're still on landing page
+  }
+
   const statusElement = document.getElementById("appStatus");
   if (statusElement) {
-    statusElement.textContent = "Laddar organisationsdata...";
+    statusElement.textContent = "Loading organization data...";
     statusElement.classList.remove("error");
   }
 
@@ -123,21 +129,28 @@ document.addEventListener("DOMContentLoaded", async () => {
     await OrgStore.load();
     OrgUI.init();
     
-    // Kontrollera om D3.js är tillgängligt innan vi initierar kartvyn
+    // Check if D3.js is available before initializing map view
     if (typeof d3 !== "undefined") {
       OrgMap.init();
     } else {
-      console.warn("D3.js är inte laddad. Kartvy kommer inte att fungera.");
+      console.warn("D3.js is not loaded. Map view will not work.");
     }
     
     AppView.init();
+    
+    // Add logout button event listener
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn && typeof LandingPage !== 'undefined' && LandingPage.handleLogout) {
+      logoutBtn.addEventListener('click', LandingPage.handleLogout);
+    }
+    
     if (statusElement) {
       statusElement.textContent = "";
     }
   } catch (error) {
-    console.error("Kunde inte initiera applikationen", error);
+    console.error("Could not initialize application", error);
     if (statusElement) {
-      statusElement.textContent = "Kunde inte ladda data. Försök igen eller kontakta administratör.";
+      statusElement.textContent = "Could not load data. Please try again or contact administrator.";
       statusElement.classList.add("error");
     }
   }
