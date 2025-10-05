@@ -8,21 +8,60 @@ const OrgUI = (() => {
 
   let activeAdminTab = "edit";
 
-  const metricPalette = [
+  // Color palettes for metrics
+  const colorPalettes = {
+    orange: [
+      "#ff5a00",
+      "#ff8b3d", 
+      "#ffb266",
+      "#ffd6ad",
+      "#ffe6d5",
+      "#ffc9ae"
+    ],
+    blue: [
+      "#2563eb",
+      "#3b82f6",
+      "#60a5fa",
+      "#93c5fd",
+      "#dbeafe",
+      "#bfdbfe"
+    ],
+    green: [
+      "#16a34a",
+      "#22c55e",
+      "#4ade80",
+      "#86efac",
+      "#dcfce7",
+      "#bbf7d0"
+    ],
+    purple: [
+      "#9333ea",
+      "#a855f7",
+      "#c084fc",
+      "#d8b4fe",
+      "#f3e8ff",
+      "#e9d5ff"
+    ],
+    red: [
+      "#dc2626",
+      "#ef4444",
+      "#f87171",
+      "#fca5a5",
+      "#fecaca",
+      "#fde2e2"
+    ],
+    teal: [
+      "#0d9488",
+      "#14b8a6",
+      "#5eead4",
+      "#99f6e4",
+      "#ccfbf1",
+      "#a7f3d0"
+    ]
+  };
 
-    "#ff5a00",
-
-    "#ff8b3d",
-
-    "#ffb266",
-
-    "#ffd6ad",
-
-    "#ffe6d5",
-
-    "#ffc9ae"
-
-  ];
+  // Default palette (orange)
+  const metricPalette = colorPalettes.orange;
 
   const getMetricColor = (() => {
 
@@ -30,19 +69,23 @@ const OrgUI = (() => {
 
     let index = 0;
 
-    return (key) => {
+    return (key, palette = 'orange') => {
 
-      if (!assigned.has(key)) {
+      const colorKey = `${key}_${palette}`;
 
-        const color = metricPalette[index % metricPalette.length];
+      if (!assigned.has(colorKey)) {
 
-        assigned.set(key, color);
+        const currentPalette = colorPalettes[palette] || colorPalettes.orange;
+
+        const color = currentPalette[index % currentPalette.length];
+
+        assigned.set(colorKey, color);
 
         index += 1;
 
       }
 
-      return assigned.get(key);
+      return assigned.get(colorKey);
 
     };
 
@@ -2402,6 +2445,7 @@ const OrgUI = (() => {
     const metricName = data.get("metricName");
     const metricUnit = data.get("metricUnit") || "";
     const metricChartType = data.get("metricChartType") || "pie";
+    const metricColorPalette = data.get("metricColorPalette") || "orange";
     const metricDescription = data.get("metricDescription") || "";
     
     // Collect all value inputs
@@ -2444,6 +2488,7 @@ const OrgUI = (() => {
         values: values,
         unit: metricUnit,
         chartType: metricChartType,
+        colorPalette: metricColorPalette,
         description: metricDescription
       };
       
@@ -2668,7 +2713,7 @@ const OrgUI = (() => {
 
           const swatch = document.createElement("span");
           swatch.classList.add("detail-metrics-swatch");
-          swatch.style.backgroundColor = getMetricColor(entry.key);
+          swatch.style.backgroundColor = getMetricColor(entry.key, metric.colorPalette || 'orange');
 
           const label = document.createElement("span");
           label.textContent = entry.key;
@@ -2691,10 +2736,10 @@ const OrgUI = (() => {
         requestAnimationFrame(() => {
           if (typeof ChartRenderer !== "undefined") {
             console.log('Calling ChartRenderer.renderChart with:', entries, total, metric.chartType);
-            ChartRenderer.renderChart(chartContainer, entries, total, metric.chartType || "pie", metric.name || "Time spent on:", metric.unit || "%");
+            ChartRenderer.renderChart(chartContainer, entries, total, metric.chartType || "pie", metric.name || "Time spent on:", metric.unit || "%", metric.colorPalette || "orange");
           } else {
             console.log('ChartRenderer not available, using fallback');
-            renderMetricsChart(chartContainer, entries, total);
+            renderMetricsChart(chartContainer, entries, total, metric.colorPalette || "orange");
           }
         });
       } else {
@@ -2711,7 +2756,7 @@ const OrgUI = (() => {
 
   }
 
-  function renderMetricsChart(container, entries, total) {
+  function renderMetricsChart(container, entries, total, palette = "orange") {
 
     if (!container) {
 
@@ -2721,7 +2766,7 @@ const OrgUI = (() => {
 
     // Use new ChartRenderer if available, otherwise fallback to old implementation
     if (typeof ChartRenderer !== "undefined") {
-      ChartRenderer.renderChart(container, entries, total, "pie", "Time spent on:", "%");
+      ChartRenderer.renderChart(container, entries, total, "pie", "Time spent on:", "%", "orange");
       return;
     }
 
@@ -2775,7 +2820,7 @@ const OrgUI = (() => {
 
       .attr("d", arc)
 
-      .attr("fill", (d) => getMetricColor(d.data.key))
+      .attr("fill", (d) => getMetricColor(d.data.key, palette))
 
       .attr("stroke", "#fff")
 
