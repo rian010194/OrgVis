@@ -712,13 +712,18 @@ const LandingPage = (() => {
       document.documentElement.style.setProperty('--base-font-size', fontSize);
       document.body.style.fontSize = fontSize;
       
-      // Apply to all text elements
+      // Apply to text elements that don't have explicit font sizes set
       const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div, button, input, select, textarea, label');
       textElements.forEach(el => {
+        // Only apply if the element doesn't have an inline font-size style
         if (!el.style.fontSize || el.style.fontSize === '') {
           el.style.fontSize = fontSize;
         }
       });
+    } else {
+      // If no font size specified, ensure we have a default
+      document.documentElement.style.setProperty('--base-font-size', '16px');
+      document.body.style.fontSize = '16px';
     }
     
     // Apply logo to header (both landing page and main app)
@@ -845,13 +850,13 @@ const LandingPage = (() => {
     document.documentElement.style.removeProperty('--font-family');
     document.documentElement.style.removeProperty('--base-font-size');
     
-    // Reset body font
+    // Reset body font to default values (not empty strings)
     document.body.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
-    document.body.style.fontSize = '';
+    document.body.style.fontSize = '16px'; // Set explicit default font size
     
-    // Reset all elements font family
-    const allElements = document.querySelectorAll('*');
-    allElements.forEach(el => {
+    // Reset font styles for text elements only (more targeted approach)
+    const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div, button, input, select, textarea, label, a');
+    textElements.forEach(el => {
       el.style.fontFamily = '';
       el.style.fontSize = '';
     });
@@ -887,10 +892,8 @@ const LandingPage = (() => {
     // Show success message
     showSuccessMessage('Logged out successfully!');
     
-    // Force page refresh to ensure clean state
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
+    // Remove the forced page reload - it's causing the text size issue
+    // The logout should work without needing a page refresh
   };
   
   // Public API
