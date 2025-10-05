@@ -67,6 +67,16 @@
       mapContainer.classList.remove("hidden");
       if (typeof OrgMap !== "undefined" && OrgMap && typeof OrgMap.show === "function") {
         OrgMap.show();
+        
+        // Focus on the currently selected node when switching to map view
+        if (typeof OrgUI !== "undefined" && OrgUI && typeof OrgUI.getSelectedNodeId === "function") {
+          const selectedNodeId = OrgUI.getSelectedNodeId();
+          if (selectedNodeId && typeof OrgMap.reveal === "function") {
+            setTimeout(() => {
+              OrgMap.reveal(selectedNodeId);
+            }, 100);
+          }
+        }
       } else {
         // Visa felmeddelande om kartvyn inte är tillgänglig
         mapContainer.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;"><p>Kartvy är inte tillgänglig. D3.js kanske inte laddades korrekt.</p><p>Växla till trädvy för att se organisationsstrukturen.</p></div>';

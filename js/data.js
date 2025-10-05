@@ -37,12 +37,25 @@
         const result = {
           id: metric.id || Date.now() + Math.random(),
           name: metric.name || "Time spent on:",
-          type: metric.type || "pie",
+          type: metric.chartType || metric.type || "pie",
+          chartType: metric.chartType || metric.type || "pie",
           unit: metric.unit || "%",
+          description: metric.description || "",
           data: {}
         };
         
-        if (metric.data && typeof metric.data === "object") {
+        // Handle new values format (multi-value metrics)
+        if (metric.values && Array.isArray(metric.values)) {
+          result.values = metric.values.filter(v => v && v.label && !isNaN(v.value));
+          // Also create data for backward compatibility
+          metric.values.forEach(v => {
+            if (v && v.label && !isNaN(v.value)) {
+              result.data[String(v.label)] = Number(v.value);
+            }
+          });
+        }
+        // Handle old data format
+        else if (metric.data && typeof metric.data === "object") {
           Object.entries(metric.data).forEach(([key, value]) => {
             if (key === undefined || key === null) {
               return;
@@ -52,10 +65,16 @@
               result.data[String(key)] = numeric;
             }
           });
-        } else if (typeof metric === "object" && !metric.data) {
-          // Handle case where metric is the data object itself (old format)
+        } 
+        // Handle single value format
+        else if (metric.value !== undefined) {
+          result.value = Number(metric.value);
+          result.data[result.name || "Value"] = Number(metric.value);
+        }
+        // Handle case where metric is the data object itself (old format)
+        else if (typeof metric === "object" && !metric.data) {
           Object.entries(metric).forEach(([key, value]) => {
-            if (key === "id" || key === "name" || key === "type" || key === "unit") {
+            if (key === "id" || key === "name" || key === "type" || key === "chartType" || key === "unit" || key === "values" || key === "value" || key === "description") {
               return;
             }
             const numeric = Number(value);
@@ -65,7 +84,8 @@
           });
         }
         
-        return Object.keys(result.data).length ? result : null;
+        // Return result if it has either data or values
+        return (Object.keys(result.data).length > 0 || (result.values && result.values.length > 0)) ? result : null;
       }).filter(Boolean);
     }
     

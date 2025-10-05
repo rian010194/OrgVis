@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>JumpYard Organization Chart</title>
-    <link rel="stylesheet" href="css/style.css?v=20241220k">
+    <link rel="stylesheet" href="css/style.css?v=20241220l">
 </head>
 <body>
   <header>
@@ -208,13 +208,29 @@
                 Metric Name
                 <input name="metricName" type="text" placeholder="e.g., Budget, Headcount, Revenue" required />
               </label>
-              <label>
-                Value
-                <input name="metricValue" type="number" step="0.01" placeholder="0" required />
-              </label>
+              <div id="valuesContainer" style="display: none;">
+                <label>Data Points</label>
+                <div id="valuesList">
+                  <!-- Dynamic value inputs will be added here -->
+                </div>
+                <button type="button" id="addValueBtn" class="secondary" style="margin-top: 0.5rem; font-size: 0.9rem;">
+                  + Add Data Point
+                </button>
+              </div>
               <label>
                 Unit
                 <input name="metricUnit" type="text" placeholder="e.g., SEK, people, %" />
+              </label>
+              <label>
+                Chart Type
+                <select name="metricChartType" required>
+                  <option value="">Select chart type...</option>
+                  <option value="pie">Pie Chart</option>
+                  <option value="bar">Bar Chart</option>
+                  <option value="line">Line Chart</option>
+                  <option value="doughnut">Doughnut Chart</option>
+                  <option value="table">Table</option>
+                </select>
               </label>
               <label>
                 Description
@@ -253,15 +269,15 @@
 
   <script src="js/d3.v7.min.js"></script>
   <!-- DEVELOPMENT: Using mock data for frontend-only development -->
-    <script src="js/data.js?v=20241220b"></script>
+    <script src="js/data.js?v=20241220c"></script>
   <!-- PRODUCTION: Uncomment these when deploying with Supabase backend:
   <script type="module" src="js/config.js?v=20241220"></script>
   <script type="module" src="js/supabase.js?v=20241220"></script>
   <script type="module" src="js/data-supabase.js?v=20241220"></script>
   -->
-  <script src="js/charts.js?v=20241220"></script>
-    <script src="js/ui.js?v=20241220m"></script>
-  <script src="js/map.js?v=20241220h"></script>
-  <script src="js/app.js?v=20241220a"></script>
+  <script src="js/charts.js?v=20241220a"></script>
+    <script src="js/ui.js?v=20241220x"></script>
+  <script src="js/map.js?v=20241220j"></script>
+  <script src="js/app.js?v=20241220b"></script>
 </body>
 </html>

@@ -11,7 +11,10 @@ const ChartRenderer = (() => {
 
   // Pie Chart (existing functionality enhanced)
   const renderPieChart = (container, entries, total, title = "Time spent on:", unit = "%") => {
+    console.log('renderPieChart called with:', { container, entries, total, title, unit });
+    
     if (!container || !d3 || !d3.pie) {
+      console.log('Pie chart error:', { container: !!container, d3: !!d3, d3pie: !!(d3 && d3.pie) });
       container.textContent = "Enable D3.js to show the diagram.";
       return;
     }
@@ -20,6 +23,8 @@ const ChartRenderer = (() => {
     const height = container.clientHeight || 300;
     const size = Math.max(Math.min(width, height), 250);
     const radius = size / 2;
+    
+    console.log('Pie chart dimensions:', { width, height, size, radius });
 
     const root = d3.select(container);
     root.selectAll("*").remove();
@@ -35,11 +40,17 @@ const ChartRenderer = (() => {
 
     const pie = d3.pie().sort(null).value(d => d.value);
     const arc = d3.arc().innerRadius(radius * 0.45).outerRadius(radius * 0.85);
+    
+    const pieData = pie(entries);
+    console.log('Pie data:', pieData);
 
-    group
+    const paths = group
       .selectAll("path")
-      .data(pie(entries))
-      .enter()
+      .data(pieData);
+      
+    console.log('Paths selection:', paths.size());
+    
+    paths.enter()
       .append("path")
       .attr("d", arc)
       .attr("fill", (d, i) => getMetricColor(d.data.key, i))
@@ -54,6 +65,14 @@ const ChartRenderer = (() => {
         .attr("dy", "0.35em")
         .text("100%");
     }
+    
+    // Fallback if no paths were created
+    setTimeout(() => {
+      if (container.querySelector('path') === null) {
+        console.log('No pie chart paths created, showing fallback');
+        container.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">Pie chart could not be rendered<br>Data: ' + JSON.stringify(entries) + '</div>';
+      }
+    }, 100);
   };
 
   // Bar Chart

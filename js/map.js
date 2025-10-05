@@ -106,7 +106,8 @@ const OrgMap = (() => {
     const desiredScale = options.scale !== undefined ? options.scale : contextScale;
     const scale = Math.max(zoomSettings.min, Math.min(zoomSettings.max, desiredScale));
     const centerX = width / 2;
-    const centerY = height / 2;
+    // Adjust centerY to be slightly higher to avoid nodes appearing too far down
+    const centerY = height * 0.4; // Center at 40% of height instead of 50%
     const tx = centerX - target.x * scale;
     const ty = centerY - (focusY || target.y) * scale;
     const transform = d3.zoomIdentity.translate(tx, ty).scale(scale);
@@ -696,6 +697,9 @@ const OrgMap = (() => {
     }
     
     if (isVisible) {
+      // Close all other support offices first (only allow one open at a time)
+      supportVisibility.clear();
+      // Open the new support office
       supportVisibility.add(parentId);
       
       // Zoom out a bit when opening support offices

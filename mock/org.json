@@ -25,15 +25,32 @@
         "Affärsplaner per region",
         "Beslut om investeringar och expansion"
       ],
-      "metrics": {
-        "Strategisk planering": 35,
-        "Ledningsmöten": 25,
-        "Resursallokering": 20,
-        "Riskanalys": 15,
-        "Extern kommunikation": 5
-      },
-      "metricsName": "Time spent on:",
-      "metricsType": "pie"
+      "metrics": [
+        {
+          "name": "Time spent on:",
+          "values": [
+            {"label": "Strategisk planering", "value": 35},
+            {"label": "Ledningsmöten", "value": 25},
+            {"label": "Resursallokering", "value": 20},
+            {"label": "Riskanalys", "value": 15},
+            {"label": "Extern kommunikation", "value": 5}
+          ],
+          "chartType": "pie",
+          "unit": "%",
+          "description": "Fördelning av tid på olika ledningsaktiviteter"
+        },
+        {
+          "name": "Budget Allocation",
+          "values": [
+            {"label": "Nordic", "value": 40},
+            {"label": "Europe", "value": 35},
+            {"label": "Global", "value": 25}
+          ],
+          "chartType": "bar",
+          "unit": "%",
+          "description": "Budgetfördelning per region"
+        }
+      ]
     },
     {
       "id": "ceo",
@@ -71,6 +88,31 @@
       "outcomes": [
         "Godkänd expansionsplan",
         "Uppdaterad kundstrategi"
+      ],
+      "metrics": [
+        {
+          "name": "Customer Satisfaction",
+          "values": [
+            {"label": "Q1", "value": 85},
+            {"label": "Q2", "value": 88},
+            {"label": "Q3", "value": 92},
+            {"label": "Q4", "value": 90}
+          ],
+          "chartType": "line",
+          "unit": "%",
+          "description": "Kundnöjdhet per kvartal"
+        },
+        {
+          "name": "Revenue Growth",
+          "values": [
+            {"label": "Nordic", "value": 15},
+            {"label": "Europe", "value": 22},
+            {"label": "Global", "value": 8}
+          ],
+          "chartType": "bar",
+          "unit": "%",
+          "description": "Intäktsväxt per region"
+        }
       ]
     },
     {
@@ -102,6 +144,20 @@
       ],
       "outcomes": [
         "Globala konceptmanualer"
+      ],
+      "metrics": [
+        {
+          "name": "Brand Awareness",
+          "values": [
+            {"label": "Local", "value": 65},
+            {"label": "Regional", "value": 45},
+            {"label": "National", "value": 30},
+            {"label": "International", "value": 15}
+          ],
+          "chartType": "doughnut",
+          "unit": "%",
+          "description": "Varumärkesmedvetenhet per geografisk nivå"
+        }
       ]
     },
     {
@@ -136,6 +192,19 @@
       "outcomes": [
         "Driftplaner per region",
         "Beslut om nya supportinitiativ"
+      ],
+      "metrics": [
+        {
+          "name": "Operational Efficiency",
+          "values": [
+            {"label": "Nordic", "value": 92},
+            {"label": "Europe", "value": 87},
+            {"label": "Global", "value": 78}
+          ],
+          "chartType": "bar",
+          "unit": "%",
+          "description": "Operativ effektivitet per region"
+        }
       ]
     },
     {
@@ -172,6 +241,19 @@
       "outcomes": [
         "Godkända budgetar",
         "Finansiella rapporter"
+      ],
+      "metrics": [
+        {
+          "name": "Financial Performance",
+          "values": [
+            {"label": "Revenue", "value": 15000000},
+            {"label": "Expenses", "value": 12000000},
+            {"label": "Profit", "value": 3000000}
+          ],
+          "chartType": "pie",
+          "unit": "SEK",
+          "description": "Finansiell prestation för året"
+        }
       ]
     },
     {
@@ -235,15 +317,32 @@
         "Gemensamma arbetssätt",
         "Årsplaner per region"
       ],
-      "metrics": {
-        "Regionala driftsforum": 30,
-        "Incidentuppföljningar": 25,
-        "Strategi till operation": 20,
-        "Resursfördelning": 15,
-        "Best practice delning": 10
-      },
-      "metricsName": "Time spent on:",
-      "metricsType": "pie"
+      "metrics": [
+        {
+          "name": "Time spent on:",
+          "values": [
+            {"label": "Regionala driftsforum", "value": 30},
+            {"label": "Incidentuppföljningar", "value": 25},
+            {"label": "Strategi till operation", "value": 20},
+            {"label": "Resursfördelning", "value": 15},
+            {"label": "Best practice delning", "value": 10}
+          ],
+          "chartType": "pie",
+          "unit": "%",
+          "description": "Tidsfördelning på operativa aktiviteter"
+        },
+        {
+          "name": "Regional Performance",
+          "values": [
+            {"label": "Nordics", "value": 95},
+            {"label": "Germany", "value": 88},
+            {"label": "Iberia", "value": 82}
+          ],
+          "chartType": "bar",
+          "unit": "%",
+          "description": "Prestanda per region"
+        }
+      ]
     },
     {
       "id": "support_office_global",

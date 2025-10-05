@@ -548,6 +548,71 @@ const OrgUI = (() => {
     if (elements.addMetricForm) {
 
       elements.addMetricForm.addEventListener("submit", handleAddMetric);
+      
+      // Function to create a value input row (accessible globally for edit functionality)
+      window.createValueInput = (index = 0, label = '', value = '') => {
+        const valueRow = document.createElement('div');
+        valueRow.className = 'value-input-row';
+        valueRow.style.cssText = 'display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center;';
+        
+        valueRow.innerHTML = `
+          <input type="text" name="valueLabel_${index}" placeholder="Label (e.g., Q1, Sales, etc.)" value="${label}" style="flex: 1;" />
+          <input type="number" name="valueValue_${index}" step="0.01" placeholder="0" value="${value}" style="flex: 1;" />
+          <button type="button" class="remove-value-btn" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">×</button>
+        `;
+        
+        // Add remove functionality
+        const removeBtn = valueRow.querySelector('.remove-value-btn');
+        removeBtn.addEventListener('click', () => {
+          valueRow.remove();
+        });
+        
+        return valueRow;
+      };
+      
+      // Handle chart type changes to show/hide values container
+      const chartTypeSelect = elements.addMetricForm.querySelector('select[name="metricChartType"]');
+      const valuesContainer = document.getElementById('valuesContainer');
+      const valuesList = document.getElementById('valuesList');
+      const addValueBtn = document.getElementById('addValueBtn');
+      
+      if (chartTypeSelect && valuesContainer && valuesList && addValueBtn) {
+        // Function to add a new value input
+        const addValueInput = () => {
+          const currentInputs = valuesList.querySelectorAll('.value-input-row');
+          const index = currentInputs.length;
+          const valueRow = window.createValueInput(index);
+          valuesList.appendChild(valueRow);
+        };
+        
+        // Handle chart type changes
+        chartTypeSelect.addEventListener('change', (e) => {
+          const chartType = e.target.value;
+          // Show values container for chart types that need numerical values
+          if (['pie', 'doughnut', 'bar', 'line'].includes(chartType)) {
+            valuesContainer.style.display = 'block';
+            // Initialize with one value input if none exist
+            if (valuesList.children.length === 0) {
+              addValueInput();
+            }
+          } else if (chartType === 'table') {
+            valuesContainer.style.display = 'none';
+          } else {
+            valuesContainer.style.display = 'block';
+            if (valuesList.children.length === 0) {
+              addValueInput();
+            }
+          }
+        });
+        
+        // Handle add value button
+        addValueBtn.addEventListener('click', addValueInput);
+        
+        // Initialize with one value input for pie charts (most common)
+        if (chartTypeSelect.value === 'pie') {
+          addValueInput();
+        }
+      }
 
     }
 
@@ -1529,10 +1594,21 @@ const OrgUI = (() => {
         `;
         
         const metricInfo = document.createElement('div');
+        let valuesText = '';
+        if (metric.values && metric.values.length > 0) {
+          valuesText = metric.values.map(v => `${v.label}: ${v.value}${metric.unit || ''}`).join(', ');
+        } else if (metric.value !== undefined) {
+          // Backward compatibility for old single-value metrics
+          valuesText = `${metric.value} ${metric.unit || ''}`;
+        }
+        
         metricInfo.innerHTML = `
           <strong>${metric.name}</strong><br>
           <span style="color: var(--muted); font-size: 0.9rem;">
-            ${metric.value} ${metric.unit || ''}
+            ${valuesText}
+          </span><br>
+          <span style="color: var(--brand-orange); font-size: 0.8rem; font-weight: 500;">
+            ${metric.chartType ? metric.chartType.toUpperCase() + ' CHART' : 'PIE CHART'}
           </span>
         `;
         
@@ -1545,16 +1621,110 @@ const OrgUI = (() => {
         editBtn.className = 'secondary';
         editBtn.style.cssText = 'font-size: 0.8rem; padding: 0.25rem 0.5rem;';
         editBtn.addEventListener('click', () => {
-          // Pre-fill the remove form with this metric
-          const nodeSelect = elements.removeMetricForm?.querySelector('select[name="removeNodeId"]');
-          const metricSelect = elements.removeMetricForm?.querySelector('select[name="metricToRemove"]');
-          
-          if (nodeSelect && metricSelect) {
-            nodeSelect.value = selectedNodeId;
-            updateMetricsOptions(selectedNodeId);
-            setTimeout(() => {
-              metricSelect.value = index;
-            }, 100);
+          // Pre-fill the add form with this metric for editing
+          const addForm = elements.addMetricForm;
+          if (addForm) {
+            // Clear existing value inputs
+            const valuesList = document.getElementById('valuesList');
+            if (valuesList) {
+              valuesList.innerHTML = '';
+            }
+            
+            // Fill in the form with existing metric data
+            addForm.querySelector('select[name="nodeId"]').value = selectedNodeId;
+            addForm.querySelector('input[name="metricName"]').value = metric.name;
+            addForm.querySelector('input[name="metricUnit"]').value = metric.unit || '';
+            addForm.querySelector('select[name="metricChartType"]').value = metric.chartType || 'pie';
+            addForm.querySelector('textarea[name="metricDescription"]').value = metric.description || '';
+            
+            // Show values container and populate with existing values
+            const chartType = metric.chartType || 'pie';
+            const valuesContainer = document.getElementById('valuesContainer');
+            
+            if (['pie', 'doughnut', 'bar', 'line'].includes(chartType)) {
+              valuesContainer.style.display = 'block';
+              
+              // Create value input function locally if not available globally
+              const createValueInput = (idx = 0, label = '', value = '') => {
+                const valueRow = document.createElement('div');
+                valueRow.className = 'value-input-row';
+                valueRow.style.cssText = 'display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center;';
+                
+                valueRow.innerHTML = `
+                  <input type="text" name="valueLabel_${idx}" placeholder="Label (e.g., Q1, Sales, etc.)" value="${label}" style="flex: 1;" />
+                  <input type="number" name="valueValue_${idx}" step="0.01" placeholder="0" value="${value}" style="flex: 1;" />
+                  <button type="button" class="remove-value-btn" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">×</button>
+                `;
+                
+                // Add remove functionality
+                const removeBtn = valueRow.querySelector('.remove-value-btn');
+                removeBtn.addEventListener('click', () => {
+                  valueRow.remove();
+                });
+                
+                return valueRow;
+              };
+              
+              // Add existing values
+              if (metric.values && metric.values.length > 0) {
+                metric.values.forEach((valueData, idx) => {
+                  const valueRow = createValueInput(idx, valueData.label, valueData.value);
+                  valuesList.appendChild(valueRow);
+                });
+              } else if (metric.value !== undefined) {
+                // Backward compatibility for old single-value metrics
+                const valueRow = createValueInput(0, metric.name || '', metric.value);
+                valuesList.appendChild(valueRow);
+              } else {
+                // Add one empty value input
+                const valueRow = createValueInput(0);
+                valuesList.appendChild(valueRow);
+              }
+            } else if (chartType === 'table') {
+              valuesContainer.style.display = 'none';
+            }
+            
+            // Switch to metrics tab to show the form
+            setActiveAdminTab("metrics");
+            
+            // Store the metric to be edited globally for the form submission
+            window.editingMetric = {
+              originalIndex: index,
+              nodeId: selectedNodeId,
+              metric: { ...metric }
+            };
+            
+            // Change submit button text to "Save Metric"
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+              submitBtn.textContent = "Save Metric";
+              submitBtn.style.backgroundColor = "#28a745"; // Green color for save
+            }
+            
+            // Show success message with clear instructions
+            displayAdminMessage(`Editing metric "${metric.name}". Make your changes and click "Save Metric" to update.`, "info");
+            
+            // Add a cancel button to the form
+            const cancelBtn = document.createElement("button");
+            cancelBtn.textContent = "Cancel Edit";
+            cancelBtn.type = "button";
+            cancelBtn.className = "secondary";
+            cancelBtn.style.cssText = "margin-left: 1rem;";
+            cancelBtn.addEventListener("click", () => {
+              window.editingMetric = null;
+              form.reset();
+              // Reset submit button text
+              if (submitBtn) {
+                submitBtn.textContent = "Add Metric";
+                submitBtn.style.backgroundColor = "";
+              }
+              displayAdminMessage("Edit cancelled.", "info");
+            });
+            
+            // Add cancel button next to submit button
+            if (submitBtn) {
+              submitBtn.parentNode.insertBefore(cancelBtn, submitBtn.nextSibling);
+            }
           }
         });
         
@@ -2158,12 +2328,32 @@ const OrgUI = (() => {
     
     const nodeId = data.get("nodeId");
     const metricName = data.get("metricName");
-    const metricValue = parseFloat(data.get("metricValue"));
     const metricUnit = data.get("metricUnit") || "";
+    const metricChartType = data.get("metricChartType") || "pie";
     const metricDescription = data.get("metricDescription") || "";
     
-    if (!nodeId || !metricName || isNaN(metricValue)) {
-      displayAdminMessage("Please fill in all required fields (Node, Metric Name, Value).", "error");
+    // Collect all value inputs
+    const values = [];
+    const valueInputs = form.querySelectorAll('.value-input-row');
+    valueInputs.forEach((row, index) => {
+      const labelInput = row.querySelector(`input[name="valueLabel_${index}"]`);
+      const valueInput = row.querySelector(`input[name="valueValue_${index}"]`);
+      if (labelInput && valueInput && labelInput.value.trim() && valueInput.value.trim()) {
+        values.push({
+          label: labelInput.value.trim(),
+          value: parseFloat(valueInput.value)
+        });
+      }
+    });
+    
+    if (!nodeId || !metricName || !metricChartType) {
+      displayAdminMessage("Please fill in all required fields (Node, Metric Name, Chart Type).", "error");
+      return;
+    }
+    
+    // Only require values for chart types that need numerical values
+    if (['pie', 'doughnut', 'bar', 'line'].includes(metricChartType) && values.length === 0) {
+      displayAdminMessage("Please provide at least one data point for this chart type.", "error");
       return;
     }
     
@@ -2179,17 +2369,39 @@ const OrgUI = (() => {
       // Add metric to node
       const newMetric = {
         name: metricName,
-        value: metricValue,
+        values: values,
         unit: metricUnit,
+        chartType: metricChartType,
         description: metricDescription
       };
       
-      // Update node with new metric
-      const updatedMetrics = [...(node.metrics || []), newMetric];
+      // Check if we're editing an existing metric
+      let updatedMetrics;
+      if (window.editingMetric && window.editingMetric.nodeId === nodeId) {
+        // Replace the existing metric
+        updatedMetrics = [...(node.metrics || [])];
+        updatedMetrics[window.editingMetric.originalIndex] = newMetric;
+        
+        // Clear the editing state
+        window.editingMetric = null;
+        
+        displayAdminMessage("Metric updated successfully.", "success");
+      } else {
+        // Add new metric
+        updatedMetrics = [...(node.metrics || []), newMetric];
+        displayAdminMessage("Metric added successfully.", "success");
+      }
+      
       OrgStore.updateNode(nodeId, { metrics: updatedMetrics });
       
+      // Reset submit button text if we were editing
+      const submitBtn = form.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.textContent = "Add Metric";
+        submitBtn.style.backgroundColor = "";
+      }
+      
       form.reset();
-      displayAdminMessage("Metric added successfully.", "success");
       
       // Update current metrics display
       displayCurrentMetrics();
@@ -2336,6 +2548,44 @@ const OrgUI = (() => {
 
       body.appendChild(empty);
 
+      // Add specific chart type buttons (only show in admin mode)
+      if (elements.adminPanel && elements.adminPanel.classList.contains("open")) {
+        const chartTypes = [
+          { type: 'pie', label: 'Add Pie Chart' },
+          { type: 'bar', label: 'Add Bar Chart' },
+          { type: 'line', label: 'Add Line Chart' },
+          { type: 'table', label: 'Add Table' }
+        ];
+        
+        const buttonsContainer = document.createElement("div");
+        buttonsContainer.style.cssText = "margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem;";
+        
+        chartTypes.forEach(chartType => {
+          const btn = document.createElement("button");
+          btn.textContent = chartType.label;
+          btn.className = "secondary";
+          btn.style.cssText = "padding: 0.5rem 1rem; font-size: 0.9rem;";
+          btn.addEventListener("click", () => {
+            // Switch to metrics tab
+            setActiveAdminTab("metrics");
+            // Pre-fill the selected node and chart type
+            const nodeSelect = elements.addMetricForm?.querySelector('select[name="nodeId"]');
+            const chartTypeSelect = elements.addMetricForm?.querySelector('select[name="metricChartType"]');
+            if (nodeSelect && selectedNodeId) {
+              nodeSelect.value = selectedNodeId;
+            }
+            if (chartTypeSelect) {
+              chartTypeSelect.value = chartType.type;
+              // Trigger change event to show/hide values container
+              chartTypeSelect.dispatchEvent(new Event('change'));
+            }
+          });
+          buttonsContainer.appendChild(btn);
+        });
+        
+        body.appendChild(buttonsContainer);
+      }
+
       return section;
 
     }
@@ -2353,12 +2603,26 @@ const OrgUI = (() => {
       chartContainer.classList.add("detail-metrics-chart");
       metricContainer.appendChild(chartContainer);
 
-      const entries = Object.entries(metric.data || {})
-        .map(([key, value]) => ({ key, value: Number(value) || 0 }))
-        .filter((entry) => entry.value > 0);
+      // Handle both new multi-value format and old single-value format
+      let entries = [];
+      if (metric.values && Array.isArray(metric.values)) {
+        // New multi-value format
+        entries = metric.values
+          .filter(v => v.label && !isNaN(v.value))
+          .map(v => ({ key: v.label, value: Number(v.value) || 0 }));
+      } else if (metric.value !== undefined) {
+        // Old single-value format - create a single entry
+        entries = [{ key: metric.name || "Value", value: Number(metric.value) || 0 }];
+      } else if (metric.data) {
+        // Legacy data format
+        entries = Object.entries(metric.data || {})
+          .map(([key, value]) => ({ key, value: Number(value) || 0 }))
+          .filter((entry) => entry.value > 0);
+      }
 
       if (entries.length > 0) {
         const total = entries.reduce((sum, entry) => sum + entry.value, 0);
+        console.log('Rendering metric:', metric.name, 'entries:', entries, 'total:', total);
 
         const legend = document.createElement("ul");
         legend.classList.add("detail-metrics-legend");
@@ -2390,15 +2654,58 @@ const OrgUI = (() => {
 
         requestAnimationFrame(() => {
           if (typeof ChartRenderer !== "undefined") {
-            ChartRenderer.renderChart(chartContainer, entries, total, metric.type || "pie", metric.name || "Time spent on:", metric.unit || "%");
+            console.log('Calling ChartRenderer.renderChart with:', entries, total, metric.chartType);
+            ChartRenderer.renderChart(chartContainer, entries, total, metric.chartType || "pie", metric.name || "Time spent on:", metric.unit || "%");
           } else {
+            console.log('ChartRenderer not available, using fallback');
             renderMetricsChart(chartContainer, entries, total);
           }
         });
+      } else {
+        console.log('No entries found for metric:', metric.name, 'metric:', metric);
+        chartContainer.innerHTML = '<p class="chart-empty">No data available</p>';
       }
 
       body.appendChild(metricContainer);
     });
+
+    // Add specific chart type buttons (only show in admin mode)
+    if (elements.adminPanel && elements.adminPanel.classList.contains("open")) {
+      const chartTypes = [
+        { type: 'pie', label: 'Add Pie Chart' },
+        { type: 'bar', label: 'Add Bar Chart' },
+        { type: 'line', label: 'Add Line Chart' },
+        { type: 'table', label: 'Add Table' }
+      ];
+      
+      const buttonsContainer = document.createElement("div");
+      buttonsContainer.style.cssText = "margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem;";
+      
+      chartTypes.forEach(chartType => {
+        const btn = document.createElement("button");
+        btn.textContent = chartType.label;
+        btn.className = "secondary";
+        btn.style.cssText = "padding: 0.5rem 1rem; font-size: 0.9rem;";
+        btn.addEventListener("click", () => {
+          // Switch to metrics tab
+          setActiveAdminTab("metrics");
+          // Pre-fill the selected node and chart type
+          const nodeSelect = elements.addMetricForm?.querySelector('select[name="nodeId"]');
+          const chartTypeSelect = elements.addMetricForm?.querySelector('select[name="metricChartType"]');
+          if (nodeSelect && selectedNodeId) {
+            nodeSelect.value = selectedNodeId;
+          }
+          if (chartTypeSelect) {
+            chartTypeSelect.value = chartType.type;
+            // Trigger change event to show/hide values container
+            chartTypeSelect.dispatchEvent(new Event('change'));
+          }
+        });
+        buttonsContainer.appendChild(btn);
+      });
+      
+      body.appendChild(buttonsContainer);
+    }
 
     return section;
 
@@ -2547,7 +2854,9 @@ const OrgUI = (() => {
 
     init,
 
-    openNode
+    openNode,
+
+    getSelectedNodeId: () => selectedNodeId
 
   };
 

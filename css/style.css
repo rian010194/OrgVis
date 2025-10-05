@@ -1763,9 +1763,14 @@ button.danger {
 .detail-metrics-chart {
   width: 100%;
   height: 240px;
+  min-height: 200px;
+  min-width: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fafafa;
 }
 
 .detail-metrics-chart svg {
