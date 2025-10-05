@@ -135,3 +135,6 @@ git push origin main
 - `feature/diagram-display`
 - `fix/metrics-layout`
 - `style/tree-view-improvements`
+
+
+Make it so that you can switch from bottum up to top down to left right etc for the Orgstructure
