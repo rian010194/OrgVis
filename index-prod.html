@@ -2,19 +2,232 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>JumpYard Organization Chart</title>
-  <link rel="stylesheet" href="css/style.css?v=20241220">
+  <title>Organization Chart</title>
+    <link rel="stylesheet" href="css/style.css?v=20241221a">
+    <!-- Google Fonts for custom typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@300;400;500;600;700&family=Lato:wght@300;400;700&family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header>
-  </header>
+  <!-- Landing Page -->
+  <div id="landingPage" class="landing-page">
+    <header class="landing-header">
+      <div class="landing-header-content">
+        <h1 class="landing-title">Organization Chart</h1>
+        <p class="landing-subtitle">Visualize and manage your organization structure with ease</p>
+        <div class="demo-notice">
+          <span class="demo-badge">Demo Available</span>
+          <span class="demo-text">Try the JumpYard demo organization with sample data</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="landing-main">
+      <div class="landing-hero">
+        <div class="hero-content">
+          <h2 class="hero-title">Create Your Organization</h2>
+          <p class="hero-description">
+            Get started by creating your organization structure. You can add departments, teams, and individuals, 
+            define relationships, and track metrics all in one place.
+          </p>
+          <div class="hero-features">
+            <div class="feature-item">
+              <span class="feature-icon">🌳</span>
+              <span class="feature-text">Interactive Tree View</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">🗺️</span>
+              <span class="feature-text">Visual Map View</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">📊</span>
+              <span class="feature-text">Metrics & Analytics</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">🔗</span>
+              <span class="feature-text">Relationship Mapping</span>
+            </div>
+          </div>
+          <button id="createOrgBtn" class="create-org-button">
+            <span class="button-icon">✨</span>
+            <span class="button-text">Create Organization</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="landing-actions">
+        <div class="action-card">
+          <h3>Start Fresh</h3>
+          <p>Create a new organization from scratch with our guided setup.</p>
+          <button id="startFreshBtn" class="action-button primary">Start Fresh</button>
+        </div>
+        <div class="action-card">
+          <h3>Load Existing</h3>
+          <p>Continue working on an existing organization you've created.</p>
+          <button id="loadExistingBtn" class="action-button secondary">Load Existing</button>
+        </div>
+        <div class="action-card demo-card">
+          <h3>JumpYard Demo</h3>
+          <p>Access the JumpYard demo organization with sample data and structure.</p>
+          <button id="loadJumpYardBtn" class="action-button demo">Access JumpYard Demo</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Create Organization Modal -->
+  <div id="createOrgModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Create New Organization</h2>
+        <button id="closeModalBtn" class="modal-close">&times;</button>
+      </div>
+      <form id="createOrgForm" class="modal-form">
+        <div class="form-group">
+          <label for="orgName">Organization Name</label>
+          <input type="text" id="orgName" name="orgName" required placeholder="Enter organization name">
+        </div>
+        <div class="form-group">
+          <label for="orgDescription">Description (Optional)</label>
+          <textarea id="orgDescription" name="orgDescription" placeholder="Brief description of your organization"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="orgType">Organization Type</label>
+          <select id="orgType" name="orgType" required>
+            <option value="">Select organization type</option>
+            <option value="company">Company</option>
+            <option value="nonprofit">Non-profit</option>
+            <option value="government">Government</option>
+            <option value="educational">Educational</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="orgPassword">Password (Optional)</label>
+          <input type="password" id="orgPassword" name="orgPassword" placeholder="Set a password to protect your organization">
+          <small class="form-hint">Leave empty for no password protection</small>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="cancelCreateBtn" class="button secondary">Cancel</button>
+          <button type="submit" class="button primary">Create Organization</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Login Modal -->
+  <div id="loginModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Access Organization</h2>
+        <button id="closeLoginBtn" class="modal-close">&times;</button>
+      </div>
+      <form id="loginForm" class="modal-form">
+        <div class="form-group">
+          <label for="loginOrgName">Organization Name</label>
+          <input type="text" id="loginOrgName" name="orgName" required placeholder="Enter organization name">
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" name="password" placeholder="Enter password (if set)">
+        </div>
+        <div class="form-actions">
+          <button type="button" id="cancelLoginBtn" class="button secondary">Cancel</button>
+          <button type="submit" class="button primary">Access Organization</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Customization Modal -->
+  <div id="customizationModal" class="modal-overlay hidden">
+    <div class="modal-content large">
+      <div class="modal-header">
+        <h2>Customize Your Organization</h2>
+        <button id="closeCustomizationBtn" class="modal-close">&times;</button>
+      </div>
+      <form id="customizationForm" class="modal-form">
+        <div class="customization-section">
+          <h3>Logo & Branding</h3>
+          <div class="form-group">
+            <label for="orgLogo">Organization Logo</label>
+            <div class="logo-upload">
+              <input type="file" id="orgLogo" name="orgLogo" accept="image/*" class="file-input">
+              <div class="logo-preview" id="logoPreview">
+                <span class="logo-placeholder">No logo selected</span>
+              </div>
+              <button type="button" id="uploadLogoBtn" class="button secondary">Choose Logo</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="customization-section">
+          <h3>Colors</h3>
+          <div class="color-grid">
+            <div class="form-group">
+              <label for="primaryColor">Primary Color</label>
+              <div class="color-input-group">
+                <input type="color" id="primaryColor" name="primaryColor" value="#ff5a00">
+                <input type="text" id="primaryColorText" value="#ff5a00" placeholder="#ff5a00">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="secondaryColor">Secondary Color</label>
+              <div class="color-input-group">
+                <input type="color" id="secondaryColor" name="secondaryColor" value="#e53e3e">
+                <input type="text" id="secondaryColorText" value="#e53e3e" placeholder="#e53e3e">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="customization-section">
+          <h3>Typography</h3>
+          <div class="form-group">
+            <label for="fontFamily">Font Family</label>
+            <select id="fontFamily" name="fontFamily">
+              <option value="system">System Font (Default)</option>
+              <option value="inter">Inter</option>
+              <option value="roboto">Roboto</option>
+              <option value="open-sans">Open Sans</option>
+              <option value="lato">Lato</option>
+              <option value="montserrat">Montserrat</option>
+              <option value="poppins">Poppins</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="fontSize">Base Font Size</label>
+            <select id="fontSize" name="fontSize">
+              <option value="14">Small (14px)</option>
+              <option value="16" selected>Medium (16px)</option>
+              <option value="18">Large (18px)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" id="skipCustomizationBtn" class="button secondary">Skip for Now</button>
+          <button type="submit" class="button primary">Save & Continue</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main Application (hidden initially) -->
+  <div id="mainApp" class="main-app hidden">
+    <header>
+    </header>
 
   <div class="app-toolbar" role="toolbar" aria-label="View and admin controls">
     <div class="toolbar-group view-switch" role="group" aria-label="Select view">
       <button type="button" data-view="tree" class="view-button active" aria-pressed="true">Tree View</button>
       <button type="button" data-view="map" class="view-button" aria-pressed="false">Map View</button>
     </div>
-    <button id="toggleAdmin" type="button" class="admin-toggle" aria-pressed="false" aria-controls="adminPanel">Admin Mode</button>
+    <div class="toolbar-actions">
+      <button id="toggleAdmin" type="button" class="admin-toggle" aria-pressed="false" aria-controls="adminPanel">Admin Mode</button>
+      <button id="logoutBtn" type="button" class="logout-button">Logout</button>
+    </div>
   </div>
 
   <main class="app-layout">
@@ -204,14 +417,22 @@
     <div id="relationView" class="relation-view"></div>
   </section>
 
+  </div>
+
   <script src="js/d3.v7.min.js"></script>
-  <!-- PRODUCTION: Using Supabase backend -->
-  <script type="module" src="js/config.js?v=20241220"></script>
-  <script type="module" src="js/supabase.js?v=20241220"></script>
-  <script type="module" src="js/data-supabase.js?v=20241220"></script>
-  <script src="js/charts.js?v=20241220"></script>
-  <script src="js/ui.js?v=20241220"></script>
-  <script src="js/map.js?v=20241220"></script>
-  <script src="js/app.js?v=20241220"></script>
+  <!-- DEVELOPMENT: Using mock data for frontend-only development -->
+    <script src="js/data.js?v=20241221a"></script>
+  <!-- PRODUCTION: Uncomment these when deploying with Supabase backend:
+  <script type="module" src="js/config.js?v=20241221"></script>
+  <script type="module" src="js/supabase.js?v=20241221"></script>
+  <script type="module" src="js/data-supabase.js?v=20241221"></script>
+  -->
+  <script src="js/charts.js?v=20241221a"></script>
+    <script src="js/ui.js?v=20241221a"></script>
+  <script src="js/map.js?v=20241221a"></script>
+  <script src="js/app.js?v=20241221a"></script>
+
+  <!-- Landing Page JavaScript -->
+  <script src="js/landing.js?v=20241221a"></script>
 </body>
 </html>
