@@ -1216,6 +1216,13 @@ const OrgUI = (() => {
       if (nodeId) {
 
         openNode(nodeId);
+        
+        // If we're in map view, ensure proper focus for support offices
+        if (typeof OrgMap !== "undefined" && OrgMap && typeof OrgMap.reveal === "function") {
+          setTimeout(() => {
+            OrgMap.reveal(nodeId);
+          }, 100);
+        }
 
       }
 

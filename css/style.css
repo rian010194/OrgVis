@@ -1941,6 +1941,13 @@ button.danger {
   box-shadow: 0 0 0 2px rgba(255, 90, 0, 0.25);
 }
 
+.support-box .support-box-item.selected {
+  background: var(--brand-orange);
+  color: #fff;
+  border-color: var(--brand-orange);
+  box-shadow: 0 2px 8px rgba(255, 90, 0, 0.3);
+}
+
 .support-toggle-button {
   border: 1px solid var(--brand-orange);
   background: #fff;

@@ -621,6 +621,7 @@ const OrgMap = (() => {
             .append('button')
             .attr('type', 'button')
             .attr('class', 'support-box-item')
+            .attr('data-node-id', child.id)
             .text(child && child.name ? child.name : child && child.id ? child.id : '');
           button.on('click', (event) => {
             event.stopPropagation();
@@ -632,6 +633,26 @@ const OrgMap = (() => {
       } else {
         console.log('No children found for support office:', officeName);
         div.append('div').attr('class', 'support-box-item').text('Inga barn hittades');
+      }
+      
+      // Update selection state for support items
+      updateSupportItemsSelection(div);
+    });
+  };
+
+  const updateSupportItemsSelection = (supportBoxDiv) => {
+    if (!supportBoxDiv || !state.selectedId) {
+      return;
+    }
+    
+    supportBoxDiv.selectAll('.support-box-item').each(function() {
+      const button = d3.select(this);
+      const nodeId = button.attr('data-node-id');
+      
+      if (nodeId === state.selectedId) {
+        button.classed('selected', true);
+      } else {
+        button.classed('selected', false);
       }
     });
   };
@@ -750,6 +771,15 @@ const OrgMap = (() => {
     renderNodes(layout.nodeData);
     renderSupportToggles(layout);
     renderSupportBoxes(layout);
+    
+    // Update selection state for all support items
+    if (state.selectedId) {
+      supportBoxGroup.selectAll('.support-box-fo').each(function() {
+        const fo = d3.select(this);
+        const supportBox = fo.select('div.support-box');
+        updateSupportItemsSelection(supportBox);
+      });
+    }
     
     // Restore and apply the preserved transform
     currentTransform = preservedTransform;
