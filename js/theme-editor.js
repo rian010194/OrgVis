@@ -7,6 +7,7 @@ class ThemeEditor {
   init() {
     this.setupEventListeners();
     this.loadCurrentTheme();
+    this.initializeHeader();
   }
 
   setupEventListeners() {
@@ -47,6 +48,40 @@ class ThemeEditor {
     
     if (themeOrgLogoInput) {
       themeOrgLogoInput.addEventListener('change', (e) => this.handleLogoUpload(e));
+    }
+  }
+
+  initializeHeader() {
+    // Initialize header with current organization data
+    const currentOrgId = localStorage.getItem('current_organization_id');
+    if (currentOrgId) {
+      const orgData = JSON.parse(localStorage.getItem(`org_${currentOrgId}`) || '{}');
+      const brandingData = JSON.parse(localStorage.getItem(`org_branding_${currentOrgId}`) || '{}');
+      
+      // Update header
+      const orgNameElement = document.getElementById('orgName');
+      const orgDescriptionElement = document.getElementById('orgDescription');
+      
+      if (orgNameElement && orgData.name) {
+        orgNameElement.textContent = orgData.name;
+      }
+      
+      if (orgDescriptionElement && orgData.description) {
+        orgDescriptionElement.textContent = orgData.description;
+      }
+
+      // Apply branding if available
+      if (brandingData.primaryColor || brandingData.secondaryColor) {
+        this.applyTheme(brandingData, orgData);
+      }
+    } else {
+      // If no current org ID, try to set it to demo
+      const demoOrgId = 'demo_org';
+      const demoData = JSON.parse(localStorage.getItem(`org_${demoOrgId}`) || '{}');
+      if (demoData.name) {
+        localStorage.setItem('current_organization_id', demoOrgId);
+        this.initializeHeader();
+      }
     }
   }
 
@@ -112,7 +147,17 @@ class ThemeEditor {
 
   loadCurrentTheme() {
     const currentOrgId = localStorage.getItem('current_organization_id');
-    if (!currentOrgId) return;
+    if (!currentOrgId) {
+      // If no current org ID, try to get from organizations list
+      const orgList = JSON.parse(localStorage.getItem('organizations_list') || '[]');
+      if (orgList.length > 0) {
+        const firstOrg = orgList[0];
+        localStorage.setItem('current_organization_id', firstOrg.id);
+        this.loadCurrentTheme();
+        return;
+      }
+      return;
+    }
 
     // Load organization data
     const orgData = JSON.parse(localStorage.getItem(`org_${currentOrgId}`) || '{}');
@@ -123,11 +168,11 @@ class ThemeEditor {
     const orgDescriptionInput = document.getElementById('themeOrgDescription');
     
     if (orgNameInput) {
-      orgNameInput.value = orgData.name || '';
+      orgNameInput.value = orgData.name || 'My Organization';
     }
     
     if (orgDescriptionInput) {
-      orgDescriptionInput.value = orgData.description || '';
+      orgDescriptionInput.value = orgData.description || 'Organization description';
     }
 
     // Update all color inputs
@@ -310,9 +355,25 @@ class ThemeEditor {
     
     // Update organization data
     const orgData = JSON.parse(localStorage.getItem(`org_${currentOrgId}`) || '{}');
-    orgData.name = formData.get('orgName') || orgData.name;
-    orgData.description = formData.get('orgDescription') || orgData.description;
+    const newName = formData.get('orgName');
+    const newDescription = formData.get('orgDescription');
+    
+    if (newName) {
+      orgData.name = newName;
+    }
+    if (newDescription) {
+      orgData.description = newDescription;
+    }
+    
     localStorage.setItem(`org_${currentOrgId}`, JSON.stringify(orgData));
+    
+    // Update the organizations list as well
+    const orgList = JSON.parse(localStorage.getItem('organizations_list') || '[]');
+    const orgIndex = orgList.findIndex(org => org.id === currentOrgId);
+    if (orgIndex !== -1 && newName) {
+      orgList[orgIndex].name = newName;
+      localStorage.setItem('organizations_list', JSON.stringify(orgList));
+    }
 
     // Update branding data with all colors
     const brandingData = {
