@@ -25,8 +25,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid #e0e0e0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-bottom: 1px solid var(--border);
+  background: var(--brand-gradient);
   color: white;
 }
 
@@ -79,14 +79,14 @@
 }
 
 .nav-btn:hover {
-  color: #333;
-  background-color: rgba(0, 123, 255, 0.05);
+  color: var(--text);
+  background-color: rgba(255, 90, 0, 0.05);
 }
 
 .nav-btn.active {
-  color: #007bff;
-  border-bottom-color: #007bff;
-  background-color: rgba(0, 123, 255, 0.05);
+  color: var(--brand-orange);
+  border-bottom-color: var(--brand-orange);
+  background-color: rgba(255, 90, 0, 0.05);
 }
 
 /* Content */
@@ -208,8 +208,8 @@
 .filter-input:focus,
 .filter-select:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+  border-color: var(--brand-orange);
+  box-shadow: 0 0 0 2px rgba(255, 90, 0, 0.1);
 }
 
 /* Tables */
@@ -325,12 +325,13 @@
 }
 
 .btn-primary {
-  background-color: #007bff;
+  background: var(--brand-gradient);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
 }
 
 .btn-secondary {
@@ -393,8 +394,8 @@
 }
 
 .file-upload-area:hover {
-  border-color: #007bff;
-  background-color: #f8f9ff;
+  border-color: var(--brand-orange);
+  background-color: var(--brand-light);
 }
 
 .upload-content {
@@ -407,7 +408,7 @@
 }
 
 .upload-link {
-  color: #007bff;
+  color: var(--brand-orange);
   text-decoration: underline;
   cursor: pointer;
 }
@@ -464,8 +465,8 @@
 
 .form-input:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+  border-color: var(--brand-orange);
+  box-shadow: 0 0 0 2px rgba(255, 90, 0, 0.1);
 }
 
 .import-actions {
@@ -501,7 +502,7 @@
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #007bff, #00d4ff);
+  background: var(--brand-gradient);
   width: 0%;
   transition: width 0.3s ease;
 }
@@ -649,7 +650,7 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--brand-gradient);
   display: flex;
   align-items: center;
   justify-content: center;

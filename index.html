@@ -262,12 +262,54 @@
                 <input type="color" id="themePrimaryColor" name="primaryColor" value="#ff5a00">
                 <input type="text" id="themePrimaryColorText" value="#ff5a00" placeholder="#ff5a00">
               </div>
+              <div class="color-preview" id="primaryColorPreview">
+                <span class="preview-label">Primary</span>
+                <div class="preview-swatch primary-swatch"></div>
+              </div>
             </div>
             <div class="form-group">
               <label for="themeSecondaryColor">Secondary Color</label>
               <div class="color-input-group">
                 <input type="color" id="themeSecondaryColor" name="secondaryColor" value="#e53e3e">
                 <input type="text" id="themeSecondaryColorText" value="#e53e3e" placeholder="#e53e3e">
+              </div>
+              <div class="color-preview" id="secondaryColorPreview">
+                <span class="preview-label">Secondary</span>
+                <div class="preview-swatch secondary-swatch"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="color-grid">
+            <div class="form-group">
+              <label for="themeBackgroundColor">Background Color</label>
+              <div class="color-input-group">
+                <input type="color" id="themeBackgroundColor" name="backgroundColor" value="#f8fafc">
+                <input type="text" id="themeBackgroundColorText" value="#f8fafc" placeholder="#f8fafc">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="themeTextColor">Text Color</label>
+              <div class="color-input-group">
+                <input type="color" id="themeTextColor" name="textColor" value="#1a202c">
+                <input type="text" id="themeTextColorText" value="#1a202c" placeholder="#1a202c">
+              </div>
+            </div>
+          </div>
+          
+          <div class="color-grid">
+            <div class="form-group">
+              <label for="themeBorderColor">Border Color</label>
+              <div class="color-input-group">
+                <input type="color" id="themeBorderColor" name="borderColor" value="#e2e8f0">
+                <input type="text" id="themeBorderColorText" value="#e2e8f0" placeholder="#e2e8f0">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="themeMutedColor">Muted Text Color</label>
+              <div class="color-input-group">
+                <input type="color" id="themeMutedColor" name="mutedColor" value="#718096">
+                <input type="text" id="themeMutedColorText" value="#718096" placeholder="#718096">
               </div>
             </div>
           </div>
@@ -294,6 +336,74 @@
               <option value="16" selected>Medium (16px)</option>
               <option value="18">Large (18px)</option>
             </select>
+          </div>
+          <div class="font-preview" id="fontPreview">
+            <h4>Preview Text</h4>
+            <p>This is how your text will look with the selected font and size.</p>
+          </div>
+        </div>
+
+        <div class="customization-section">
+          <h3>Live Preview</h3>
+          <div class="theme-preview">
+            <div class="preview-header">
+              <h4>Header Preview</h4>
+              <p>This shows how your header will look</p>
+            </div>
+            <div class="preview-buttons">
+              <button class="preview-btn primary">Primary Button</button>
+              <button class="preview-btn secondary">Secondary Button</button>
+            </div>
+            <div class="preview-card">
+              <h5>Card Example</h5>
+              <p>This shows how text and borders will appear with your chosen colors.</p>
+              <div class="preview-badge">Sample Badge</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="customization-section">
+          <h3>Spacing & Layout</h3>
+          <div class="color-grid">
+            <div class="form-group">
+              <label for="themeBorderRadius">Border Radius</label>
+              <select id="themeBorderRadius" name="borderRadius">
+                <option value="4">Small (4px)</option>
+                <option value="8" selected>Medium (8px)</option>
+                <option value="12">Large (12px)</option>
+                <option value="16">Extra Large (16px)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="themeSpacing">Spacing Scale</label>
+              <select id="themeSpacing" name="spacing">
+                <option value="compact">Compact</option>
+                <option value="normal" selected>Normal</option>
+                <option value="relaxed">Relaxed</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="customization-section">
+          <h3>Shadows & Effects</h3>
+          <div class="color-grid">
+            <div class="form-group">
+              <label for="themeShadowIntensity">Shadow Intensity</label>
+              <select id="themeShadowIntensity" name="shadowIntensity">
+                <option value="light">Light</option>
+                <option value="normal" selected>Normal</option>
+                <option value="strong">Strong</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="themeHoverEffects">Hover Effects</label>
+              <select id="themeHoverEffects" name="hoverEffects">
+                <option value="subtle">Subtle</option>
+                <option value="normal" selected>Normal</option>
+                <option value="dramatic">Dramatic</option>
+              </select>
+            </div>
           </div>
         </div>
 

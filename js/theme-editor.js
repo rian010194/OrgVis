@@ -51,33 +51,47 @@ class ThemeEditor {
   }
 
   setupColorInputSync() {
-    const primaryColorInput = document.getElementById('themePrimaryColor');
-    const primaryColorText = document.getElementById('themePrimaryColorText');
-    const secondaryColorInput = document.getElementById('themeSecondaryColor');
-    const secondaryColorText = document.getElementById('themeSecondaryColorText');
+    // Define all color input pairs
+    const colorInputs = [
+      { color: 'themePrimaryColor', text: 'themePrimaryColorText' },
+      { color: 'themeSecondaryColor', text: 'themeSecondaryColorText' },
+      { color: 'themeBackgroundColor', text: 'themeBackgroundColorText' },
+      { color: 'themeTextColor', text: 'themeTextColorText' },
+      { color: 'themeBorderColor', text: 'themeBorderColorText' },
+      { color: 'themeMutedColor', text: 'themeMutedColorText' }
+    ];
 
-    if (primaryColorInput && primaryColorText) {
-      primaryColorInput.addEventListener('input', (e) => {
-        primaryColorText.value = e.target.value;
-      });
-      
-      primaryColorText.addEventListener('input', (e) => {
-        if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
-          primaryColorInput.value = e.target.value;
-        }
-      });
+    colorInputs.forEach(({ color, text }) => {
+      const colorInput = document.getElementById(color);
+      const textInput = document.getElementById(text);
+
+      if (colorInput && textInput) {
+        colorInput.addEventListener('input', (e) => {
+          textInput.value = e.target.value;
+          this.updateColorPreview(color, e.target.value);
+          this.previewThemeChanges();
+        });
+        
+        textInput.addEventListener('input', (e) => {
+          if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+            colorInput.value = e.target.value;
+            this.updateColorPreview(color, e.target.value);
+            this.previewThemeChanges();
+          }
+        });
+      }
+    });
+
+    // Setup real-time title/description updates
+    const orgNameInput = document.getElementById('themeOrgName');
+    const orgDescriptionInput = document.getElementById('themeOrgDescription');
+
+    if (orgNameInput) {
+      orgNameInput.addEventListener('input', () => this.previewThemeChanges());
     }
 
-    if (secondaryColorInput && secondaryColorText) {
-      secondaryColorInput.addEventListener('input', (e) => {
-        secondaryColorText.value = e.target.value;
-      });
-      
-      secondaryColorText.addEventListener('input', (e) => {
-        if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
-          secondaryColorInput.value = e.target.value;
-        }
-      });
+    if (orgDescriptionInput) {
+      orgDescriptionInput.addEventListener('input', () => this.previewThemeChanges());
     }
   }
 
@@ -116,19 +130,26 @@ class ThemeEditor {
       orgDescriptionInput.value = orgData.description || '';
     }
 
-    // Update color inputs
-    const primaryColorInput = document.getElementById('themePrimaryColor');
-    const primaryColorText = document.getElementById('themePrimaryColorText');
-    const secondaryColorInput = document.getElementById('themeSecondaryColor');
-    const secondaryColorText = document.getElementById('themeSecondaryColorText');
+    // Update all color inputs
+    const colorMappings = [
+      { key: 'primaryColor', input: 'themePrimaryColor', text: 'themePrimaryColorText', default: '#ff5a00' },
+      { key: 'secondaryColor', input: 'themeSecondaryColor', text: 'themeSecondaryColorText', default: '#e53e3e' },
+      { key: 'backgroundColor', input: 'themeBackgroundColor', text: 'themeBackgroundColorText', default: '#f8fafc' },
+      { key: 'textColor', input: 'themeTextColor', text: 'themeTextColorText', default: '#1a202c' },
+      { key: 'borderColor', input: 'themeBorderColor', text: 'themeBorderColorText', default: '#e2e8f0' },
+      { key: 'mutedColor', input: 'themeMutedColor', text: 'themeMutedColorText', default: '#718096' }
+    ];
 
-    const primaryColor = brandingData.primaryColor || '#ff5a00';
-    const secondaryColor = brandingData.secondaryColor || '#e53e3e';
-
-    if (primaryColorInput) primaryColorInput.value = primaryColor;
-    if (primaryColorText) primaryColorText.value = primaryColor;
-    if (secondaryColorInput) secondaryColorInput.value = secondaryColor;
-    if (secondaryColorText) secondaryColorText.value = secondaryColor;
+    colorMappings.forEach(({ key, input, text, default: defaultValue }) => {
+      const colorValue = brandingData[key] || defaultValue;
+      const colorInput = document.getElementById(input);
+      const textInput = document.getElementById(text);
+      
+      if (colorInput) colorInput.value = colorValue;
+      if (textInput) textInput.value = colorValue;
+      
+      this.updateColorPreview(input, colorValue);
+    });
 
     // Update font family and size
     const fontFamilySelect = document.getElementById('themeFontFamily');
@@ -165,6 +186,117 @@ class ThemeEditor {
     }
   }
 
+  updateColorPreview(inputId, colorValue) {
+    // Update color preview swatches
+    const previewId = inputId.replace('theme', '').replace('Color', '') + 'ColorPreview';
+    const previewElement = document.getElementById(previewId);
+    if (previewElement) {
+      const swatch = previewElement.querySelector('.preview-swatch');
+      if (swatch) {
+        swatch.style.backgroundColor = colorValue;
+      }
+    }
+  }
+
+  previewThemeChanges() {
+    // Get current form values
+    const orgName = document.getElementById('themeOrgName')?.value || '';
+    const orgDescription = document.getElementById('themeOrgDescription')?.value || '';
+    const primaryColor = document.getElementById('themePrimaryColor')?.value || '#ff5a00';
+    const secondaryColor = document.getElementById('themeSecondaryColor')?.value || '#e53e3e';
+    const backgroundColor = document.getElementById('themeBackgroundColor')?.value || '#f8fafc';
+    const textColor = document.getElementById('themeTextColor')?.value || '#1a202c';
+    const borderColor = document.getElementById('themeBorderColor')?.value || '#e2e8f0';
+    const mutedColor = document.getElementById('themeMutedColor')?.value || '#718096';
+
+    // Update header immediately
+    const orgNameElement = document.getElementById('orgName');
+    const orgDescriptionElement = document.getElementById('orgDescription');
+    
+    if (orgNameElement && orgName) {
+      orgNameElement.textContent = orgName;
+    }
+    
+    if (orgDescriptionElement && orgDescription) {
+      orgDescriptionElement.textContent = orgDescription;
+    }
+
+    // Apply color previews to the main interface
+    document.documentElement.style.setProperty('--primary-color', primaryColor);
+    document.documentElement.style.setProperty('--secondary-color', secondaryColor);
+    document.documentElement.style.setProperty('--brand-orange', primaryColor);
+    document.documentElement.style.setProperty('--brand-red', secondaryColor);
+    document.documentElement.style.setProperty('--brand-gradient', 
+      `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`);
+    document.documentElement.style.setProperty('--surface', '#ffffff');
+    document.documentElement.style.setProperty('--border', borderColor);
+    document.documentElement.style.setProperty('--text', textColor);
+    document.documentElement.style.setProperty('--muted', mutedColor);
+    
+    // Update body background
+    document.body.style.background = backgroundColor;
+
+    // Update live preview in theme editor
+    this.updateLivePreview({
+      primaryColor,
+      secondaryColor,
+      backgroundColor,
+      textColor,
+      borderColor,
+      mutedColor
+    });
+  }
+
+  updateLivePreview(colors) {
+    // Update preview header background
+    const previewHeader = document.querySelector('.preview-header');
+    if (previewHeader) {
+      previewHeader.style.background = `linear-gradient(135deg, ${colors.primaryColor} 0%, ${colors.secondaryColor} 100%)`;
+    }
+
+    // Update preview buttons
+    const primaryBtn = document.querySelector('.preview-btn.primary');
+    if (primaryBtn) {
+      primaryBtn.style.background = `linear-gradient(135deg, ${colors.primaryColor} 0%, ${colors.secondaryColor} 100%)`;
+    }
+
+    const secondaryBtn = document.querySelector('.preview-btn.secondary');
+    if (secondaryBtn) {
+      secondaryBtn.style.color = colors.primaryColor;
+      secondaryBtn.style.borderColor = colors.primaryColor;
+      secondaryBtn.style.background = `rgba(${this.hexToRgb(colors.primaryColor)}, 0.1)`;
+    }
+
+    // Update preview card
+    const previewCard = document.querySelector('.preview-card');
+    if (previewCard) {
+      previewCard.style.borderColor = colors.borderColor;
+    }
+
+    const previewCardText = previewCard?.querySelector('h5');
+    if (previewCardText) {
+      previewCardText.style.color = colors.textColor;
+    }
+
+    const previewCardMuted = previewCard?.querySelector('p');
+    if (previewCardMuted) {
+      previewCardMuted.style.color = colors.mutedColor;
+    }
+
+    // Update preview badge
+    const previewBadge = document.querySelector('.preview-badge');
+    if (previewBadge) {
+      previewBadge.style.background = colors.primaryColor;
+    }
+  }
+
+  hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? 
+      `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : 
+      '255, 90, 0';
+  }
+
   handleThemeSubmit(e) {
     e.preventDefault();
     
@@ -182,10 +314,14 @@ class ThemeEditor {
     orgData.description = formData.get('orgDescription') || orgData.description;
     localStorage.setItem(`org_${currentOrgId}`, JSON.stringify(orgData));
 
-    // Update branding data
+    // Update branding data with all colors
     const brandingData = {
       primaryColor: formData.get('primaryColor'),
       secondaryColor: formData.get('secondaryColor'),
+      backgroundColor: formData.get('backgroundColor'),
+      textColor: formData.get('textColor'),
+      borderColor: formData.get('borderColor'),
+      mutedColor: formData.get('mutedColor'),
       fontFamily: formData.get('fontFamily'),
       fontSize: formData.get('fontSize'),
       logo: null
@@ -248,11 +384,27 @@ class ThemeEditor {
       }
     }
 
-    // Apply CSS custom properties
+    // Apply all CSS custom properties
     document.documentElement.style.setProperty('--primary-color', brandingData.primaryColor);
     document.documentElement.style.setProperty('--secondary-color', brandingData.secondaryColor);
+    document.documentElement.style.setProperty('--brand-orange', brandingData.primaryColor);
+    document.documentElement.style.setProperty('--brand-red', brandingData.secondaryColor);
     document.documentElement.style.setProperty('--brand-gradient', 
       `linear-gradient(135deg, ${brandingData.primaryColor} 0%, ${brandingData.secondaryColor} 100%)`);
+    
+    // Apply additional color properties
+    if (brandingData.backgroundColor) {
+      document.body.style.background = brandingData.backgroundColor;
+    }
+    if (brandingData.textColor) {
+      document.documentElement.style.setProperty('--text', brandingData.textColor);
+    }
+    if (brandingData.borderColor) {
+      document.documentElement.style.setProperty('--border', brandingData.borderColor);
+    }
+    if (brandingData.mutedColor) {
+      document.documentElement.style.setProperty('--muted', brandingData.mutedColor);
+    }
 
     // Apply font family
     const fontFamily = this.getFontFamily(brandingData.fontFamily);

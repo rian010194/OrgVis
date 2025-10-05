@@ -176,17 +176,17 @@ header .logo {
     justify-content: center;
     border-radius: 10px;
     font-weight: 600;
-    background: rgba(108, 117, 125, 0.08);
-    border: 2px solid #6c757d;
-    color: #6c757d;
+    background: rgba(255, 90, 0, 0.08);
+    border: 2px solid var(--brand-orange);
+    color: var(--brand-orange);
     transition: all 0.2s ease;
   }
   
   .logout-button:hover {
-    background: #6c757d;
+    background: var(--brand-orange);
     color: #fff;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.25);
+    box-shadow: 0 4px 12px rgba(255, 90, 0, 0.25);
   }
   
   .logout-icon {
@@ -243,22 +243,25 @@ header .logo {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background: linear-gradient(135deg, #9333ea 0%, #c084fc 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
+  padding: 0.6rem 1rem;
+  border: 2px solid var(--brand-orange);
+  background: rgba(255, 90, 0, 0.1);
+  color: var(--brand-orange);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(147, 51, 234, 0.2);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(255, 90, 0, 0.1);
 }
 
-.theme-edit-button:hover {
+.theme-edit-button:hover,
+.theme-edit-button.active {
+  background: var(--brand-gradient);
+  color: #fff;
+  border-color: transparent;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(147, 51, 234, 0.3);
-  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  box-shadow: var(--shadow);
 }
 
 .theme-edit-button:active {
@@ -295,8 +298,8 @@ header .logo {
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid #e0e0e0;
-  background: linear-gradient(135deg, #9333ea 0%, #c084fc 100%);
+  border-bottom: 1px solid var(--border);
+  background: var(--brand-gradient);
   color: white;
 }
 
@@ -378,8 +381,8 @@ header .logo {
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #9333ea;
-  box-shadow: 0 0 0 2px rgba(147, 51, 234, 0.1);
+  border-color: var(--brand-orange);
+  box-shadow: 0 0 0 2px rgba(255, 90, 0, 0.1);
 }
 
 .color-grid {
@@ -407,6 +410,126 @@ header .logo {
   flex: 1;
 }
 
+/* Color Preview Swatches */
+.color-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.preview-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--muted);
+  min-width: 60px;
+}
+
+.preview-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.primary-swatch {
+  background: var(--brand-orange);
+}
+
+.secondary-swatch {
+  background: var(--brand-red);
+}
+
+/* Live Preview Styles */
+.theme-preview {
+  background: #f8f9fa;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.preview-header {
+  background: var(--brand-gradient);
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.preview-header h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+}
+
+.preview-header p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.9rem;
+}
+
+.preview-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.preview-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: default;
+  font-size: 0.9rem;
+}
+
+.preview-btn.primary {
+  background: var(--brand-gradient);
+  color: white;
+}
+
+.preview-btn.secondary {
+  background: rgba(255, 90, 0, 0.1);
+  color: var(--brand-orange);
+  border: 2px solid var(--brand-orange);
+}
+
+.preview-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.preview-card h5 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.preview-card p {
+  margin: 0 0 1rem 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.preview-badge {
+  display: inline-block;
+  background: var(--brand-orange);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
 .logo-upload {
   border: 2px dashed #ddd;
   border-radius: 8px;
@@ -416,7 +539,7 @@ header .logo {
 }
 
 .logo-upload:hover {
-  border-color: #9333ea;
+  border-color: var(--brand-orange);
 }
 
 .logo-preview {
@@ -452,13 +575,13 @@ header .logo {
 }
 
 .btn-primary {
-  background: #9333ea;
+  background: var(--brand-gradient);
   color: white;
 }
 
 .btn-primary:hover {
-  background: #7c3aed;
   transform: translateY(-1px);
+  box-shadow: var(--shadow);
 }
 
 .btn-secondary {
@@ -901,15 +1024,15 @@ body.detail-expanded .map-view {
 }
 
 .user-management-button {
-  border: 2px solid #007bff;
-  background: rgba(0, 123, 255, 0.1);
-  color: #007bff;
+  border: 2px solid var(--brand-orange);
+  background: rgba(255, 90, 0, 0.1);
+  color: var(--brand-orange);
   border-radius: 12px;
   padding: 0.6rem 1rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(255, 90, 0, 0.1);
   font-size: 0.9rem;
   display: flex;
   align-items: center;
@@ -918,12 +1041,13 @@ body.detail-expanded .map-view {
   white-space: nowrap;
 }
 
-.user-management-button:hover {
-  background: #007bff;
+.user-management-button:hover,
+.user-management-button.active {
+  background: var(--brand-gradient);
   color: #fff;
   border-color: transparent;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.25);
+  box-shadow: var(--shadow);
 }
 
 .user-icon {
@@ -937,15 +1061,15 @@ body.detail-expanded .map-view {
 }
 
 .logout-button {
-  border: 2px solid #6c757d;
-  background: rgba(108, 117, 125, 0.1);
-  color: #6c757d;
+  border: 2px solid var(--brand-orange);
+  background: rgba(255, 90, 0, 0.1);
+  color: var(--brand-orange);
   border-radius: 12px;
   padding: 0.6rem 1rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(108, 117, 125, 0.1);
+  box-shadow: 0 2px 8px rgba(255, 90, 0, 0.1);
   font-size: 0.9rem;
   display: flex;
   align-items: center;
@@ -954,11 +1078,11 @@ body.detail-expanded .map-view {
 }
 
 .logout-button:hover {
-  background: #6c757d;
+  background: var(--brand-gradient);
   color: #fff;
   border-color: transparent;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.25);
+  box-shadow: var(--shadow);
 }
 
 .logout-icon {
@@ -1959,6 +2083,16 @@ button.danger {
     justify-content: center;
     min-height: 52px;
     border-radius: 10px;
+    background: rgba(255, 90, 0, 0.08);
+    border: 2px solid var(--brand-orange);
+    color: var(--brand-orange);
+  }
+  
+  .user-management-button:hover {
+    background: var(--brand-orange);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 90, 0, 0.25);
   }
   
   .admin-icon {
@@ -2065,6 +2199,9 @@ button.danger {
     min-height: 48px;
     border-radius: 8px;
     justify-content: center;
+    background: rgba(255, 90, 0, 0.08);
+    border: 2px solid var(--brand-orange);
+    color: var(--brand-orange);
   }
   
   .admin-icon {
@@ -2083,6 +2220,9 @@ button.danger {
     min-height: 48px;
     border-radius: 8px;
     justify-content: center;
+    background: rgba(255, 90, 0, 0.08);
+    border: 2px solid var(--brand-orange);
+    color: var(--brand-orange);
   }
   
   .logout-icon {
@@ -2939,6 +3079,39 @@ button.danger {
   background: #fafafa;
   font-size: 1rem;
   line-height: 1.5;
+}
+
+/* Color previews */
+.color-preview {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fafafa;
+}
+
+.preview-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.preview-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.primary-swatch {
+  background: var(--brand-orange);
+}
+
+.secondary-swatch {
+  background: var(--brand-red);
 }
 
 /* Main App Styles */
