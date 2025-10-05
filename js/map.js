@@ -970,16 +970,55 @@ const OrgMap = (() => {
     if (!words.length) {
       return;
     }
+    
     let line = [];
     let lineNumber = 0;
-    const lineHeight = 1.1;
+    const lineHeight = 1.2; // Increased line height for better spacing
+    const maxLines = 2; // Limit to 2 lines to prevent overflow
+    
     let tspan = textSelection.append("tspan").attr("x", 0).attr("dy", "0em");
+    
     words.forEach((word) => {
-      line.push(word);
+      // Check if single word is too long and needs to be broken
+      tspan.text(word);
+      if (tspan.node().getComputedTextLength() > width) {
+        // Break long words by characters
+        const chars = word.split('');
+        let currentWord = '';
+        for (const char of chars) {
+          const testWord = currentWord + char;
+          tspan.text(testWord);
+          if (tspan.node().getComputedTextLength() > width && currentWord.length > 0) {
+            line.push(currentWord);
+            tspan.text(line.join(" "));
+            if (lineNumber >= maxLines - 1) {
+              tspan.text(line.join(" ") + "...");
+              return; // Stop processing if we hit max lines
+            }
+            line = [];
+            lineNumber += 1;
+            tspan = textSelection
+              .append("tspan")
+              .attr("x", 0)
+              .attr("dy", lineHeight + "em");
+            currentWord = char;
+          } else {
+            currentWord = testWord;
+          }
+        }
+        line.push(currentWord);
+      } else {
+        line.push(word);
+      }
+      
       tspan.text(line.join(" "));
       if (tspan.node().getComputedTextLength() > width && line.length > 1) {
         line.pop();
         tspan.text(line.join(" "));
+        if (lineNumber >= maxLines - 1) {
+          tspan.text(line.join(" ") + "...");
+          return; // Stop processing if we hit max lines
+        }
         line = [word];
         lineNumber += 1;
         tspan = textSelection
@@ -989,10 +1028,16 @@ const OrgMap = (() => {
           .text(word);
       }
     });
+    
     const totalLines = lineNumber + 1;
+    
+    // Center the text vertically within the node
     textSelection
       .selectAll("tspan")
-      .attr("dy", (_, index) => (index - (totalLines - 1) / 2) * lineHeight + "em");
+      .attr("dy", (_, index) => {
+        const offset = (index - (totalLines - 1) / 2) * lineHeight;
+        return index === 0 ? offset + "em" : lineHeight + "em";
+      });
   };
 
   return {
