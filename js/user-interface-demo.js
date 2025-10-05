@@ -223,7 +223,7 @@ class UserInterfaceDemo {
     
     if (roleCanvas) {
       // Set canvas size
-      roleCanvas.width = 350;
+      roleCanvas.width = 700;
       roleCanvas.height = 250;
       
       const ctx = roleCanvas.getContext('2d');
@@ -234,15 +234,15 @@ class UserInterfaceDemo {
       const labels = ['Medlem', 'Teamledare', 'Avdelningsadmin', 'Org Admin', 'Super Admin'];
       const colors = ['#6c757d', '#20c997', '#ffc107', '#fd7e14', '#dc3545'];
       
-      const barWidth = 50; // Fixed bar width
-      const barSpacing = 20; // Space between bars
+      const barWidth = 80; // Wider bars for better visibility
+      const barSpacing = 40; // More space between bars
       const maxValue = Math.max(...data);
       const chartHeight = roleCanvas.height - 80; // More space for labels
       const chartStartY = 20;
       
       data.forEach((value, index) => {
         const barHeight = (value / maxValue) * chartHeight;
-        const x = index * (barWidth + barSpacing) + 30;
+        const x = index * (barWidth + barSpacing) + 60;
         const y = chartStartY + (chartHeight - barHeight);
         
         // Draw bar
@@ -269,7 +269,7 @@ class UserInterfaceDemo {
     
     if (levelCanvas) {
       // Set canvas size
-      levelCanvas.width = 350;
+      levelCanvas.width = 700;
       levelCanvas.height = 250;
       
       const ctx = levelCanvas.getContext('2d');
@@ -277,9 +277,9 @@ class UserInterfaceDemo {
       
       // Simple line chart with better spacing
       const data = [5, 25, 150, 400, 600, 200, 50]; // levels 1-7
-      const chartWidth = levelCanvas.width - 60; // Leave space for labels
+      const chartWidth = levelCanvas.width - 120; // Leave more space for labels
       const chartHeight = levelCanvas.height - 80;
-      const chartStartX = 40;
+      const chartStartX = 80;
       const chartStartY = 20;
       
       const stepX = chartWidth / (data.length - 1);
