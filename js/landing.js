@@ -533,6 +533,13 @@ const LandingPage = (() => {
       mainApp.classList.remove('hidden');
     }
     
+    // Refresh header with current organization data
+    setTimeout(() => {
+      if (window.ThemeEditor && window.ThemeEditor.refreshHeader) {
+        window.ThemeEditor.refreshHeader();
+      }
+    }, 100);
+    
     // Initialize the main app
     currentState = 'app';
     

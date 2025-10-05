@@ -68,14 +68,15 @@
 .nav-btn {
   background: none;
   border: none;
-  padding: 0.75rem 1rem;
+  padding: 0.875rem 1.125rem;
   cursor: pointer;
   color: #666;
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   font-weight: 500;
   transition: all 0.2s;
   white-space: nowrap;
   border-bottom: 2px solid transparent;
+  line-height: 1.4;
 }
 
 .nav-btn:hover {
@@ -92,6 +93,7 @@
 /* Content */
 .user-panel-content {
   padding: 1.5rem;
+  line-height: 1.6;
 }
 
 .view-content {
@@ -120,16 +122,18 @@
 }
 
 .stat-card h4 {
-  margin: 0 0 0.5rem 0;
-  font-size: 0.875rem;
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
   color: #666;
   font-weight: 500;
+  line-height: 1.4;
 }
 
 .stat-number {
   font-size: 2rem;
   font-weight: 700;
   color: #333;
+  line-height: 1.2;
 }
 
 .dashboard-charts {
@@ -149,8 +153,10 @@
 
 .chart-container h4 {
   margin: 0 0 1rem 0;
-  font-size: 1rem;
+  font-size: 1.125rem;
   color: #333;
+  line-height: 1.4;
+  font-weight: 600;
 }
 
 .chart-container canvas {
@@ -171,8 +177,10 @@
 
 .view-header h4 {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.375rem;
   color: #333;
+  line-height: 1.3;
+  font-weight: 600;
 }
 
 .view-actions {
@@ -228,9 +236,10 @@
 .permissions-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   table-layout: fixed;
   min-width: 700px; /* Ensure minimum table width */
+  line-height: 1.5;
 }
 
 .users-table th:nth-child(1),
@@ -249,21 +258,24 @@
 .users-table th,
 .permissions-table th {
   background: #f8f9fa;
-  padding: 0.75rem;
+  padding: 0.875rem 0.75rem;
   text-align: left;
   font-weight: 600;
   color: #333;
   border-bottom: 1px solid #e0e0e0;
+  line-height: 1.4;
+  font-size: 0.9375rem;
 }
 
 .users-table td,
 .permissions-table td {
-  padding: 0.75rem;
+  padding: 0.875rem 0.75rem;
   border-bottom: 1px solid #f0f0f0;
   vertical-align: middle;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  line-height: 1.5;
 }
 
 .users-table tr:hover,
@@ -274,11 +286,12 @@
 /* Badges */
 .role-badge {
   display: inline-block;
-  padding: 0.25rem 0.5rem;
+  padding: 0.375rem 0.625rem;
   border-radius: 12px;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   color: white;
+  line-height: 1.2;
 }
 
 .role-badge.super_admin { background-color: #dc3545; }
@@ -289,10 +302,11 @@
 
 .status-badge {
   display: inline-block;
-  padding: 0.25rem 0.5rem;
+  padding: 0.375rem 0.625rem;
   border-radius: 12px;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 500;
+  line-height: 1.2;
 }
 
 .status-badge.active {
@@ -308,15 +322,16 @@
 /* Buttons */
 .btn {
   display: inline-block;
-  padding: 0.5rem 1rem;
+  padding: 0.625rem 1.125rem;
   border: none;
-  border-radius: 4px;
-  font-size: 0.875rem;
+  border-radius: 6px;
+  font-size: 0.9375rem;
   font-weight: 500;
   text-align: center;
   cursor: pointer;
   transition: all 0.2s;
   text-decoration: none;
+  line-height: 1.4;
 }
 
 .btn:disabled {
@@ -370,17 +385,21 @@
 }
 
 .import-info h5 {
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.75rem 0;
   color: #333;
+  font-size: 1.125rem;
+  line-height: 1.4;
+  font-weight: 600;
 }
 
 .import-info ul {
-  margin: 0.5rem 0 0 1rem;
+  margin: 0.75rem 0 0 1rem;
   color: #666;
+  line-height: 1.5;
 }
 
 .import-info li {
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.375rem;
 }
 
 .file-upload-area {
@@ -450,17 +469,20 @@
 
 .option-group label {
   display: block;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.375rem;
   font-weight: 500;
   color: #333;
+  font-size: 0.9375rem;
+  line-height: 1.4;
 }
 
 .form-input {
   width: 100%;
-  padding: 0.5rem;
+  padding: 0.625rem 0.75rem;
   border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 0.875rem;
+  border-radius: 6px;
+  font-size: 0.9375rem;
+  line-height: 1.4;
 }
 
 .form-input:focus {
@@ -599,6 +621,9 @@
 .department-header h5 {
   margin: 0;
   color: #333;
+  font-size: 1.125rem;
+  line-height: 1.3;
+  font-weight: 600;
 }
 
 .department-code {
@@ -613,7 +638,8 @@
 .department-content p {
   margin: 0 0 0.75rem 0;
   color: #666;
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
 }
 
 .department-stats {
@@ -660,14 +686,18 @@
 }
 
 .profile-details h5 {
-  margin: 0 0 0.25rem 0;
+  margin: 0 0 0.375rem 0;
   color: #333;
+  font-size: 1.125rem;
+  line-height: 1.3;
+  font-weight: 600;
 }
 
 .profile-details p {
-  margin: 0 0 0.25rem 0;
+  margin: 0 0 0.375rem 0;
   color: #666;
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
 }
 
 .profile-details p:last-child {

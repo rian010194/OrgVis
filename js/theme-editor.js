@@ -54,19 +54,32 @@ class ThemeEditor {
   initializeHeader() {
     // Initialize header with current organization data
     const currentOrgId = localStorage.getItem('current_organization_id');
+    console.log('ThemeEditor: Initializing header with org ID:', currentOrgId);
+    
     if (currentOrgId) {
       const orgData = JSON.parse(localStorage.getItem(`org_${currentOrgId}`) || '{}');
       const brandingData = JSON.parse(localStorage.getItem(`org_branding_${currentOrgId}`) || '{}');
+      
+      console.log('ThemeEditor: Org data:', orgData);
+      console.log('ThemeEditor: Branding data:', brandingData);
       
       // Update header
       const orgNameElement = document.getElementById('orgName');
       const orgDescriptionElement = document.getElementById('orgDescription');
       
+      console.log('ThemeEditor: Header elements found:', {
+        orgName: !!orgNameElement,
+        orgDescription: !!orgDescriptionElement
+      });
+      
       if (orgNameElement && orgData.name) {
+        console.log('ThemeEditor: Updating org name from', orgNameElement.textContent, 'to', orgData.name);
         orgNameElement.textContent = orgData.name;
+        console.log('ThemeEditor: Header org name is now:', orgNameElement.textContent);
       }
       
       if (orgDescriptionElement && orgData.description) {
+        console.log('ThemeEditor: Updating org description from', orgDescriptionElement.textContent, 'to', orgData.description);
         orgDescriptionElement.textContent = orgData.description;
       }
 
@@ -78,11 +91,70 @@ class ThemeEditor {
       // If no current org ID, try to set it to demo
       const demoOrgId = 'demo_org';
       const demoData = JSON.parse(localStorage.getItem(`org_${demoOrgId}`) || '{}');
+      console.log('ThemeEditor: No current org ID, checking demo data:', demoData);
       if (demoData.name) {
         localStorage.setItem('current_organization_id', demoOrgId);
         this.initializeHeader();
       }
     }
+  }
+
+  // Public method to refresh header from external calls
+  refreshHeader() {
+    console.log('ThemeEditor: Refreshing header...');
+    this.initializeHeader();
+  }
+
+  // Update header in real-time as user types
+  updateHeaderInRealTime() {
+    const orgNameInput = document.getElementById('themeOrgName');
+    const orgDescriptionInput = document.getElementById('themeOrgDescription');
+    const orgNameElement = document.getElementById('orgName');
+    const orgDescriptionElement = document.getElementById('orgDescription');
+    
+    if (orgNameInput && orgNameElement) {
+      const newName = orgNameInput.value || 'Organization Chart';
+      console.log('ThemeEditor: Real-time update - changing org name to:', newName);
+      orgNameElement.textContent = newName;
+    }
+    
+    if (orgDescriptionInput && orgDescriptionElement) {
+      const newDescription = orgDescriptionInput.value || 'Visualize and manage your organization structure';
+      console.log('ThemeEditor: Real-time update - changing org description to:', newDescription);
+      orgDescriptionElement.textContent = newDescription;
+    }
+  }
+
+  // Debug method to check current state
+  debugState() {
+    const currentOrgId = localStorage.getItem('current_organization_id');
+    const orgData = currentOrgId ? JSON.parse(localStorage.getItem(`org_${currentOrgId}`) || '{}') : {};
+    const brandingData = currentOrgId ? JSON.parse(localStorage.getItem(`org_branding_${currentOrgId}`) || '{}') : {};
+    
+    console.log('ThemeEditor Debug State:');
+    console.log('- Current Org ID:', currentOrgId);
+    console.log('- Org Data:', orgData);
+    console.log('- Branding Data:', brandingData);
+    
+    const orgNameElement = document.getElementById('orgName');
+    const orgDescriptionElement = document.getElementById('orgDescription');
+    
+    console.log('- Header Elements:', {
+      orgName: orgNameElement,
+      orgDescription: orgDescriptionElement
+    });
+    
+    console.log('- Current Header Text:', {
+      orgName: orgNameElement ? orgNameElement.textContent : 'NOT FOUND',
+      orgDescription: orgDescriptionElement ? orgDescriptionElement.textContent : 'NOT FOUND'
+    });
+    
+    // Check for any other elements that might contain "Demo"
+    const allElements = document.querySelectorAll('*');
+    const demoElements = Array.from(allElements).filter(el => 
+      el.textContent && el.textContent.includes('Demo') && el.textContent.trim() === 'Demo'
+    );
+    console.log('- Elements containing "Demo":', demoElements);
   }
 
   setupColorInputSync() {
@@ -122,11 +194,19 @@ class ThemeEditor {
     const orgDescriptionInput = document.getElementById('themeOrgDescription');
 
     if (orgNameInput) {
-      orgNameInput.addEventListener('input', () => this.previewThemeChanges());
+      orgNameInput.addEventListener('input', () => {
+        this.previewThemeChanges();
+        // Also update the header immediately
+        this.updateHeaderInRealTime();
+      });
     }
 
     if (orgDescriptionInput) {
-      orgDescriptionInput.addEventListener('input', () => this.previewThemeChanges());
+      orgDescriptionInput.addEventListener('input', () => {
+        this.previewThemeChanges();
+        // Also update the header immediately
+        this.updateHeaderInRealTime();
+      });
     }
   }
 
@@ -254,16 +334,20 @@ class ThemeEditor {
     const borderColor = document.getElementById('themeBorderColor')?.value || '#e2e8f0';
     const mutedColor = document.getElementById('themeMutedColor')?.value || '#718096';
 
-    // Update header immediately
+    // Update header immediately with real-time preview
     const orgNameElement = document.getElementById('orgName');
     const orgDescriptionElement = document.getElementById('orgDescription');
     
-    if (orgNameElement && orgName) {
-      orgNameElement.textContent = orgName;
+    if (orgNameElement) {
+      const displayName = orgName || 'Organization Chart';
+      console.log('ThemeEditor: Preview update - changing org name to:', displayName);
+      orgNameElement.textContent = displayName;
     }
     
-    if (orgDescriptionElement && orgDescription) {
-      orgDescriptionElement.textContent = orgDescription;
+    if (orgDescriptionElement) {
+      const displayDescription = orgDescription || 'Visualize and manage your organization structure';
+      console.log('ThemeEditor: Preview update - changing org description to:', displayDescription);
+      orgDescriptionElement.textContent = displayDescription;
     }
 
     // Apply color previews to the main interface
@@ -414,6 +498,9 @@ class ThemeEditor {
     // Apply theme immediately
     this.applyTheme(brandingData, orgData);
     
+    // Ensure header is updated with the latest data
+    this.refreshHeader();
+    
     // Hide modal
     this.hideEditThemeModal();
     
@@ -541,6 +628,43 @@ class ThemeEditor {
 }
 
 // Initialize theme editor when DOM is ready
+let themeEditorInstance = null;
+
 document.addEventListener('DOMContentLoaded', () => {
-  new ThemeEditor();
+  themeEditorInstance = new ThemeEditor();
+  
+  // Make it globally accessible
+  window.ThemeEditor = themeEditorInstance;
+  
+  // Also add debug method to window for easy access
+  window.debugThemeEditor = () => {
+    if (window.ThemeEditor) {
+      window.ThemeEditor.debugState();
+    } else {
+      console.log('ThemeEditor not initialized yet');
+    }
+  };
+  
+  // Add manual refresh method for testing
+  window.refreshHeader = () => {
+    if (window.ThemeEditor) {
+      window.ThemeEditor.refreshHeader();
+    } else {
+      console.log('ThemeEditor not initialized yet');
+    }
+  };
+});
+
+// Also initialize when the main app loads (for cases where DOMContentLoaded already fired)
+document.addEventListener('DOMContentLoaded', () => {
+  // Check if we're in the main app and initialize header
+  const mainApp = document.getElementById("mainApp");
+  if (mainApp && !mainApp.classList.contains("hidden")) {
+    // Main app is visible, ensure header is initialized
+    setTimeout(() => {
+      if (window.ThemeEditor) {
+        window.ThemeEditor.refreshHeader();
+      }
+    }, 100);
+  }
 });
