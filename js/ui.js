@@ -1365,9 +1365,9 @@ const OrgUI = (() => {
     
     if (adminTextElement) {
       if (isAdminOpen) {
-        adminTextElement.textContent = 'Close';
+        adminTextElement.textContent = 'User Mode';
         if (adminIconElement) {
-          adminIconElement.textContent = '✕';
+          adminIconElement.textContent = '👤';
         }
       } else {
         adminTextElement.textContent = 'Admin';
