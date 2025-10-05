@@ -321,6 +321,27 @@ export class OrgDatabase {
       )
       .subscribe();
   }
+
+  // Create a single metric
+  async createMetric(metricData) {
+    const { data, error } = await this.supabase
+      .from('metrics')
+      .insert([metricData])
+      .select();
+    
+    if (error) throw error;
+    return data[0];
+  }
+
+  // Delete all metrics for a specific node
+  async deleteMetricsForNode(nodeId) {
+    const { error } = await this.supabase
+      .from('metrics')
+      .delete()
+      .eq('node_id', nodeId);
+    
+    if (error) throw error;
+  }
 }
 
 // Create global instance
@@ -332,8 +353,9 @@ window.orgDb = orgDb;
 // Make conversion functions globally available
 window.convertSupabaseToFrontend = convertSupabaseToFrontend;
 window.convertFrontendToSupabase = convertFrontendToSupabase;
+window.convertFrontendMetricToSupabase = convertFrontendMetricToSupabase;
 
-// Helper function to convert Supabase data to frontend format
+  // Helper function to convert Supabase data to frontend format
 export function convertSupabaseToFrontend(supabaseData) {
   if (!supabaseData) return null;
 
@@ -379,5 +401,29 @@ export function convertFrontendToSupabase(frontendData) {
     support_office_id: frontendData.supportOffice,
     responsibilities: frontendData.responsibilities || [],
     outcomes: frontendData.outcomes || []
+  };
+}
+
+// Helper function to convert frontend metric to Supabase format
+export function convertFrontendMetricToSupabase(metric, organizationId, nodeId) {
+  if (!metric) return null;
+
+  // Convert values array to data object
+  const data = {};
+  if (metric.values && Array.isArray(metric.values)) {
+    metric.values.forEach(item => {
+      if (item && item.label && item.value !== undefined) {
+        data[String(item.label)] = Number(item.value);
+      }
+    });
+  }
+
+  return {
+    organization_id: organizationId,
+    node_id: nodeId,
+    name: metric.name || 'Time spent on:',
+    type: metric.type || metric.chartType || 'pie',
+    unit: metric.unit || '%',
+    data: data
   };
 }

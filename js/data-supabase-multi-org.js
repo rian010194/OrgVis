@@ -39,14 +39,20 @@ const OrgStore = (() => {
         if (!metric || typeof metric !== "object") {
           return null;
         }
+        // Handle both Supabase format (type) and frontend format (chartType)
+        const chartType = metric.type || metric.chartType || "pie";
+        
         const result = {
           id: metric.id || Date.now() + Math.random(),
           name: metric.name || "Time spent on:",
-          type: metric.type || "pie",
+          type: chartType,
+          chartType: chartType, // Keep both for compatibility
           unit: metric.unit || "%",
-          data: {}
+          data: {},
+          values: [] // Keep values array for frontend compatibility
         };
         
+        // Handle Supabase data format (object with key-value pairs)
         if (metric.data && typeof metric.data === "object") {
           Object.entries(metric.data).forEach(([key, value]) => {
             if (key === undefined || key === null) {
@@ -55,17 +61,42 @@ const OrgStore = (() => {
             const numeric = Number(value);
             if (Number.isFinite(numeric)) {
               result.data[String(key)] = numeric;
+              // Also create values array for frontend compatibility
+              result.values.push({
+                label: String(key),
+                value: numeric
+              });
             }
           });
-        } else if (typeof metric === "object" && !metric.data) {
-          // Handle case where metric is the data object itself (old format)
+        }
+        // Handle frontend values format (array of {label, value} objects)
+        else if (metric.values && Array.isArray(metric.values)) {
+          metric.values.forEach(item => {
+            if (item && item.label && item.value !== undefined) {
+              const numeric = Number(item.value);
+              if (Number.isFinite(numeric)) {
+                result.data[String(item.label)] = numeric;
+                result.values.push({
+                  label: String(item.label),
+                  value: numeric
+                });
+              }
+            }
+          });
+        }
+        // Handle case where metric is the data object itself (old format)
+        else if (typeof metric === "object" && !metric.data && !metric.values) {
           Object.entries(metric).forEach(([key, value]) => {
-            if (key === "id" || key === "name" || key === "type" || key === "unit") {
+            if (key === "id" || key === "name" || key === "type" || key === "chartType" || key === "unit") {
               return;
             }
             const numeric = Number(value);
             if (Number.isFinite(numeric)) {
               result.data[String(key)] = numeric;
+              result.values.push({
+                label: String(key),
+                value: numeric
+              });
             }
           });
         }
@@ -80,8 +111,10 @@ const OrgStore = (() => {
         id: Date.now() + Math.random(),
         name: "Time spent on:",
         type: "pie",
+        chartType: "pie",
         unit: "%",
-        data: {}
+        data: {},
+        values: []
       };
       
       Object.entries(metrics).forEach(([key, value]) => {
@@ -91,6 +124,10 @@ const OrgStore = (() => {
         const numeric = Number(value);
         if (Number.isFinite(numeric)) {
           result.data[String(key)] = numeric;
+          result.values.push({
+            label: String(key),
+            value: numeric
+          });
         }
       });
       
@@ -436,6 +473,9 @@ const OrgStore = (() => {
       }
       if (updates.metrics !== undefined) {
         node.metrics = normaliseMetrics(updates.metrics) || [];
+        
+        // Save metrics to Supabase
+        await this.saveMetricsToSupabase(nodeId, node.metrics);
       }
       if (updates.responsibilities !== undefined) {
         node.responsibilities = normaliseStringList(updates.responsibilities);
@@ -625,6 +665,26 @@ const OrgStore = (() => {
     lastError: state.lastError ? String(state.lastError) : null,
     currentOrganizationId: state.currentOrganizationId
   });
+
+  // Save metrics to Supabase
+  const saveMetricsToSupabase = async (nodeId, metrics) => {
+    try {
+      // First, delete existing metrics for this node
+      await window.orgDb.deleteMetricsForNode(nodeId);
+      
+      // Then insert new metrics
+      for (const metric of metrics) {
+        if (metric && (Object.keys(metric.data || {}).length > 0 || (metric.values && metric.values.length > 0))) {
+          const supabaseMetric = window.convertFrontendMetricToSupabase(metric, state.currentOrganizationId, nodeId);
+          if (supabaseMetric && Object.keys(supabaseMetric.data || {}).length > 0) {
+            await window.orgDb.createMetric(supabaseMetric);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error saving metrics to Supabase:', error);
+    }
+  };
 
   // Setup real-time subscriptions
   const setupRealtimeSubscriptions = () => {
