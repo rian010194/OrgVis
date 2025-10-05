@@ -629,35 +629,35 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Insert sample departments for JumpYard organization
-INSERT INTO departments (organization_id, name, code, description) VALUES
-('jumpyard', 'Executive Leadership', 'EXEC', 'Executive leadership team'),
-('jumpyard', 'Global Operations', 'OPS', 'Global operations and regional management'),
-('jumpyard', 'Support Office', 'SUPPORT', 'Global support office and standards'),
-('jumpyard', 'Human Resources', 'HR', 'Human resources and talent management'),
-('jumpyard', 'Information Technology', 'IT', 'IT infrastructure and systems'),
-('jumpyard', 'Finance', 'FIN', 'Financial management and reporting'),
-('jumpyard', 'Marketing', 'MKT', 'Marketing and brand management'),
-('jumpyard', 'Regional Management', 'REGION', 'Regional operations management')
+-- Insert sample departments for Demo organization
+INSERT INTO departments (organization_id, name, code, description) VALUES       
+('demo', 'Executive Leadership', 'EXEC', 'Executive leadership team'),      
+('demo', 'Global Operations', 'OPS', 'Global operations and regional management'),
+('demo', 'Support Office', 'SUPPORT', 'Global support office and standards'),
+('demo', 'Human Resources', 'HR', 'Human resources and talent management'), 
+('demo', 'Information Technology', 'IT', 'IT infrastructure and systems'),  
+('demo', 'Finance', 'FIN', 'Financial management and reporting'),
+('demo', 'Marketing', 'MKT', 'Marketing and brand management'),
+('demo', 'Regional Management', 'REGION', 'Regional operations management') 
 
 ON CONFLICT (organization_id, code) DO UPDATE SET
     name = EXCLUDED.name,
     description = EXCLUDED.description,
     updated_at = NOW();
 
--- Insert sample admin user for JumpYard organization
+-- Insert sample admin user for Demo organization (no password required)
 INSERT INTO users (
-    organization_id, employee_id, email, name, first_name, last_name, password_hash, 
+    organization_id, employee_id, email, name, first_name, last_name, password_hash,
     department_id, position, level, role, permissions, profile_data
 ) VALUES (
-    'jumpyard', 
+    'demo',
     'EMP001',
-    'admin@jumpyard.com', 
-    'JumpYard Admin', 
-    'JumpYard', 
+    'admin@demo.com',
+    'Demo Admin',
+    'Demo',
     'Admin',
-    'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', -- hash of 'jumpyard'
-    (SELECT id FROM departments WHERE organization_id = 'jumpyard' AND code = 'EXEC'),
+    '', -- No password required
+    (SELECT id FROM departments WHERE organization_id = 'demo' AND code = 'EXEC'),
     'Organization Administrator',
     1,
     'org_admin',

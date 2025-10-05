@@ -1,5 +1,5 @@
 // Demo version of user interface for testing without Supabase
-export class UserInterfaceDemo {
+class UserInterfaceDemo {
   constructor() {
     this.init();
   }
@@ -294,4 +294,4 @@ export class UserInterfaceDemo {
 }
 
 // Create global instance
-export const userInterfaceDemo = new UserInterfaceDemo();
+const userInterfaceDemo = new UserInterfaceDemo();

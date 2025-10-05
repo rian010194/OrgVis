@@ -1,16 +1,16 @@
 employee_id,email,first_name,last_name,department_code,position,level,role,manager_employee_id,phone,start_date,contract_type
-EMP001,admin@jumpyard.com,Admin,User,EXEC,Organization Administrator,1,org_admin,,+46 123 456 789,2024-01-01,full-time
-EMP002,operations@jumpyard.com,Operations,Manager,OPS,Operations Manager,3,department_admin,EMP001,+46 123 456 790,2024-01-01,full-time
-EMP003,hr@jumpyard.com,HR,Manager,HR,HR Manager,3,department_admin,EMP001,+46 123 456 791,2024-01-01,full-time
-EMP004,it@jumpyard.com,IT,Manager,IT,IT Manager,3,department_admin,EMP001,+46 123 456 792,2024-01-01,full-time
-EMP005,finance@jumpyard.com,Finance,Manager,FIN,Finance Manager,3,department_admin,EMP001,+46 123 456 793,2024-01-01,full-time
-EMP006,marketing@jumpyard.com,Marketing,Manager,MKT,Marketing Manager,3,department_admin,EMP001,+46 123 456 794,2024-01-01,full-time
-EMP007,ceo@jumpyard.com,CEO,Executive,EXEC,Chief Executive Officer,1,org_admin,,+46 123 456 795,2024-01-01,full-time
-EMP008,coo@jumpyard.com,COO,Executive,EXEC,Chief Operating Officer,2,org_admin,EMP007,+46 123 456 796,2024-01-01,full-time
-EMP009,cfo@jumpyard.com,CFO,Executive,EXEC,Chief Financial Officer,2,org_admin,EMP007,+46 123 456 797,2024-01-01,full-time
-EMP010,developer@jumpyard.com,John,Developer,IT,Software Developer,5,member,EMP004,+46 123 456 798,2024-01-01,full-time
-EMP011,designer@jumpyard.com,Jane,Designer,MKT,Graphic Designer,5,member,EMP006,+46 123 456 799,2024-01-01,full-time
-EMP012,analyst@jumpyard.com,Bob,Analyst,FIN,Financial Analyst,5,member,EMP005,+46 123 456 800,2024-01-01,full-time
-EMP013,recruiter@jumpyard.com,Alice,Recruiter,HR,Recruiter,5,member,EMP003,+46 123 456 801,2024-01-01,full-time
-EMP014,technician@jumpyard.com,Charlie,Technician,IT,IT Support Technician,5,member,EMP004,+46 123 456 802,2024-01-01,full-time
-EMP015,coordinator@jumpyard.com,Diana,Coordinator,OPS,Operations Coordinator,4,team_lead,EMP002,+46 123 456 803,2024-01-01,full-time
+EMP001,admin@demo.com,Admin,User,EXEC,Organization Administrator,1,org_admin,,+46 123 456 789,2024-01-01,full-time
+EMP002,operations@demo.com,Operations,Manager,OPS,Operations Manager,3,department_admin,EMP001,+46 123 456 790,2024-01-01,full-time
+EMP003,hr@demo.com,HR,Manager,HR,HR Manager,3,department_admin,EMP001,+46 123 456 791,2024-01-01,full-time
+EMP004,it@demo.com,IT,Manager,IT,IT Manager,3,department_admin,EMP001,+46 123 456 792,2024-01-01,full-time
+EMP005,finance@demo.com,Finance,Manager,FIN,Finance Manager,3,department_admin,EMP001,+46 123 456 793,2024-01-01,full-time
+EMP006,marketing@demo.com,Marketing,Manager,MKT,Marketing Manager,3,department_admin,EMP001,+46 123 456 794,2024-01-01,full-time
+EMP007,ceo@demo.com,CEO,Executive,EXEC,Chief Executive Officer,1,org_admin,,+46 123 456 795,2024-01-01,full-time
+EMP008,coo@demo.com,COO,Executive,EXEC,Chief Operating Officer,2,org_admin,EMP007,+46 123 456 796,2024-01-01,full-time
+EMP009,cfo@demo.com,CFO,Executive,EXEC,Chief Financial Officer,2,org_admin,EMP007,+46 123 456 797,2024-01-01,full-time
+EMP010,developer@demo.com,John,Developer,IT,Software Developer,5,member,EMP004,+46 123 456 798,2024-01-01,full-time
+EMP011,designer@demo.com,Jane,Designer,MKT,Graphic Designer,5,member,EMP006,+46 123 456 799,2024-01-01,full-time
+EMP012,analyst@demo.com,Bob,Analyst,FIN,Financial Analyst,5,member,EMP005,+46 123 456 800,2024-01-01,full-time
+EMP013,recruiter@demo.com,Alice,Recruiter,HR,Recruiter,5,member,EMP003,+46 123 456 801,2024-01-01,full-time
+EMP014,technician@demo.com,Charlie,Technician,IT,IT Support Technician,5,member,EMP004,+46 123 456 802,2024-01-01,full-time
+EMP015,coordinator@demo.com,Diana,Coordinator,OPS,Operations Coordinator,4,team_lead,EMP002,+46 123 456 803,2024-01-01,full-time

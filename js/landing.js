@@ -26,19 +26,18 @@ const LandingPage = (() => {
     
     // Only create demo if no organizations exist
     if (orgList.length === 0) {
-      const jumpyardOrgId = 'jumpyard_demo_org';
-      const hashedPassword = await hashPassword('jumpyard');
+      const jumpyardOrgId = 'demo_org';
       
       const jumpyardData = {
-        name: 'JumpYard',
-        description: 'Demo organization for JumpYard - a leading company in organizational management',
+        name: 'Demo',
+        description: 'Demo organization with sample data and structure',
         type: 'company',
-        password: hashedPassword,
+        password: null, // No password required
         createdAt: new Date().toISOString(),
         id: jumpyardOrgId
       };
       
-      // Save JumpYard organization
+      // Save Demo organization
       localStorage.setItem(`org_${jumpyardOrgId}`, JSON.stringify(jumpyardData));
       
       // Create demo organization structure with some sample data
@@ -46,17 +45,17 @@ const LandingPage = (() => {
       localStorage.setItem(`org_structure_${jumpyardOrgId}`, JSON.stringify(demoStructure));
       
       // Add to organizations list
-      saveOrganizationToList(jumpyardOrgId, 'JumpYard');
+      saveOrganizationToList(jumpyardOrgId, 'Demo');
       
-      // Set JumpYard branding
-      const jumpyardBranding = {
-        primaryColor: '#ff5a00',
-        secondaryColor: '#e53e3e',
+      // Set Demo branding
+      const demoBranding = {
+        primaryColor: '#007bff',
+        secondaryColor: '#6c757d',
         fontFamily: 'system',
         fontSize: '16',
         logo: null
       };
-      localStorage.setItem(`org_branding_${jumpyardOrgId}`, JSON.stringify(jumpyardBranding));
+      localStorage.setItem(`org_branding_${jumpyardOrgId}`, JSON.stringify(demoBranding));
     }
   };
   
@@ -64,11 +63,11 @@ const LandingPage = (() => {
     return {
       nodes: [
         {
-          id: 'jumpyard_root',
-          name: 'JumpYard',
+          id: 'demo_root',
+          name: 'Demo',
           type: 'Unit',
           parent: null,
-          role: 'Leading company in organizational management and digital transformation',
+          role: 'Demo organization showcasing organizational structure and management',
           responsibilities: [
             'Strategic leadership and vision',
             'Digital transformation initiatives',
@@ -406,14 +405,21 @@ const LandingPage = (() => {
   };
   
   const loadJumpYardDemo = () => {
-    const jumpyardOrgId = 'jumpyard_demo_org';
+    const jumpyardOrgId = 'demo_org';
     const orgData = JSON.parse(localStorage.getItem(`org_${jumpyardOrgId}`) || '{}');
     
     if (orgData.id) {
-      // JumpYard demo exists, show login modal
-      showLoginModal(jumpyardOrgId);
+      // Demo exists, check if password is required
+      if (orgData.password) {
+        showLoginModal(jumpyardOrgId);
+      } else {
+        // No password required, login directly
+        localStorage.setItem('current_organization_id', jumpyardOrgId);
+        loadOrganizationBranding(jumpyardOrgId);
+        showMainApp();
+      }
     } else {
-      showErrorMessage('JumpYard demo organization not found. Please refresh the page.');
+      showErrorMessage('Demo organization not found. Please refresh the page.');
     }
   };
   
