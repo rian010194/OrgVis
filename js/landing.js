@@ -46,8 +46,8 @@ const LandingPage = (() => {
     
     // Set Demo branding
     const demoBranding = {
-      primaryColor: '#2c3e50',
-      secondaryColor: '#34495e',
+      primaryColor: '#ff5a00',
+      secondaryColor: '#e53e3e',
       fontFamily: 'system',
       fontSize: '16',
       logo: null
