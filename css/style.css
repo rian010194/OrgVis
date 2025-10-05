@@ -81,8 +81,8 @@ header .logo {
 /* Mobile toolbar adjustments */
 @media (max-width: 768px) {
   .app-toolbar {
-    padding: 0.75rem 1rem;
-    gap: 0.75rem;
+    padding: 1rem;
+    gap: 1rem;
     flex-wrap: wrap;
   }
   
@@ -96,38 +96,44 @@ header .logo {
   }
   
   .view-dropdown-toggle {
-    padding: 0.6rem 1rem;
-    font-size: 0.9rem;
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
     min-width: auto;
     width: 100%;
     justify-content: space-between;
+    min-height: 48px; /* Better touch target */
   }
   
   .view-option {
-    padding: 0.75rem 1rem;
-    font-size: 0.9rem;
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
   }
   
   .view-icon {
-    font-size: 1.1rem;
-    width: 20px;
+    font-size: 1.2rem;
+    width: 24px;
   }
   
   .admin-toggle {
-    padding: 0.6rem 1rem;
-    font-size: 0.9rem;
-    gap: 0.5rem;
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+    gap: 0.75rem;
     min-width: 120px;
+    min-height: 48px;
     flex-shrink: 0;
+    justify-content: center;
   }
   
   .hamburger-icon {
-    width: 16px;
-    height: 12px;
+    width: 20px;
+    height: 16px;
   }
   
   .admin-text {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
   }
 }
 
@@ -301,6 +307,50 @@ body.detail-expanded .app-layout {
   
   .view-option:last-child {
     border-bottom: none;
+  }
+  
+  /* Admin panel mobile improvements */
+  .admin-panel {
+    padding: 1rem;
+  }
+  
+  .admin-tabs {
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .admin-tab {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    min-height: 44px;
+    flex: 1;
+  }
+  
+  .admin-form {
+    gap: 1rem;
+  }
+  
+  .admin-form label {
+    font-size: 0.9rem;
+  }
+  
+  .admin-form input,
+  .admin-form select,
+  .admin-form textarea {
+    padding: 0.75rem;
+    font-size: 1rem;
+    min-height: 44px;
+  }
+  
+  .admin-form button {
+    padding: 0.875rem 1.25rem;
+    font-size: 1rem;
+    min-height: 48px;
+  }
+  
+  .admin-hint {
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
   }
 }
 
@@ -1422,19 +1472,20 @@ button.danger {
 /* Tablet adjustments */
 @media (max-width: 768px) {
   main.app-layout {
-    padding: 0.125rem;
-    gap: 0.125rem;
+    padding: 1rem;
+    gap: 1rem;
   }
   
   .tree-container,
   .map-view {
-    height: 350px;
-    max-height: 350px;
-    padding: 0.5rem;
+    height: 400px;
+    max-height: 400px;
+    padding: 1rem;
+    min-height: 300px;
   }
   
   .detail-panel {
-    padding: 0.5rem;
+    padding: 1rem;
     max-height: 400px;
     min-height: 250px;
   }
@@ -1452,8 +1503,8 @@ button.danger {
   .app-toolbar {
     flex-direction: column;
     align-items: stretch;
-    gap: 0.5rem;
-    padding: 0.75rem;
+    gap: 0.75rem;
+    padding: 1rem;
   }
   
   .toolbar-group {
@@ -1462,57 +1513,63 @@ button.danger {
   
   .view-dropdown {
     width: 100%;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
   }
   
   .view-dropdown-toggle {
-    padding: 0.6rem 1rem;
-    font-size: 0.9rem;
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
     width: 100%;
     justify-content: space-between;
+    min-height: 52px;
   }
   
   .view-option {
-    padding: 0.75rem 1rem;
-    font-size: 0.9rem;
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
   }
   
   .view-icon {
-    font-size: 1.1rem;
-    width: 20px;
+    font-size: 1.2rem;
+    width: 24px;
   }
   
   .admin-toggle {
-    padding: 0.6rem 1rem;
-    font-size: 0.9rem;
-    gap: 0.5rem;
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+    gap: 0.75rem;
     width: 100%;
     justify-content: center;
+    min-height: 52px;
   }
   
   .hamburger-icon {
-    width: 16px;
-    height: 12px;
+    width: 20px;
+    height: 16px;
   }
   
   .admin-text {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
   }
   
   main.app-layout {
-    padding: 0.125rem;
-    gap: 0.125rem;
+    padding: 0.75rem;
+    gap: 0.75rem;
   }
   
   .tree-container,
   .map-view {
     height: 300px;
     max-height: 300px;
-    padding: 0.375rem;
+    padding: 0.75rem;
+    min-height: 250px;
   }
   
   .detail-panel {
-    padding: 0.375rem;
+    padding: 0.75rem;
     max-height: 350px;
     min-height: 200px;
   }
@@ -1548,40 +1605,45 @@ button.danger {
   }
   
   .app-toolbar {
-    padding: 0.5rem;
-    gap: 0.5rem;
+    padding: 0.75rem;
+    gap: 0.75rem;
   }
   
   .view-dropdown-toggle {
-    padding: 0.5rem 0.8rem;
-    font-size: 0.8rem;
+    padding: 0.875rem 1rem;
+    font-size: 0.9rem;
     width: 100%;
+    min-height: 48px;
   }
   
   .view-option {
-    padding: 0.6rem 0.8rem;
-    font-size: 0.8rem;
+    padding: 0.875rem 1rem;
+    font-size: 0.9rem;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
   }
   
   .view-icon {
-    font-size: 0.9rem;
-    width: 16px;
+    font-size: 1rem;
+    width: 20px;
   }
   
   .admin-toggle {
-    padding: 0.5rem 0.8rem;
-    font-size: 0.8rem;
-    gap: 0.4rem;
+    padding: 0.875rem 1rem;
+    font-size: 0.9rem;
+    gap: 0.5rem;
     width: 100%;
+    min-height: 48px;
   }
   
   .hamburger-icon {
-    width: 14px;
-    height: 10px;
+    width: 18px;
+    height: 14px;
   }
   
   .admin-text {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
   }
 
   .section-header {
