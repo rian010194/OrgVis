@@ -1445,6 +1445,110 @@ const OrgUI = (() => {
     resizeObserver.observe(elements.detailPanel);
   };
 
+  const displayCurrentMetrics = () => {
+    if (!selectedNodeId) {
+      return;
+    }
+    
+    const node = OrgStore.getNode(selectedNodeId);
+    if (!node) {
+      return;
+    }
+    
+    // Find or create metrics display area
+    let metricsDisplay = document.querySelector('.current-metrics-display');
+    if (!metricsDisplay) {
+      metricsDisplay = document.createElement('div');
+      metricsDisplay.className = 'current-metrics-display';
+      metricsDisplay.style.cssText = `
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      `;
+      
+      // Insert before the first form in metrics panel
+      const metricsPanel = document.querySelector('#adminPanel-metrics');
+      if (metricsPanel) {
+        const firstForm = metricsPanel.querySelector('form');
+        if (firstForm) {
+          metricsPanel.insertBefore(metricsDisplay, firstForm);
+        } else {
+          metricsPanel.appendChild(metricsDisplay);
+        }
+      }
+    }
+    
+    // Clear and populate metrics display
+    metricsDisplay.innerHTML = '';
+    
+    const title = document.createElement('h4');
+    title.textContent = `Current Metrics for "${node.name}"`;
+    title.style.cssText = 'margin: 0 0 0.75rem 0; color: var(--brand-orange); font-size: 1rem;';
+    metricsDisplay.appendChild(title);
+    
+    if (!node.metrics || node.metrics.length === 0) {
+      const noMetrics = document.createElement('p');
+      noMetrics.textContent = 'No metrics defined for this node.';
+      noMetrics.style.cssText = 'margin: 0; color: var(--muted); font-style: italic;';
+      metricsDisplay.appendChild(noMetrics);
+    } else {
+      const metricsList = document.createElement('div');
+      metricsList.style.cssText = 'display: flex; flex-direction: column; gap: 0.5rem;';
+      
+      node.metrics.forEach((metric, index) => {
+        const metricItem = document.createElement('div');
+        metricItem.style.cssText = `
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0.5rem;
+          background: rgba(255, 90, 0, 0.05);
+          border-radius: 4px;
+          border-left: 3px solid var(--brand-orange);
+        `;
+        
+        const metricInfo = document.createElement('div');
+        metricInfo.innerHTML = `
+          <strong>${metric.name}</strong><br>
+          <span style="color: var(--muted); font-size: 0.9rem;">
+            ${metric.value} ${metric.unit || ''}
+          </span>
+        `;
+        
+        const metricActions = document.createElement('div');
+        metricActions.style.cssText = 'display: flex; gap: 0.5rem;';
+        
+        const editBtn = document.createElement('button');
+        editBtn.textContent = 'Edit';
+        editBtn.type = 'button';
+        editBtn.className = 'secondary';
+        editBtn.style.cssText = 'font-size: 0.8rem; padding: 0.25rem 0.5rem;';
+        editBtn.addEventListener('click', () => {
+          // Pre-fill the remove form with this metric
+          const nodeSelect = elements.removeMetricForm?.querySelector('select[name="removeNodeId"]');
+          const metricSelect = elements.removeMetricForm?.querySelector('select[name="metricToRemove"]');
+          
+          if (nodeSelect && metricSelect) {
+            nodeSelect.value = selectedNodeId;
+            updateMetricsOptions(selectedNodeId);
+            setTimeout(() => {
+              metricSelect.value = index;
+            }, 100);
+          }
+        });
+        
+        metricActions.appendChild(editBtn);
+        metricItem.appendChild(metricInfo);
+        metricItem.appendChild(metricActions);
+        metricsList.appendChild(metricItem);
+      });
+      
+      metricsDisplay.appendChild(metricsList);
+    }
+  };
+
   const updateAdminTabsUI = () => {
 
     if (!elements.adminTabs || !elements.adminPanels) {
@@ -1504,6 +1608,11 @@ const OrgUI = (() => {
     // Update dropdowns when switching to Relations or Metrics tabs
     if (tab === "relations" || tab === "metrics") {
       updateFormDropdownsWithSelectedNode();
+    }
+    
+    // Show current metrics when switching to Metrics tab
+    if (tab === "metrics") {
+      displayCurrentMetrics();
     }
 
   };
@@ -1648,8 +1757,7 @@ const OrgUI = (() => {
       return;
     }
     
-    const snapshot = OrgStore.getSnapshot();
-    const node = snapshot.nodesById[nodeId];
+    const node = OrgStore.getNode(nodeId);
     
     metricSelect.innerHTML = "";
     
@@ -2051,8 +2159,7 @@ const OrgUI = (() => {
     
     try {
       // Get current node data
-      const snapshot = OrgStore.getSnapshot();
-      const node = snapshot.nodesById[nodeId];
+      const node = OrgStore.getNode(nodeId);
       
       if (!node) {
         displayAdminMessage("Selected node not found.", "error");
@@ -2073,6 +2180,9 @@ const OrgUI = (() => {
       
       form.reset();
       displayAdminMessage("Metric added successfully.", "success");
+      
+      // Update current metrics display
+      displayCurrentMetrics();
       
     } catch (error) {
       displayAdminMessage("Failed to add metric: " + error.message, "error");
@@ -2095,8 +2205,7 @@ const OrgUI = (() => {
     
     try {
       // Get current node data
-      const snapshot = OrgStore.getSnapshot();
-      const node = snapshot.nodesById[nodeId];
+      const node = OrgStore.getNode(nodeId);
       
       if (!node || !node.metrics) {
         displayAdminMessage("Selected node or metric not found.", "error");
@@ -2108,6 +2217,9 @@ const OrgUI = (() => {
       OrgStore.updateNode(nodeId, { metrics: updatedMetrics });
       
       displayAdminMessage("Metric removed successfully.", "success");
+      
+      // Update current metrics display
+      displayCurrentMetrics();
       
     } catch (error) {
       displayAdminMessage("Failed to remove metric: " + error.message, "error");
