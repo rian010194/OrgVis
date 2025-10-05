@@ -80,15 +80,6 @@ const OrgUI = (() => {
 
     appStatus: null,
 
-    metricsSection: null,
-
-    metricsList: null,
-
-    metricsAddButton: null,
-
-    metricsCreateButton: null,
-
-    metricsSaveButton: null,
 
     visualizationTypeSelect: null,
 
@@ -453,23 +444,9 @@ const OrgUI = (() => {
 
     elements.appStatus = document.getElementById("appStatus");
 
-    elements.metricsSection = document.getElementById("adminMetricsSection");
 
-    elements.metricsList = document.getElementById("adminMetricsList");
 
-    elements.metricsAddButton = document.getElementById("adminAddMetricButton");
 
-    elements.metricsCreateButton = document.getElementById("adminCreatePieButton");
-
-    elements.metricsSaveButton = document.getElementById("adminSaveMetricsButton");
-
-    elements.visualizationTypeSelect = document.getElementById("adminVisualizationType");
-
-    elements.visualizationNameInput = document.getElementById("adminVisualizationName");
-
-    elements.visualizationUnitInput = document.getElementById("adminVisualizationUnit");
-
-    elements.existingMetrics = document.getElementById("adminExistingMetrics");
 
     elements.createTypeSelect = document.getElementById("adminCreateType");
 
@@ -594,23 +571,6 @@ const OrgUI = (() => {
 
     }
 
-    if (elements.metricsCreateButton) {
-
-      elements.metricsCreateButton.addEventListener("click", handleCreatePieChart);
-
-    }
-
-    if (elements.metricsAddButton) {
-
-      elements.metricsAddButton.addEventListener("click", handleAddMetricRow);
-
-    }
-
-    if (elements.metricsSaveButton) {
-
-      elements.metricsSaveButton.addEventListener("click", handleSaveMetrics);
-
-    }
 
     if (elements.visualizationTypeSelect) {
 
@@ -1232,9 +1192,17 @@ const OrgUI = (() => {
       syncPanelHeights();
 
       if (typeof OrgMap !== "undefined" && OrgMap && typeof OrgMap.refresh === "function") {
-
-        requestAnimationFrame(() => OrgMap.refresh());
-
+        // Preserve focus on selected node when detail panel expands/collapses
+        const currentSelectedNode = selectedNodeId;
+        requestAnimationFrame(() => {
+          OrgMap.refresh();
+          // Restore focus to the selected node after refresh
+          if (currentSelectedNode && typeof OrgMap.reveal === "function") {
+            setTimeout(() => {
+              OrgMap.reveal(currentSelectedNode);
+            }, 100);
+          }
+        });
       }
 
       return;
@@ -1413,6 +1381,19 @@ const OrgUI = (() => {
           if (mapView) {
             mapView.style.height = '100%';
             mapView.style.minHeight = '100%';
+            
+            // Trigger map resize to adjust to new container size
+            if (typeof OrgMap !== "undefined" && OrgMap && typeof OrgMap.refresh === "function") {
+              setTimeout(() => {
+                OrgMap.refresh();
+                // Restore focus to selected node after resize
+                if (selectedNodeId && typeof OrgMap.reveal === "function") {
+                  setTimeout(() => {
+                    OrgMap.reveal(selectedNodeId);
+                  }, 100);
+                }
+              }, 50);
+            }
           }
         }
       } else {
@@ -1425,6 +1406,19 @@ const OrgUI = (() => {
         if (mapView) {
           mapView.style.height = '';
           mapView.style.minHeight = '';
+          
+          // Trigger map resize when collapsing
+          if (typeof OrgMap !== "undefined" && OrgMap && typeof OrgMap.refresh === "function") {
+            setTimeout(() => {
+              OrgMap.refresh();
+              // Restore focus to selected node after resize
+              if (selectedNodeId && typeof OrgMap.reveal === "function") {
+                setTimeout(() => {
+                  OrgMap.reveal(selectedNodeId);
+                }, 100);
+              }
+            }, 50);
+          }
         }
       }
     });
@@ -1868,7 +1862,6 @@ const OrgUI = (() => {
 
       }
 
-      renderMetricsEditor(null);
 
       return;
 
@@ -1921,13 +1914,6 @@ const OrgUI = (() => {
 
     }
 
-    // Clear editing state when switching nodes
-    if (elements.metricsList) {
-      delete elements.metricsList.dataset.editingIndex;
-    }
-    if (elements.metricsSection) {
-      elements.metricsSection.classList.remove("editing-metric");
-    }
 
     // Clear visualization type, name and unit for new metrics
     if (elements.visualizationTypeSelect) {
@@ -1940,7 +1926,6 @@ const OrgUI = (() => {
       elements.visualizationUnitInput.value = "";
     }
 
-    renderMetricsEditor(node);
 
   };
 
@@ -2284,551 +2269,17 @@ const OrgUI = (() => {
 
   };
 
-  const renderMetricsEditor = (node) => {
 
-    if (!elements.metricsSection || !elements.metricsList) {
 
-      return;
 
-    }
 
-    elements.metricsList.innerHTML = "";
 
-    if (!node) {
 
-      elements.metricsSection.classList.add("disabled");
 
-      elements.metricsList.appendChild(createMetricsEmpty());
 
-      return;
 
-    }
 
-    elements.metricsSection.classList.remove("disabled");
 
-    // Clear existing metrics display
-    if (elements.existingMetrics) {
-      elements.existingMetrics.innerHTML = "";
-    }
-
-    const metrics = node.metrics || [];
-
-    if (!metrics.length) {
-
-      elements.metricsList.appendChild(createMetricsEmpty());
-
-      return;
-
-    }
-
-    // Display existing metrics
-    if (elements.existingMetrics) {
-      const existingHeading = document.createElement("h5");
-      existingHeading.textContent = "Befintliga Metrics:";
-      existingHeading.style.marginBottom = "0.25rem";
-      existingHeading.style.color = "var(--brand-orange)";
-      elements.existingMetrics.appendChild(existingHeading);
-
-      metrics.forEach((metric, index) => {
-        const metricElement = document.createElement("div");
-        metricElement.classList.add("existing-metric");
-
-        const info = document.createElement("div");
-        info.classList.add("existing-metric-info");
-
-        const name = document.createElement("span");
-        name.classList.add("existing-metric-name");
-        name.textContent = metric.name || "Time spent on:";
-
-        const type = document.createElement("span");
-        type.classList.add("existing-metric-type");
-        type.textContent = metric.type || "pie";
-
-        const count = document.createElement("span");
-        count.textContent = `(${Object.keys(metric.data || {}).length} items)`;
-
-        info.appendChild(name);
-        info.appendChild(type);
-        info.appendChild(count);
-
-        const actions = document.createElement("div");
-        actions.classList.add("existing-metric-actions");
-
-        const editBtn = document.createElement("button");
-        editBtn.classList.add("edit-metric-btn");
-        editBtn.textContent = "Edit";
-        editBtn.onclick = (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          console.log("Edit button clicked for metric:", metric, "index:", index);
-          editExistingMetric(metric, index);
-        };
-
-        const deleteBtn = document.createElement("button");
-        deleteBtn.classList.add("delete-metric-btn");
-        deleteBtn.textContent = "Delete";
-        deleteBtn.onclick = () => deleteExistingMetric(index);
-
-        actions.appendChild(editBtn);
-        actions.appendChild(deleteBtn);
-
-        metricElement.appendChild(info);
-        metricElement.appendChild(actions);
-
-        elements.existingMetrics.appendChild(metricElement);
-      });
-    }
-
-  };
-
-  const editExistingMetric = (metric, index) => {
-    console.log("editExistingMetric called with:", { metric, index });
-    console.log("elements.editNodeSelect:", elements.editNodeSelect);
-    console.log("elements.editNodeSelect.value:", elements.editNodeSelect?.value);
-    
-    // Check if we have a node selected
-    if (!elements.editNodeSelect || !elements.editNodeSelect.value) {
-      console.log("No node selected, showing error message");
-      displayAdminMessage("Välj en nod först för att redigera metrics.", "error");
-      return;
-    }
-
-    console.log("Node selected:", elements.editNodeSelect.value);
-
-    // Populate the form with existing metric data
-    if (elements.visualizationTypeSelect) {
-      elements.visualizationTypeSelect.value = metric.type || "pie";
-      console.log("Set visualization type to:", metric.type || "pie");
-    }
-    if (elements.visualizationNameInput) {
-      elements.visualizationNameInput.value = metric.name || "Time spent on:";
-      console.log("Set visualization name to:", metric.name || "Time spent on:");
-    }
-    if (elements.visualizationUnitInput) {
-      elements.visualizationUnitInput.value = metric.unit || "%";
-      console.log("Set visualization unit to:", metric.unit || "%");
-    }
-
-    // Clear current metrics list and populate with existing data
-    if (elements.metricsList) {
-      elements.metricsList.innerHTML = "";
-      
-      const entries = Object.entries(metric.data || {});
-      console.log("Metric entries:", entries);
-      
-      entries.forEach(([key, value]) => {
-        const row = createMetricRow(key, value);
-        elements.metricsList.appendChild(row);
-        console.log("Added metric row:", key, value);
-      });
-
-      // Store the index for updating
-      elements.metricsList.dataset.editingIndex = index;
-      console.log("Set editing index to:", index);
-    }
-
-    // Show Add Metric button
-    if (elements.metricsAddButton) {
-      elements.metricsAddButton.style.display = "inline-block";
-      console.log("Show Add Metric button");
-    }
-
-    // Scroll to the metrics section
-    if (elements.metricsSection) {
-      elements.metricsSection.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-
-    displayAdminMessage("Redigerar metric. Ändra värdena och klicka på 'Save Metrics'.", "info");
-    
-    // Add visual indicator that we're in edit mode
-    if (elements.metricsSection) {
-      elements.metricsSection.classList.add("editing-metric");
-    }
-    
-    console.log("Edit metric function completed successfully");
-  };
-
-  const deleteExistingMetric = (index) => {
-    if (!confirm("Är du säker på att du vill ta bort denna metric?")) {
-      return;
-    }
-
-    const nodeId = elements.editNodeSelect?.value;
-    if (!nodeId) return;
-
-    const node = OrgStore.getNode(nodeId);
-    if (!node) return;
-
-    const metrics = [...(node.metrics || [])];
-    metrics.splice(index, 1);
-
-    OrgStore.updateNode(nodeId, { metrics });
-
-    displayAdminMessage("Metric deleted.", "success");
-
-    const refreshedNode = OrgStore.getNode(nodeId);
-    renderMetricsEditor(refreshedNode);
-
-    if (selectedNodeId === nodeId) {
-      renderDetailPanel();
-    }
-  };
-
-  const handleCreatePieChart = () => {
-
-    if (!elements.metricsList || !elements.metricsSection || elements.metricsSection.classList.contains("disabled")) {
-
-      return;
-
-    }
-
-    const visualizationType = elements.visualizationTypeSelect?.value;
-
-    const visualizationName = elements.visualizationNameInput?.value || "Time spent on:";
-
-    if (!visualizationType) {
-
-      displayAdminMessage("Välj en visualiseringstyp först.", "error");
-
-      return;
-
-    }
-
-    removeMetricsEmpty();
-
-    // Show Add Metric button when visualization is created
-    if (elements.metricsAddButton) {
-
-      elements.metricsAddButton.style.display = "inline-block";
-
-    }
-
-    let row = elements.metricsList.querySelector(".metrics-row");
-
-    if (!row) {
-
-      row = createMetricRow("", "");
-
-      elements.metricsList.appendChild(row);
-
-    }
-
-    const keyInput = row.querySelector('input[name="metricKey"]');
-
-    if (keyInput) {
-
-      keyInput.focus();
-
-    }
-
-    displayAdminMessage(`Visualisering "${visualizationName}" av typ "${visualizationType}" skapad. Lägg till metrics nedan.`, "success");
-
-  };
-
-  const handleVisualizationTypeChange = () => {
-
-    const visualizationType = elements.visualizationTypeSelect?.value;
-
-    // Update button text based on visualization type
-    if (elements.metricsCreateButton) {
-
-      if (visualizationType === "pie") {
-
-        elements.metricsCreateButton.textContent = "Skapa Cirkeldiagram";
-
-      } else if (visualizationType === "bar") {
-
-        elements.metricsCreateButton.textContent = "Skapa Stapeldiagram";
-
-      } else if (visualizationType === "line") {
-
-        elements.metricsCreateButton.textContent = "Skapa Linjediagram";
-
-      } else if (visualizationType === "table") {
-
-        elements.metricsCreateButton.textContent = "Skapa Tabell";
-
-      } else {
-
-        elements.metricsCreateButton.textContent = "Skapa Visualisering";
-
-      }
-
-    }
-
-  };
-
-  const handleAddMetricRow = () => {
-
-    if (!elements.metricsList || !elements.metricsSection || elements.metricsSection.classList.contains("disabled")) {
-
-      return;
-
-    }
-
-    removeMetricsEmpty();
-
-    const row = createMetricRow("", "");
-
-    elements.metricsList.appendChild(row);
-
-    const keyInput = row.querySelector('input[name="metricKey"]');
-
-    if (keyInput) {
-
-      keyInput.focus();
-
-    }
-
-  };
-
-  const handleSaveMetrics = () => {
-
-    if (!elements.metricsList || !elements.editNodeSelect) {
-
-      return;
-
-    }
-
-    const nodeId = elements.editNodeSelect.value;
-
-    if (!nodeId) {
-
-      displayAdminMessage("Select a node to update.", "error");
-
-      return;
-
-    }
-
-    const rows = Array.from(elements.metricsList.querySelectorAll(".metrics-row"));
-
-    const metrics = {};
-
-    rows.forEach((row) => {
-
-      const keyInput = row.querySelector('input[name="metricKey"]');
-
-      const valueInput = row.querySelector('input[name="metricValue"]');
-
-      if (!keyInput || !valueInput) {
-
-        return;
-
-      }
-
-      const key = keyInput.value.trim();
-
-      const value = Number(valueInput.value);
-
-      if (!key) {
-
-        return;
-
-      }
-
-      if (!Number.isFinite(value)) {
-
-        return;
-
-      }
-
-      metrics[key] = value;
-
-    });
-
-    try {
-
-      // Get visualization type, name and unit
-      const visualizationType = elements.visualizationTypeSelect?.value;
-      const visualizationName = elements.visualizationNameInput?.value;
-      const visualizationUnit = elements.visualizationUnitInput?.value || "%";
-
-      if (!visualizationType || !visualizationName) {
-        displayAdminMessage("Välj visualiseringstyp och namn först.", "error");
-        return;
-      }
-
-      // Get existing metrics
-      const node = OrgStore.getNode(nodeId);
-      const existingMetrics = node?.metrics || [];
-
-      // Check if we're editing an existing metric
-      const editingIndex = elements.metricsList.dataset.editingIndex;
-      
-      let updatedMetrics;
-      if (editingIndex !== undefined && editingIndex !== "") {
-        // Update existing metric
-        updatedMetrics = [...existingMetrics];
-        updatedMetrics[parseInt(editingIndex)] = {
-          ...updatedMetrics[parseInt(editingIndex)],
-          name: visualizationName,
-          type: visualizationType,
-          unit: visualizationUnit,
-          data: metrics
-        };
-      } else {
-        // Create new metric object
-        const newMetric = {
-          id: Date.now() + Math.random(),
-          name: visualizationName,
-          type: visualizationType,
-          unit: visualizationUnit,
-          data: metrics
-        };
-
-        // Add new metric to existing ones
-        updatedMetrics = [...existingMetrics, newMetric];
-      }
-
-      OrgStore.updateNode(nodeId, { metrics: updatedMetrics });
-
-      displayAdminMessage("Metrics saved.", "success");
-
-      // Clear editing state
-      if (elements.metricsList) {
-        delete elements.metricsList.dataset.editingIndex;
-      }
-      if (elements.metricsSection) {
-        elements.metricsSection.classList.remove("editing-metric");
-      }
-
-      const refreshedNode = OrgStore.getNode(nodeId);
-
-      renderMetricsEditor(refreshedNode);
-
-      if (selectedNodeId === nodeId) {
-
-        renderDetailPanel();
-
-      }
-
-      if (typeof OrgMap !== "undefined" && OrgMap && typeof OrgMap.refresh === "function") {
-
-        OrgMap.refresh();
-
-      }
-
-    } catch (error) {
-
-      displayAdminMessage(error.message, "error");
-
-    }
-
-  };
-
-  const createMetricRow = (key = "", value = "") => {
-
-    const row = document.createElement("div");
-
-    row.classList.add("metrics-row");
-
-    const keyInput = document.createElement("input");
-
-    keyInput.type = "text";
-
-    keyInput.name = "metricKey";
-
-    keyInput.placeholder = "Name";
-
-    keyInput.value = key;
-
-    const valueInput = document.createElement("input");
-
-    valueInput.type = "number";
-
-    valueInput.name = "metricValue";
-
-    valueInput.placeholder = "Value";
-
-    valueInput.step = "0.1";
-
-    if (value !== "" && value !== null && value !== undefined) {
-
-      valueInput.value = value;
-
-    }
-
-    const removeButton = document.createElement("button");
-
-    removeButton.type = "button";
-
-    removeButton.classList.add("metrics-remove");
-
-    removeButton.textContent = "Ta bort";
-
-    removeButton.addEventListener("click", () => {
-
-      row.remove();
-
-      ensureMetricsPlaceholder();
-
-    });
-
-    row.appendChild(keyInput);
-
-    row.appendChild(valueInput);
-
-    row.appendChild(removeButton);
-
-    return row;
-
-  };
-
-  const createMetricsEmpty = () => {
-
-    const empty = document.createElement("p");
-
-    empty.classList.add("metrics-empty");
-
-    empty.textContent = "No metrics yet.";
-
-    return empty;
-
-  };
-
-  const removeMetricsEmpty = () => {
-
-    if (!elements.metricsList) {
-
-      return;
-
-    }
-
-    const placeholder = elements.metricsList.querySelector(".metrics-empty");
-
-    if (placeholder) {
-
-      placeholder.remove();
-
-    }
-
-  };
-
-  const ensureMetricsPlaceholder = () => {
-
-    if (!elements.metricsList) {
-
-      return;
-
-    }
-
-    const hasRows = elements.metricsList.querySelector(".metrics-row");
-
-    const placeholder = elements.metricsList.querySelector(".metrics-empty");
-
-    if (hasRows && placeholder) {
-
-      placeholder.remove();
-
-    }
-
-    if (!hasRows && !placeholder) {
-
-      elements.metricsList.appendChild(createMetricsEmpty());
-
-    }
-
-  };
 
   function buildMetricsSection(node) {
 

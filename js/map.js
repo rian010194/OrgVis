@@ -70,8 +70,30 @@ const OrgMap = (() => {
     if (!lastLayout || !Array.isArray(lastLayout.nodeData) || !nodeId) {
       return;
     }
-    const target = lastLayout.nodeData.find((node) => node.id === nodeId);
+    
+    // First try to find the node in regular nodes
+    let target = lastLayout.nodeData.find((node) => node.id === nodeId);
+    let focusY = target ? target.y : null;
+    
+    // If not found in regular nodes, check if it's a support office child
+    if (!target && lastLayout.supportMap) {
+      for (const [parentId, supportEntry] of lastLayout.supportMap) {
+        const supportChild = supportEntry.children.find(child => child.id === nodeId);
+        if (supportChild) {
+          // Find the parent node to focus on
+          const parentNode = lastLayout.nodeData.find(node => node.id === parentId);
+          if (parentNode) {
+            target = parentNode;
+            // Adjust focus to account for support box position
+            focusY = parentNode.y + NODE_HEIGHT / 2 + SUPPORT_TOGGLE_OFFSET + SUPPORT_TOGGLE_HEIGHT + SUPPORT_BOX_OFFSET + SUPPORT_BOX_HEIGHT / 2;
+            break;
+          }
+        }
+      }
+    }
+    
     if (!target) {
+      console.warn('OrgMap: Node not found for focus:', nodeId);
       return;
     }
 
@@ -84,7 +106,7 @@ const OrgMap = (() => {
     const centerX = width / 2;
     const centerY = height / 2;
     const tx = centerX - target.x * scale;
-    const ty = centerY - target.y * scale;
+    const ty = centerY - (focusY || target.y) * scale;
     const transform = d3.zoomIdentity.translate(tx, ty).scale(scale);
 
     currentTransform = transform;
@@ -772,8 +794,21 @@ const OrgMap = (() => {
     if (!nodeId) {
       return;
     }
+    
+    // Check if this is a support office child
+    const allNodes = OrgStore.getAll();
+    const supportChild = allNodes.find(node => node.id === nodeId && node.type === "SupportOffice");
+    
+    if (supportChild) {
+      // For support office children, show their parent's support box
+      const parentId = supportChild.parent;
+      if (parentId) {
+        supportVisibility.add(parentId);
+      }
+    }
+    
     const parentByChild = new Map();
-    OrgStore.getAll().forEach((node) => {
+    allNodes.forEach((node) => {
       parentByChild.set(node.id, node.parent || null);
     });
     let current = parentByChild.get(nodeId);

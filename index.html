@@ -150,27 +150,6 @@
                 Outcomes (deliverables)
                 <textarea name="outcomes" id="adminEditOutcomes" rows="3" placeholder="One point per line"></textarea>
               </label>
-              <div id="adminMetricsSection" class="admin-metrics">
-                <div class="metrics-header">
-                  <h4>Metrics</h4>
-                  <div class="metrics-actions">
-                    <select id="adminVisualizationType" class="visualization-type-select">
-                      <option value="">Välj visualiseringstyp...</option>
-                      <option value="pie">Cirkeldiagram</option>
-                      <option value="bar">Stapeldiagram</option>
-                      <option value="line">Linjediagram</option>
-                      <option value="table">Tabell</option>
-                    </select>
-                    <input type="text" id="adminVisualizationName" placeholder="Namn på visualisering (t.ex. 'Time spent on: Q1')" class="visualization-name-input">
-                    <input type="text" id="adminVisualizationUnit" placeholder="Enhet (t.ex. 'timmar', '%', 'dagar')" class="visualization-unit-input">
-                    <button type="button" id="adminCreatePieButton" class="secondary">Skapa Visualisering</button>
-                    <button type="button" id="adminAddMetricButton" class="secondary" style="display: none;">Add Metric</button>
-                  </div>
-                </div>
-                <div id="adminMetricsList" class="metrics-list"></div>
-                <div id="adminExistingMetrics" class="existing-metrics"></div>
-                <button type="button" id="adminSaveMetricsButton" class="primary metrics-save">Save Metrics</button>
-              </div>
               <div class="admin-actions">
                 <button type="submit" class="primary">Save Changes</button>
                 <button type="button" id="adminDeleteNodeButton" class="danger">Delete Node</button>
@@ -281,8 +260,8 @@
   <script type="module" src="js/data-supabase.js?v=20241220"></script>
   -->
   <script src="js/charts.js?v=20241220"></script>
-    <script src="js/ui.js?v=20241220i"></script>
-  <script src="js/map.js?v=20241220"></script>
+    <script src="js/ui.js?v=20241220j"></script>
+  <script src="js/map.js?v=20241220a"></script>
   <script src="js/app.js?v=20241220a"></script>
 </body>
 </html>
