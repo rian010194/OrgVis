@@ -31,6 +31,7 @@
           <button type="button" class="admin-tab" id="adminTab-create" data-admin-tab="create" role="tab" aria-selected="false" tabindex="-1" aria-controls="adminPanel-create">Create Node</button>
           <button type="button" class="admin-tab" id="adminTab-edit" data-admin-tab="edit" role="tab" aria-selected="true" tabindex="0" aria-controls="adminPanel-edit">Edit Node</button>
           <button type="button" class="admin-tab" id="adminTab-relations" data-admin-tab="relations" role="tab" aria-selected="false" tabindex="-1" aria-controls="adminPanel-relations">Relations</button>
+          <button type="button" class="admin-tab" id="adminTab-metrics" data-admin-tab="metrics" role="tab" aria-selected="false" tabindex="-1" aria-controls="adminPanel-metrics">Metrics</button>
         </div>
         <p class="admin-hint">Changes are automatically saved to your browser. API connection will be added later.</p>
         <div id="adminMessage" class="admin-message"></div>
@@ -197,6 +198,52 @@
               <button type="submit" class="danger">Remove Relation</button>
             </form>
           </div>
+
+          <div class="admin-tab-panel" id="adminPanel-metrics" data-admin-panel="metrics" role="tabpanel" aria-labelledby="adminTab-metrics" hidden>
+            <form id="adminAddMetricForm" class="admin-form">
+              <h3>Add Metric</h3>
+              <label>
+                Node
+                <select name="nodeId" required>
+                  <option value="">Select a node...</option>
+                </select>
+              </label>
+              <label>
+                Metric Name
+                <input name="metricName" type="text" placeholder="e.g., Budget, Headcount, Revenue" required />
+              </label>
+              <label>
+                Value
+                <input name="metricValue" type="number" step="0.01" placeholder="0" required />
+              </label>
+              <label>
+                Unit
+                <input name="metricUnit" type="text" placeholder="e.g., SEK, people, %" />
+              </label>
+              <label>
+                Description
+                <textarea name="metricDescription" placeholder="Optional description of the metric"></textarea>
+              </label>
+              <button type="submit" class="primary">Add Metric</button>
+            </form>
+
+            <form id="adminRemoveMetricForm" class="admin-form">
+              <h3>Remove Metric</h3>
+              <label>
+                Node
+                <select name="removeNodeId" required>
+                  <option value="">Select a node...</option>
+                </select>
+              </label>
+              <label>
+                Metric
+                <select name="metricToRemove" required>
+                  <option value="">Select a metric...</option>
+                </select>
+              </label>
+              <button type="submit" class="danger">Remove Metric</button>
+            </form>
+          </div>
         </div>
       </div>
     </aside>
@@ -217,7 +264,7 @@
   <script type="module" src="js/data-supabase.js?v=20241220"></script>
   -->
   <script src="js/charts.js?v=20241220"></script>
-    <script src="js/ui.js?v=20241220b"></script>
+    <script src="js/ui.js?v=20241220c"></script>
   <script src="js/map.js?v=20241220"></script>
   <script src="js/app.js?v=20241220"></script>
 </body>
