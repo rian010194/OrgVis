@@ -1947,13 +1947,23 @@ const OrgUI = (() => {
 
     }
 
-    // Show/hide Users button based on admin state
+    // Show/hide Users and Edit Theme buttons based on admin state
     const userManagementBtn = document.getElementById('userManagementBtn');
+    const editThemeBtn = document.getElementById('editThemeBtn');
+    
     if (userManagementBtn) {
       if (willOpen) {
         userManagementBtn.classList.remove('hidden');
       } else {
         userManagementBtn.classList.add('hidden');
+      }
+    }
+    
+    if (editThemeBtn) {
+      if (willOpen) {
+        editThemeBtn.classList.remove('hidden');
+      } else {
+        editThemeBtn.classList.add('hidden');
       }
     }
 

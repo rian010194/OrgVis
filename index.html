@@ -215,9 +215,103 @@
     </div>
   </div>
 
+  <!-- Edit Theme Panel -->
+  <div id="editThemePanel" class="theme-panel hidden">
+    <div class="theme-panel-header">
+      <div class="header-left">
+        <h3>Edit Theme</h3>
+        <span class="theme-stats">Customize your organization</span>
+      </div>
+      <button id="closeThemeBtn" class="close-btn">&times;</button>
+    </div>
+    
+    <div class="theme-panel-content">
+      <form id="editThemeForm" class="theme-form">
+        <div class="customization-section">
+          <h3>Organization Info</h3>
+          <div class="form-group">
+            <label for="themeOrgName">Organization Name</label>
+            <input type="text" id="themeOrgName" name="orgName" placeholder="Enter organization name">
+          </div>
+          <div class="form-group">
+            <label for="themeOrgDescription">Description</label>
+            <input type="text" id="themeOrgDescription" name="orgDescription" placeholder="Enter organization description">
+          </div>
+        </div>
+
+        <div class="customization-section">
+          <h3>Logo & Branding</h3>
+          <div class="form-group">
+            <label for="themeOrgLogo">Organization Logo</label>
+            <div class="logo-upload">
+              <input type="file" id="themeOrgLogo" name="orgLogo" accept="image/*" class="file-input">
+              <div class="logo-preview" id="themeLogoPreview">
+                <span class="logo-placeholder">No logo selected</span>
+              </div>
+              <button type="button" id="themeUploadLogoBtn" class="button secondary">Choose Logo</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="customization-section">
+          <h3>Colors</h3>
+          <div class="color-grid">
+            <div class="form-group">
+              <label for="themePrimaryColor">Primary Color</label>
+              <div class="color-input-group">
+                <input type="color" id="themePrimaryColor" name="primaryColor" value="#ff5a00">
+                <input type="text" id="themePrimaryColorText" value="#ff5a00" placeholder="#ff5a00">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="themeSecondaryColor">Secondary Color</label>
+              <div class="color-input-group">
+                <input type="color" id="themeSecondaryColor" name="secondaryColor" value="#e53e3e">
+                <input type="text" id="themeSecondaryColorText" value="#e53e3e" placeholder="#e53e3e">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="customization-section">
+          <h3>Typography</h3>
+          <div class="form-group">
+            <label for="themeFontFamily">Font Family</label>
+            <select id="themeFontFamily" name="fontFamily">
+              <option value="system">System Font (Default)</option>
+              <option value="inter">Inter</option>
+              <option value="roboto">Roboto</option>
+              <option value="open-sans">Open Sans</option>
+              <option value="lato">Lato</option>
+              <option value="montserrat">Montserrat</option>
+              <option value="poppins">Poppins</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="themeFontSize">Base Font Size</label>
+            <select id="themeFontSize" name="fontSize">
+              <option value="14">Small (14px)</option>
+              <option value="16" selected>Medium (16px)</option>
+              <option value="18">Large (18px)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" id="cancelThemeBtn" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Theme</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Main Application (hidden initially) -->
   <div id="mainApp" class="main-app hidden">
-    <header>
+    <header class="app-header">
+      <div class="org-info">
+        <h1 id="orgName" class="org-title">Organization Chart</h1>
+        <span id="orgDescription" class="org-description">Visualize and manage your organization structure</span>
+      </div>
     </header>
 
   <div class="app-toolbar" role="toolbar" aria-label="View and admin controls">
@@ -243,6 +337,10 @@
       <button id="userManagementBtn" type="button" class="user-management-button hidden" title="User Management">
         <span class="user-icon">👥</span>
         <span class="user-text">Users</span>
+      </button>
+      <button id="editThemeBtn" type="button" class="theme-edit-button hidden" title="Edit Theme">
+        <span class="theme-icon">🎨</span>
+        <span class="theme-text">Edit Theme</span>
       </button>
       <button id="toggleAdmin" type="button" class="admin-toggle" aria-pressed="false" aria-controls="adminPanel">
         <span class="admin-icon">⚙️</span>
@@ -515,6 +613,7 @@
     <!-- <script type="module" src="js/user-interface.js?v=20241221"></script> -->
     <!-- Demo version for testing without Supabase -->
     <script src="js/user-interface-demo.js?v=20241221c"></script>
+    <script src="js/theme-editor.js?v=20241221c"></script>
     <script src="js/app.js?v=20241221b"></script>
   </div>
 

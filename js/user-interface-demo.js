@@ -222,9 +222,9 @@ class UserInterfaceDemo {
     const levelCanvas = document.getElementById('levelChart');
     
     if (roleCanvas) {
-      // Set canvas size
-      roleCanvas.width = 700;
-      roleCanvas.height = 250;
+      // Set canvas size - much wider for better spacing
+      roleCanvas.width = 900;
+      roleCanvas.height = 300;
       
       const ctx = roleCanvas.getContext('2d');
       ctx.clearRect(0, 0, roleCanvas.width, roleCanvas.height);

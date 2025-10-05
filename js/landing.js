@@ -879,8 +879,22 @@ const LandingPage = (() => {
       }
     }
     
+    // Get current organization ID before clearing it
+    const currentOrgId = localStorage.getItem('current_organization_id');
+    
     // Clear current organization
     localStorage.removeItem('current_organization_id');
+    
+    // Clear any organization branding/logo from landing page
+    if (currentOrgId) {
+      localStorage.removeItem(`org_branding_${currentOrgId}`);
+    }
+    
+    // Remove logo from landing page if it exists
+    const logoElement = document.querySelector('.landing-logo');
+    if (logoElement) {
+      logoElement.remove();
+    }
     
     // Reset all branding to default
     document.documentElement.style.removeProperty('--brand-orange');

@@ -218,8 +218,10 @@
   background: white;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: visible;
   margin-bottom: 1rem;
+  max-height: 400px;
 }
 
 .users-table,
@@ -228,20 +230,21 @@
   border-collapse: collapse;
   font-size: 0.875rem;
   table-layout: fixed;
+  min-width: 700px; /* Ensure minimum table width */
 }
 
 .users-table th:nth-child(1),
-.users-table td:nth-child(1) { width: 12%; } /* Anställnings-ID */
+.users-table td:nth-child(1) { width: 15%; min-width: 80px; } /* Anställnings-ID */
 .users-table th:nth-child(2),
-.users-table td:nth-child(2) { width: 18%; } /* Namn */
+.users-table td:nth-child(2) { width: 20%; min-width: 120px; } /* Namn */
 .users-table th:nth-child(3),
-.users-table td:nth-child(3) { width: 25%; } /* E-post */
+.users-table td:nth-child(3) { width: 25%; min-width: 180px; } /* E-post */
 .users-table th:nth-child(4),
-.users-table td:nth-child(4) { width: 15%; } /* Avdelning */
+.users-table td:nth-child(4) { width: 15%; min-width: 100px; } /* Avdelning */
 .users-table th:nth-child(5),
-.users-table td:nth-child(5) { width: 15%; } /* Roll */
+.users-table td:nth-child(5) { width: 15%; min-width: 120px; } /* Roll */
 .users-table th:nth-child(6),
-.users-table td:nth-child(6) { width: 15%; } /* Status */
+.users-table td:nth-child(6) { width: 10%; min-width: 80px; } /* Status */
 
 .users-table th,
 .permissions-table th {
@@ -258,6 +261,9 @@
   padding: 0.75rem;
   border-bottom: 1px solid #f0f0f0;
   vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .users-table tr:hover,
