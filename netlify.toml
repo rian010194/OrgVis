@@ -12,12 +12,12 @@
 [[headers]]
   for = "/js/*"
   [headers.values]
-    Cache-Control = "public, max-age=86400"  # 24 hours
+    Cache-Control = "public, max-age=300"  # 5 minutes for development
 
 [[headers]]
   for = "/css/*"
   [headers.values]
-    Cache-Control = "public, max-age=86400"  # 24 hours
+    Cache-Control = "public, max-age=300"  # 5 minutes for development
 
 [[headers]]
   for = "/img/*"
