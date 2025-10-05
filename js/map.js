@@ -24,7 +24,7 @@ const OrgMap = (() => {
     expanded: new Set(),
     selectedId: null
   };
-  const zoomSettings = { min: 0.3, max: 2.5, focusScale: 1.2 };
+  const zoomSettings = { min: 0.3, max: 2.5, focusScale: 0.6 }; // More zoomed out for better context
   const supportVisibility = new Set();
 
   let container = null;
@@ -101,7 +101,9 @@ const OrgMap = (() => {
     const width = (bounds && bounds.width) || lastLayout.outerWidth || minInnerWidth + margins.left + margins.right;
     const height = (bounds && bounds.height) || lastLayout.outerHeight || minInnerHeight + margins.top + margins.bottom;
 
-    const desiredScale = options.scale !== undefined ? options.scale : zoomSettings.focusScale;
+    // Use a more zoomed-out scale to show context of where the node is in the tree
+    const contextScale = Math.max(zoomSettings.min, 0.6); // More zoomed out for better context
+    const desiredScale = options.scale !== undefined ? options.scale : contextScale;
     const scale = Math.max(zoomSettings.min, Math.min(zoomSettings.max, desiredScale));
     const centerX = width / 2;
     const centerY = height / 2;
@@ -494,11 +496,42 @@ const OrgMap = (() => {
   const toggleSupportVisibility = (parentId) => {
     console.log('toggleSupportVisibility called with parentId:', parentId);
     if (supportVisibility.has(parentId)) {
+      // Close the current support office
       supportVisibility.delete(parentId);
       console.log('Removed from supportVisibility');
+      
+      // When closing support offices, ensure focus is maintained on selected node
+      if (state.selectedId) {
+        setTimeout(() => {
+          focusNode(state.selectedId, { duration: 200 });
+        }, 100);
+      }
     } else {
+      // Close all other support offices first (only allow one open at a time)
+      supportVisibility.clear();
+      // Open the new support office
       supportVisibility.add(parentId);
-      console.log('Added to supportVisibility');
+      console.log('Cleared all and added new to supportVisibility');
+      
+      // Zoom out a bit to accommodate support boxes
+      if (svg && zoomBehavior) {
+        const currentScale = currentTransform.k;
+        const newScale = Math.max(zoomSettings.min, currentScale * 0.7); // Zoom out to 70% of current scale
+        const newTransform = d3.zoomIdentity.translate(currentTransform.x, currentTransform.y).scale(newScale);
+        
+        svg.transition()
+          .duration(300)
+          .ease(d3.easeCubicInOut)
+          .call(zoomBehavior.transform, newTransform)
+          .on('end', () => {
+            // After zoom animation, focus on the selected node if any
+            if (state.selectedId) {
+              setTimeout(() => {
+                focusNode(state.selectedId, { duration: 200, scale: 0.6 });
+              }, 50);
+            }
+          });
+      }
     }
     console.log('Current supportVisibility:', Array.from(supportVisibility));
     console.log('lastLayout exists:', !!lastLayout);
@@ -655,6 +688,51 @@ const OrgMap = (() => {
         button.classed('selected', false);
       }
     });
+  };
+
+  const setSupportVisibility = (parentId, isVisible) => {
+    if (!parentId) {
+      return;
+    }
+    
+    if (isVisible) {
+      supportVisibility.add(parentId);
+      
+      // Zoom out a bit when opening support offices
+      if (svg && zoomBehavior) {
+        const currentScale = currentTransform.k;
+        const newScale = Math.max(zoomSettings.min, currentScale * 0.7); // Zoom out to 70% of current scale
+        const newTransform = d3.zoomIdentity.translate(currentTransform.x, currentTransform.y).scale(newScale);
+        
+        svg.transition()
+          .duration(300)
+          .ease(d3.easeCubicInOut)
+          .call(zoomBehavior.transform, newTransform)
+          .on('end', () => {
+            // After zoom animation, focus on the selected node if any
+            if (state.selectedId) {
+              setTimeout(() => {
+                focusNode(state.selectedId, { duration: 200, scale: 0.6 });
+              }, 50);
+            }
+          });
+      }
+    } else {
+      supportVisibility.delete(parentId);
+      
+      // When closing support offices, ensure focus is maintained on selected node
+      if (state.selectedId) {
+        setTimeout(() => {
+          focusNode(state.selectedId, { duration: 200 });
+        }, 100);
+      }
+    }
+    
+    // Re-render support toggles and boxes
+    if (lastLayout) {
+      renderSupportToggles(lastLayout);
+      renderSupportBoxes(lastLayout);
+    }
   };
 
   const toggleNode = (node) => {
@@ -853,7 +931,7 @@ const OrgMap = (() => {
     refresh();
     if (nodeId) {
       requestAnimationFrame(() => {
-        focusNode(nodeId);
+        focusNode(nodeId, { scale: 0.6 }); // Use context scale for better overview
       });
     }
   };
@@ -920,7 +998,8 @@ const OrgMap = (() => {
     refresh,
     reveal,
     resetView,
-    teardown
+    teardown,
+    setSupportVisibility
   };
 })();
 

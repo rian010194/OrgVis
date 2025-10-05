@@ -599,6 +599,21 @@ const OrgUI = (() => {
 
   };
 
+  const syncSupportOfficeVisibility = (nodeId) => {
+    // Check if the selected node is a support office child
+    const node = OrgStore.getNode(nodeId);
+    if (!node) {
+      return;
+    }
+    
+    // If this is a support office child, show its parent's support box in map view
+    if (node.type === "SupportOffice" && node.parent) {
+      if (typeof OrgMap !== "undefined" && OrgMap && typeof OrgMap.setSupportVisibility === "function") {
+        OrgMap.setSupportVisibility(node.parent, true);
+      }
+    }
+  };
+
   const renderOrgChart = () => {
 
     if (!elements.treeContainer) {
@@ -837,6 +852,9 @@ const OrgUI = (() => {
     if (typeof OrgMap !== "undefined" && OrgMap && typeof OrgMap.reveal === "function") {
 
       OrgMap.reveal(nodeId);
+      
+      // If this is a support office child, ensure its parent's support box is visible
+      syncSupportOfficeVisibility(nodeId);
 
     }
 
