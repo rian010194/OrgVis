@@ -1,5 +1,5 @@
 // Supabase-powered Theme Editor for Organization Chart
-import { orgDb } from './supabase-multi-org.js';
+// Note: orgDb is made globally available by supabase-multi-org.js
 
 class SupabaseThemeEditor {
   constructor() {
@@ -60,7 +60,7 @@ class SupabaseThemeEditor {
     
     if (currentOrgId) {
       try {
-        const orgData = await orgDb.getOrganization(currentOrgId);
+        const orgData = await window.orgDb.getOrganization(currentOrgId);
         console.log('SupabaseThemeEditor: Org data from Supabase:', orgData);
         
         // Update header
@@ -93,7 +93,7 @@ class SupabaseThemeEditor {
       // If no current org ID, try to set it to demo
       const demoOrgId = 'demo_org';
       try {
-        const demoData = await orgDb.getOrganization(demoOrgId);
+        const demoData = await window.orgDb.getOrganization(demoOrgId);
         if (demoData && demoData.name) {
           localStorage.setItem('current_organization_id', demoOrgId);
           this.initializeHeader();
@@ -203,7 +203,7 @@ class SupabaseThemeEditor {
     if (!currentOrgId) {
       // If no current org ID, try to get from organizations list
       try {
-        const orgList = await orgDb.getOrganizations();
+        const orgList = await window.orgDb.getOrganizations();
         if (orgList && orgList.length > 0) {
           const firstOrg = orgList[0];
           localStorage.setItem('current_organization_id', firstOrg.id);
@@ -218,7 +218,7 @@ class SupabaseThemeEditor {
 
     try {
       // Load organization data from Supabase
-      const orgData = await orgDb.getOrganization(currentOrgId);
+      const orgData = await window.orgDb.getOrganization(currentOrgId);
       const brandingData = orgData.branding || {};
 
       // Update form fields
@@ -450,7 +450,7 @@ class SupabaseThemeEditor {
       } else {
         // Keep existing logo if no new one uploaded
         try {
-          const existingOrg = await orgDb.getOrganization(currentOrgId);
+          const existingOrg = await window.orgDb.getOrganization(currentOrgId);
           brandingData.logo = existingOrg.branding?.logo;
         } catch (error) {
           console.error('SupabaseThemeEditor: Error getting existing logo:', error);
@@ -468,7 +468,7 @@ class SupabaseThemeEditor {
     
     try {
       // Update organization in Supabase
-      await orgDb.updateOrganization(currentOrgId, {
+      await window.orgDb.updateOrganization(currentOrgId, {
         ...orgUpdates,
         branding: brandingData
       });

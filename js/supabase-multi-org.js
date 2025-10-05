@@ -2,14 +2,21 @@
 import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js@2';
 import { SUPABASE_CONFIG } from './config.js';
 
-// Create Supabase client
-export const supabase = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true
+// Create Supabase client (singleton to avoid multiple instances)
+let supabaseInstance = null;
+
+export const supabase = (() => {
+  if (!supabaseInstance) {
+    supabaseInstance = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true
+      }
+    });
   }
-});
+  return supabaseInstance;
+})();
 
 // Database service class for multi-organization data
 export class OrgDatabase {
@@ -318,6 +325,13 @@ export class OrgDatabase {
 
 // Create global instance
 export const orgDb = new OrgDatabase();
+
+// Make orgDb globally available for compatibility
+window.orgDb = orgDb;
+
+// Make conversion functions globally available
+window.convertSupabaseToFrontend = convertSupabaseToFrontend;
+window.convertFrontendToSupabase = convertFrontendToSupabase;
 
 // Helper function to convert Supabase data to frontend format
 export function convertSupabaseToFrontend(supabaseData) {

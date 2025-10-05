@@ -1,5 +1,5 @@
 // Supabase-powered OrgStore with Multi-Organization Support
-import { orgDb, convertSupabaseToFrontend, convertFrontendToSupabase } from './supabase.js';
+// Note: orgDb is made globally available by supabase-multi-org.js
 
 const OrgStore = (() => {
   const state = {
@@ -224,16 +224,16 @@ const OrgStore = (() => {
     state.loadPromise = (async () => {
       try {
         // Load nodes with metrics from Supabase for specific organization
-        const supabaseData = await orgDb.getNodesWithMetrics(organizationId);
+        const supabaseData = await window.orgDb.getNodesWithMetrics(organizationId);
         
         state.nodesById.clear();
         supabaseData.forEach((rawNode) => {
-          const node = normaliseNode(rawNode);
+          const node = normaliseNode(window.convertSupabaseToFrontend(rawNode));
           state.nodesById.set(node.id, node);
         });
 
         // Load relations from Supabase for specific organization
-        const relations = await orgDb.getRelations(organizationId);
+        const relations = await window.orgDb.getRelations(organizationId);
         
         // Add relations to nodes
         relations.forEach((relation) => {
@@ -390,9 +390,9 @@ const OrgStore = (() => {
       node.supportOffice = node.supportOffice ? String(node.supportOffice) : null;
 
       // Save to Supabase with organization ID
-      const supabaseData = convertFrontendToSupabase(node);
+      const supabaseData = window.convertFrontendToSupabase(node);
       supabaseData.organization_id = state.currentOrganizationId;
-      await orgDb.createNode(supabaseData);
+      await window.orgDb.createNode(supabaseData);
 
       state.nodesById.set(node.id, node);
       if (node.parent) {
@@ -452,9 +452,9 @@ const OrgStore = (() => {
       }
 
       // Update in Supabase
-      const supabaseData = convertFrontendToSupabase(node);
+      const supabaseData = window.convertFrontendToSupabase(node);
       supabaseData.organization_id = state.currentOrganizationId;
-      await orgDb.updateNode(id, supabaseData);
+      await window.orgDb.updateNode(id, supabaseData);
 
       notify();
       return clone(node);
@@ -477,7 +477,7 @@ const OrgStore = (() => {
       }
 
       // Remove from Supabase
-      await orgDb.deleteNode(id);
+      await window.orgDb.deleteNode(id);
 
       if (node.parent) {
         const parent = state.nodesById.get(node.parent);
@@ -527,7 +527,7 @@ const OrgStore = (() => {
       }
 
       // Add to Supabase with organization ID
-      await orgDb.createRelation({
+      await window.orgDb.createRelation({
         organization_id: state.currentOrganizationId,
         from_node_id: from,
         to_node_id: to,
@@ -571,7 +571,7 @@ const OrgStore = (() => {
       }
 
       // Remove from Supabase
-      await orgDb.deleteRelation(from, to);
+      await window.orgDb.deleteRelation(from, to);
 
       const fromNode = state.nodesById.get(from);
       const toNode = state.nodesById.get(to);
@@ -631,21 +631,21 @@ const OrgStore = (() => {
     if (!state.currentOrganizationId) return;
 
     // Subscribe to node changes for current organization
-    orgDb.subscribeToNodes((payload) => {
+    window.orgDb.subscribeToNodes((payload) => {
       console.log('Node changed:', payload);
       // Reload data when nodes change
       load(state.currentOrganizationId);
     }, state.currentOrganizationId);
 
     // Subscribe to metrics changes for current organization
-    orgDb.subscribeToMetrics((payload) => {
+    window.orgDb.subscribeToMetrics((payload) => {
       console.log('Metric changed:', payload);
       // Reload data when metrics change
       load(state.currentOrganizationId);
     }, state.currentOrganizationId);
 
     // Subscribe to relations changes for current organization
-    orgDb.subscribeToRelations((payload) => {
+    window.orgDb.subscribeToRelations((payload) => {
       console.log('Relation changed:', payload);
       // Reload data when relations change
       load(state.currentOrganizationId);
@@ -655,7 +655,7 @@ const OrgStore = (() => {
   // Initialize real-time subscriptions when store is first loaded
   let subscriptionsInitialized = false;
   const originalLoad = load;
-  load = async (...args) => {
+  const loadWithSubscriptions = async (...args) => {
     const result = await originalLoad(...args);
     if (!subscriptionsInitialized && state.isLoaded && state.currentOrganizationId) {
       setupRealtimeSubscriptions();
@@ -665,7 +665,7 @@ const OrgStore = (() => {
   };
 
   return {
-    load,
+    load: loadWithSubscriptions,
     ensureLoaded,
     getSnapshot,
     getNode,
@@ -682,5 +682,11 @@ const OrgStore = (() => {
     getState
   };
 })();
+
+// Make OrgStore globally available for compatibility
+window.OrgStore = OrgStore;
+
+// Make conversion functions globally available (they're already available from supabase-multi-org.js)
+// No need to redefine them here
 
 export default OrgStore;
