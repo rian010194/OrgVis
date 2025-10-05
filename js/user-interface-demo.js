@@ -222,49 +222,77 @@ class UserInterfaceDemo {
     const levelCanvas = document.getElementById('levelChart');
     
     if (roleCanvas) {
+      // Set canvas size
+      roleCanvas.width = 350;
+      roleCanvas.height = 250;
+      
       const ctx = roleCanvas.getContext('2d');
       ctx.clearRect(0, 0, roleCanvas.width, roleCanvas.height);
       
-      // Simple bar chart
+      // Simple bar chart with better spacing
       const data = [150, 300, 500, 200, 50]; // member, team_lead, department_admin, org_admin, super_admin
       const labels = ['Medlem', 'Teamledare', 'Avdelningsadmin', 'Org Admin', 'Super Admin'];
       const colors = ['#6c757d', '#20c997', '#ffc107', '#fd7e14', '#dc3545'];
       
-      const barWidth = roleCanvas.width / data.length - 10;
+      const barWidth = 50; // Fixed bar width
+      const barSpacing = 20; // Space between bars
       const maxValue = Math.max(...data);
+      const chartHeight = roleCanvas.height - 80; // More space for labels
+      const chartStartY = 20;
       
       data.forEach((value, index) => {
-        const barHeight = (value / maxValue) * (roleCanvas.height - 40);
-        const x = index * (barWidth + 10) + 5;
-        const y = roleCanvas.height - barHeight - 20;
+        const barHeight = (value / maxValue) * chartHeight;
+        const x = index * (barWidth + barSpacing) + 30;
+        const y = chartStartY + (chartHeight - barHeight);
         
+        // Draw bar
         ctx.fillStyle = colors[index];
         ctx.fillRect(x, y, barWidth, barHeight);
         
+        // Draw value on top
         ctx.fillStyle = '#333';
-        ctx.font = '12px Arial';
+        ctx.font = 'bold 12px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText(value, x + barWidth/2, y - 5);
-        ctx.fillText(labels[index], x + barWidth/2, roleCanvas.height - 5);
+        ctx.fillText(value.toString(), x + barWidth/2, y - 8);
+        
+        // Draw label rotated for better fit
+        ctx.save();
+        ctx.translate(x + barWidth/2, roleCanvas.height - 15);
+        ctx.rotate(-Math.PI / 4); // Rotate 45 degrees
+        ctx.font = '11px Arial';
+        ctx.fillStyle = '#666';
+        ctx.textAlign = 'center';
+        ctx.fillText(labels[index], 0, 0);
+        ctx.restore();
       });
     }
     
     if (levelCanvas) {
+      // Set canvas size
+      levelCanvas.width = 350;
+      levelCanvas.height = 250;
+      
       const ctx = levelCanvas.getContext('2d');
       ctx.clearRect(0, 0, levelCanvas.width, levelCanvas.height);
       
-      // Simple line chart
+      // Simple line chart with better spacing
       const data = [5, 25, 150, 400, 600, 200, 50]; // levels 1-7
-      const stepX = levelCanvas.width / (data.length - 1);
-      const stepY = (levelCanvas.height - 40) / Math.max(...data);
+      const chartWidth = levelCanvas.width - 60; // Leave space for labels
+      const chartHeight = levelCanvas.height - 80;
+      const chartStartX = 40;
+      const chartStartY = 20;
       
+      const stepX = chartWidth / (data.length - 1);
+      const maxValue = Math.max(...data);
+      
+      // Draw line
       ctx.strokeStyle = '#007bff';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 3;
       ctx.beginPath();
       
       data.forEach((value, index) => {
-        const x = index * stepX;
-        const y = levelCanvas.height - (value * stepY) - 20;
+        const x = chartStartX + index * stepX;
+        const y = chartStartY + chartHeight - (value / maxValue) * chartHeight;
         
         if (index === 0) {
           ctx.moveTo(x, y);
@@ -275,19 +303,25 @@ class UserInterfaceDemo {
         // Draw point
         ctx.fillStyle = '#007bff';
         ctx.beginPath();
-        ctx.arc(x, y, 3, 0, 2 * Math.PI);
+        ctx.arc(x, y, 4, 0, 2 * Math.PI);
         ctx.fill();
+        
+        // Draw value above point
+        ctx.fillStyle = '#333';
+        ctx.font = 'bold 11px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(value.toString(), x, y - 10);
       });
       
       ctx.stroke();
       
-      // Add labels
-      ctx.fillStyle = '#333';
-      ctx.font = '12px Arial';
+      // Add labels with better spacing
+      ctx.fillStyle = '#666';
+      ctx.font = '11px Arial';
       ctx.textAlign = 'center';
       data.forEach((value, index) => {
-        const x = index * stepX;
-        ctx.fillText(`Nivå ${index + 1}`, x, levelCanvas.height - 5);
+        const x = chartStartX + index * stepX;
+        ctx.fillText(`Nivå ${index + 1}`, x, levelCanvas.height - 10);
       });
     }
   }

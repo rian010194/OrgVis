@@ -144,6 +144,7 @@
   border-radius: 8px;
   padding: 1.25rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  overflow: hidden; /* Prevent canvas overflow */
 }
 
 .chart-container h4 {
@@ -154,7 +155,10 @@
 
 .chart-container canvas {
   width: 100%;
-  height: 150px;
+  height: 250px;
+  max-width: 350px;
+  display: block;
+  margin: 0 auto;
 }
 
 /* View Headers */
