@@ -178,6 +178,12 @@ const LandingPage = (() => {
       loadJumpYardBtn.addEventListener('click', loadJumpYardDemo);
     }
     
+    // Header demo button
+    const headerDemoBtn = document.getElementById('headerDemoBtn');
+    if (headerDemoBtn) {
+      headerDemoBtn.addEventListener('click', loadJumpYardDemo);
+    }
+    
     // Create organization modal events
     const closeModalBtn = document.getElementById('closeModalBtn');
     const cancelCreateBtn = document.getElementById('cancelCreateBtn');
@@ -940,53 +946,73 @@ const LandingPage = (() => {
     }, 4000);
   };
   
-  const handleLogout = async () => {
-    // Try to use user management system if available
-    if (typeof userManager !== 'undefined') {
-      try {
-        await userManager.logout();
-      } catch (error) {
-        console.log('User management logout failed, continuing with organization logout');
+  // Debounce logout to prevent multiple rapid clicks
+  let logoutInProgress = false;
+  
+  const handleLogout = async (event) => {
+    // Prevent multiple simultaneous logout attempts
+    if (logoutInProgress) {
+      console.log('Logout already in progress, ignoring click');
+      return;
+    }
+    
+    logoutInProgress = true;
+    
+    // Disable the logout button immediately to prevent multiple clicks
+    const logoutBtn = event?.target || document.getElementById('logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.disabled = true;
+      logoutBtn.style.opacity = '0.6';
+      logoutBtn.style.cursor = 'not-allowed';
+    }
+    
+    try {
+      // Try to use user management system if available
+      if (typeof userManager !== 'undefined') {
+        try {
+          await userManager.logout();
+        } catch (error) {
+          console.log('User management logout failed, continuing with organization logout');
+        }
       }
-    }
-    
-    // Get current organization ID before clearing it
-    const currentOrgId = localStorage.getItem('current_organization_id');
-    
-    // Clear current organization
-    localStorage.removeItem('current_organization_id');
-    
-    // Clear any organization branding/logo from landing page
-    if (currentOrgId) {
-      localStorage.removeItem(`org_branding_${currentOrgId}`);
-    }
-    
-    // Remove logo from landing page if it exists
-    const logoElement = document.querySelector('.landing-logo');
-    if (logoElement) {
-      logoElement.remove();
-    }
-    
-    // Reset all branding to default
-    document.documentElement.style.removeProperty('--brand-orange');
-    document.documentElement.style.removeProperty('--brand-red');
-    document.documentElement.style.removeProperty('--brand-gradient');
-    document.documentElement.style.removeProperty('--font-family');
-    document.documentElement.style.removeProperty('--base-font-size');
-    
-    // Reset body font to default values (not empty strings)
-    document.body.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
-    document.body.style.fontSize = '16px'; // Set explicit default font size
-    
-    // Reset any remaining inline font styles (should be minimal now)
-    const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div, button, input, select, textarea, label, a');
-    textElements.forEach(el => {
-      el.style.fontFamily = '';
-      el.style.fontSize = '';
-    });
-    
-    // Remove any organization logos from headers
-    const existingLogos = document.querySelectorAll('.organization-logo');
+      
+      // Get current organization ID before clearing it
+      const currentOrgId = localStorage.getItem('current_organization_id');
+      
+      // Clear current organization
+      localStorage.removeItem('current_organization_id');
+      
+      // Clear any organization branding/logo from landing page
+      if (currentOrgId) {
+        localStorage.removeItem(`org_branding_${currentOrgId}`);
+      }
+      
+      // Remove logo from landing page if it exists
+      const logoElement = document.querySelector('.landing-logo');
+      if (logoElement) {
+        logoElement.remove();
+      }
+      
+      // Reset all branding to default
+      document.documentElement.style.removeProperty('--brand-orange');
+      document.documentElement.style.removeProperty('--brand-red');
+      document.documentElement.style.removeProperty('--brand-gradient');
+      document.documentElement.style.removeProperty('--font-family');
+      document.documentElement.style.removeProperty('--base-font-size');
+      
+      // Reset body font to default values (not empty strings)
+      document.body.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+      document.body.style.fontSize = '16px'; // Set explicit default font size
+      
+      // Reset any remaining inline font styles (should be minimal now)
+      const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div, button, input, select, textarea, label, a');
+      textElements.forEach(el => {
+        el.style.fontFamily = '';
+        el.style.fontSize = '';
+      });
+      
+      // Remove any organization logos from headers
+      const existingLogos = document.querySelectorAll('.organization-logo');
     existingLogos.forEach(logo => logo.remove());
     
     // Reset header titles to default
@@ -998,26 +1024,39 @@ const LandingPage = (() => {
       }
     });
     
-    // Show landing page and hide main app
-    const landingPage = document.getElementById('landingPage');
-    const mainApp = document.getElementById('mainApp');
-    
-    if (landingPage) {
-      landingPage.classList.remove('hidden');
+      // Show landing page and hide main app
+      const landingPage = document.getElementById('landingPage');
+      const mainApp = document.getElementById('mainApp');
+      
+      if (landingPage) {
+        landingPage.classList.remove('hidden');
+      }
+      
+      if (mainApp) {
+        mainApp.classList.add('hidden');
+      }
+      
+      // Reset state
+      currentState = 'landing';
+      
+      // Show success message
+      showSuccessMessage('Logged out successfully!');
+      
+      // Remove the forced page reload - it's causing the text size issue
+      // The logout should work without needing a page refresh
+      
+    } catch (error) {
+      console.error('Logout error:', error);
+      showErrorMessage('An error occurred during logout. Please try again.');
+    } finally {
+      // Re-enable the logout button
+      logoutInProgress = false;
+      if (logoutBtn) {
+        logoutBtn.disabled = false;
+        logoutBtn.style.opacity = '';
+        logoutBtn.style.cursor = '';
+      }
     }
-    
-    if (mainApp) {
-      mainApp.classList.add('hidden');
-    }
-    
-    // Reset state
-    currentState = 'landing';
-    
-    // Show success message
-    showSuccessMessage('Logged out successfully!');
-    
-    // Remove the forced page reload - it's causing the text size issue
-    // The logout should work without needing a page refresh
   };
   
   // Public API
@@ -1037,10 +1076,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Global logout button handler (works even if main app hasn't initialized yet)
 document.addEventListener('click', (e) => {
-  if (e.target && e.target.id === 'logoutBtn') {
+  // Check if the clicked element or its parent is the logout button
+  const logoutBtn = e.target.closest('#logoutBtn');
+  if (logoutBtn) {
     e.preventDefault();
+    e.stopPropagation();
     if (typeof LandingPage !== 'undefined' && LandingPage.handleLogout) {
-      LandingPage.handleLogout();
+      LandingPage.handleLogout(e);
     }
   }
 });

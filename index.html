@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Organization Chart</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNCIgZmlsbD0iI2ZmNWEwMCIvPgo8dGV4dCB4PSIxNiIgeT0iMjAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5PPC90ZXh0Pgo8L3N2Zz4K">
     <link rel="stylesheet" href="css/style.css?v=20241221b">
     <link rel="stylesheet" href="css/user-management.css?v=20241221c">
     <!-- Google Fonts for custom typography -->
@@ -18,9 +19,22 @@
       <div class="landing-header-content">
         <h1 class="landing-title">Organization Chart</h1>
         <p class="landing-subtitle">Visualize and manage your organization structure with ease</p>
+        <p class="landing-description">
+          A modern, interactive tool designed for HR professionals, managers, and organizational leaders 
+          who need to visualize, understand, and manage complex organizational structures. Perfect for 
+          companies, non-profits, educational institutions, and government organizations.
+        </p>
         <div class="demo-notice">
-          <span class="demo-badge">Demo Available</span>
-          <span class="demo-text">Try the demo organization with sample data</span>
+          <button id="headerDemoBtn" class="demo-notice-button">
+            <span class="demo-badge">Demo Available</span>
+            <span class="demo-text">Try the demo organization with sample data</span>
+          </button>
+        </div>
+        <div class="github-link">
+          <a href="https://github.com/rian010194/OrgVis/blob/main/docs/index.md" target="_blank" rel="noopener noreferrer" class="github-button">
+            <span class="github-icon">📁</span>
+            <span class="github-text">View on GitHub</span>
+          </a>
         </div>
       </div>
     </header>
@@ -58,6 +72,108 @@
         </div>
       </div>
 
+      <!-- Features Section -->
+      <div class="features-section">
+        <div class="features-container">
+          <h2 class="features-title">Why Choose Our Organization Chart Tool?</h2>
+          <p class="features-subtitle">Built for modern organizations that need clarity, efficiency, and insight</p>
+          
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="feature-icon-large">🌳</div>
+              <h3>Interactive Tree View</h3>
+              <p>Navigate your organization hierarchy with an intuitive tree structure. Expand, collapse, and search through departments, teams, and individuals with ease.</p>
+            </div>
+            
+            <div class="feature-card">
+              <div class="feature-icon-large">🗺️</div>
+              <h3>Visual Map View</h3>
+              <p>See the big picture with our D3.js-powered force-directed graph. Understand relationships and connections between different parts of your organization.</p>
+            </div>
+            
+            <div class="feature-card">
+              <div class="feature-icon-large">📊</div>
+              <h3>Metrics & Analytics</h3>
+              <p>Track KPIs, budgets, headcount, and performance indicators. Visualize data with charts, graphs, and customizable dashboards.</p>
+            </div>
+            
+            <div class="feature-card">
+              <div class="feature-icon-large">🔗</div>
+              <h3>Relationship Mapping</h3>
+              <p>Define and visualize complex relationships between departments, support offices, and cross-functional teams.</p>
+            </div>
+            
+            <div class="feature-card">
+              <div class="feature-icon-large">🎨</div>
+              <h3>Custom Branding</h3>
+              <p>Personalize your organization chart with custom colors, fonts, logos, and themes that match your brand identity.</p>
+            </div>
+            
+            <div class="feature-card">
+              <div class="feature-icon-large">👥</div>
+              <h3>Multi-Organization</h3>
+              <p>Manage multiple organizations from a single interface. Perfect for consultants, agencies, or holding companies.</p>
+            </div>
+            
+            <div class="feature-card">
+              <div class="feature-icon-large">📱</div>
+              <h3>Mobile Optimized</h3>
+              <p>Access and manage your organization chart on any device. Touch-friendly interface optimized for tablets and smartphones.</p>
+            </div>
+            
+            <div class="feature-card">
+              <div class="feature-icon-large">🔒</div>
+              <h3>Secure & Private</h3>
+              <p>Your data is protected with password authentication and secure storage. Choose between local storage or cloud-based Supabase backend.</p>
+            </div>
+            
+            <div class="feature-card">
+              <div class="feature-icon-large">🔓</div>
+              <h3>Open Source & Extensible</h3>
+              <p>Built with modern web technologies and comprehensive documentation. Your IT team can easily customize, extend, and integrate with existing systems.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Use Cases Section -->
+      <div class="use-cases-section">
+        <div class="use-cases-container">
+          <h2 class="use-cases-title">Perfect For</h2>
+          <div class="use-cases-grid">
+            <div class="use-case-card">
+              <h3>🏢 Companies & Corporations</h3>
+              <p>Visualize corporate hierarchies, track department performance, and manage organizational changes during growth or restructuring.</p>
+            </div>
+            
+            <div class="use-case-card">
+              <h3>🎓 Educational Institutions</h3>
+              <p>Map academic departments, administrative structures, and faculty relationships. Track enrollment and resource allocation.</p>
+            </div>
+            
+            <div class="use-case-card">
+              <h3>🏛️ Government & Public Sector</h3>
+              <p>Organize government agencies, track public service delivery, and visualize complex bureaucratic structures.</p>
+            </div>
+            
+            <div class="use-case-card">
+              <h3>💝 Non-Profit Organizations</h3>
+              <p>Manage volunteer networks, track program delivery, and visualize community impact across different initiatives.</p>
+            </div>
+            
+            <div class="use-case-card">
+              <h3>🏥 Healthcare Systems</h3>
+              <p>Map hospital departments, track patient care pathways, and manage complex healthcare delivery networks.</p>
+            </div>
+            
+            <div class="use-case-card">
+              <h3>🔧 Consulting & Agencies</h3>
+              <p>Manage multiple client organizations, track project teams, and visualize service delivery structures.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="landing-actions">
         <div class="action-card">
           <h3>Start Fresh</h3>
@@ -70,12 +186,79 @@
           <button id="loadExistingBtn" class="action-button secondary">Load Existing</button>
         </div>
         <div class="action-card demo-card">
-          <h3>Demo</h3>
-          <p>Access the demo organization with sample data and structure.</p>
+          <h3>Try Demo</h3>
+          <p>Explore our demo organization with sample data, metrics, and relationships. Perfect for understanding the tool's capabilities before creating your own organization.</p>
+          <div class="demo-features">
+            <span class="demo-feature">📊 Sample metrics & charts</span>
+            <span class="demo-feature">🔗 Relationship examples</span>
+            <span class="demo-feature">🎨 Theme customization</span>
+          </div>
           <button id="loadJumpYardBtn" class="action-button demo">Access Demo</button>
         </div>
       </div>
     </main>
+
+    <!-- Footer -->
+    <footer class="landing-footer">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>Organization Chart Tool</h3>
+          <p>A modern, interactive web application for visualizing and managing organizational structures. Built with vanilla JavaScript, D3.js, and Supabase.</p>
+          <div class="footer-links">
+            <a href="https://github.com/rian010194/OrgVis/blob/main/docs/index.md" target="_blank" rel="noopener noreferrer">
+              <span class="footer-icon">📁</span> Documentation
+            </a>
+            <a href="https://github.com/rian010194/OrgVis/issues" target="_blank" rel="noopener noreferrer">
+              <span class="footer-icon">🐛</span> Report Issues
+            </a>
+            <a href="https://github.com/rian010194/OrgVis/discussions" target="_blank" rel="noopener noreferrer">
+              <span class="footer-icon">💬</span> Discussions
+            </a>
+          </div>
+        </div>
+        
+        <div class="footer-section">
+          <h4>Features</h4>
+          <ul>
+            <li>Interactive Tree & Map Views</li>
+            <li>Metrics & Analytics</li>
+            <li>Custom Branding</li>
+            <li>Multi-Organization Support</li>
+            <li>Mobile Optimized</li>
+            <li>Secure & Private</li>
+          </ul>
+        </div>
+        
+        <div class="footer-section">
+          <h4>Technology</h4>
+          <ul>
+            <li>Vanilla JavaScript</li>
+            <li>D3.js Visualization</li>
+            <li>Supabase Backend</li>
+            <li>CSS Grid & Flexbox</li>
+            <li>Responsive Design</li>
+            <li>Progressive Web App</li>
+          </ul>
+        </div>
+        
+        <div class="footer-section">
+          <h4>Use Cases</h4>
+          <ul>
+            <li>Corporate Organizations</li>
+            <li>Educational Institutions</li>
+            <li>Government Agencies</li>
+            <li>Non-Profit Organizations</li>
+            <li>Healthcare Systems</li>
+            <li>Consulting Firms</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2024 Organization Chart Tool. Built with ❤️ for modern organizational management.</p>
+        <p>Open source project - MIT License</p>
+      </div>
+    </footer>
   </div>
 
   <!-- Create Organization Modal -->
@@ -142,79 +325,6 @@
     </div>
   </div>
 
-  <!-- Customization Modal -->
-  <div id="customizationModal" class="modal-overlay hidden">
-    <div class="modal-content large">
-      <div class="modal-header">
-        <h2>Customize Your Organization</h2>
-        <button id="closeCustomizationBtn" class="modal-close">&times;</button>
-      </div>
-      <form id="customizationForm" class="modal-form">
-        <div class="customization-section">
-          <h3>Logo & Branding</h3>
-          <div class="form-group">
-            <label for="orgLogo">Organization Logo</label>
-            <div class="logo-upload">
-              <input type="file" id="orgLogo" name="orgLogo" accept="image/*" class="file-input">
-              <div class="logo-preview" id="logoPreview">
-                <span class="logo-placeholder">No logo selected</span>
-              </div>
-              <button type="button" id="uploadLogoBtn" class="button secondary">Choose Logo</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="customization-section">
-          <h3>Colors</h3>
-          <div class="color-grid">
-            <div class="form-group">
-              <label for="primaryColor">Primary Color</label>
-              <div class="color-input-group">
-                <input type="color" id="primaryColor" name="primaryColor" value="#ff5a00">
-                <input type="text" id="primaryColorText" value="#ff5a00" placeholder="#ff5a00">
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="secondaryColor">Secondary Color</label>
-              <div class="color-input-group">
-                <input type="color" id="secondaryColor" name="secondaryColor" value="#e53e3e">
-                <input type="text" id="secondaryColorText" value="#e53e3e" placeholder="#e53e3e">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="customization-section">
-          <h3>Typography</h3>
-          <div class="form-group">
-            <label for="fontFamily">Font Family</label>
-            <select id="fontFamily" name="fontFamily">
-              <option value="system">System Font (Default)</option>
-              <option value="inter">Inter</option>
-              <option value="roboto">Roboto</option>
-              <option value="open-sans">Open Sans</option>
-              <option value="lato">Lato</option>
-              <option value="montserrat">Montserrat</option>
-              <option value="poppins">Poppins</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="fontSize">Base Font Size</label>
-            <select id="fontSize" name="fontSize">
-              <option value="14">Small (14px)</option>
-              <option value="16" selected>Medium (16px)</option>
-              <option value="18">Large (18px)</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-actions">
-          <button type="button" id="skipCustomizationBtn" class="button secondary">Skip for Now</button>
-          <button type="submit" class="button primary">Save & Continue</button>
-        </div>
-      </form>
-    </div>
-  </div>
 
   <!-- Edit Theme Panel -->
   <div id="editThemePanel" class="theme-panel hidden">
@@ -255,64 +365,117 @@
         </div>
 
         <div class="customization-section">
-          <h3>Colors</h3>
-          <div class="color-grid">
-            <div class="form-group">
-              <label for="themePrimaryColor">Primary Color</label>
-              <div class="color-input-group">
-                <input type="color" id="themePrimaryColor" name="primaryColor" value="#ff5a00">
-                <input type="text" id="themePrimaryColorText" value="#ff5a00" placeholder="#ff5a00">
+          <h3>Color Theme</h3>
+          <div class="form-group">
+            <label for="themePreset">Choose Theme</label>
+            <select id="themePreset" name="themePreset">
+              <option value="orange">Orange (Current)</option>
+              <option value="blue">Blue</option>
+              <option value="green">Green</option>
+              <option value="purple">Purple</option>
+              <option value="red">Red</option>
+              <option value="dark">Dark</option>
+            </select>
+          </div>
+          
+          <div class="theme-preview">
+            <h4>Theme Preview</h4>
+            <div class="theme-preview-boxes">
+              <div class="preview-box primary-preview">
+                <span>Primary</span>
               </div>
-              <div class="color-preview" id="primaryColorPreview">
-                <span class="preview-label">Primary</span>
-                <div class="preview-swatch primary-swatch"></div>
+              <div class="preview-box secondary-preview">
+                <span>Secondary</span>
               </div>
-            </div>
-            <div class="form-group">
-              <label for="themeSecondaryColor">Secondary Color</label>
-              <div class="color-input-group">
-                <input type="color" id="themeSecondaryColor" name="secondaryColor" value="#e53e3e">
-                <input type="text" id="themeSecondaryColorText" value="#e53e3e" placeholder="#e53e3e">
+              <div class="preview-box hover-preview">
+                <span>Hover</span>
               </div>
-              <div class="color-preview" id="secondaryColorPreview">
-                <span class="preview-label">Secondary</span>
-                <div class="preview-swatch secondary-swatch"></div>
+              <div class="preview-box selected-preview">
+                <span>Selected</span>
               </div>
             </div>
           </div>
-          
-          <div class="color-grid">
-            <div class="form-group">
-              <label for="themeBackgroundColor">Background Color</label>
-              <div class="color-input-group">
-                <input type="color" id="themeBackgroundColor" name="backgroundColor" value="#f8fafc">
-                <input type="text" id="themeBackgroundColorText" value="#f8fafc" placeholder="#f8fafc">
-              </div>
+
+          <div class="form-group">
+            <label for="themePrimaryColor">Primary Color</label>
+            <div class="color-input-group">
+              <input type="color" id="themePrimaryColor" name="primaryColor" value="#ff5a00">
+              <input type="text" id="themePrimaryColorText" value="#ff5a00" placeholder="#ff5a00">
             </div>
-            <div class="form-group">
-              <label for="themeTextColor">Text Color</label>
-              <div class="color-input-group">
-                <input type="color" id="themeTextColor" name="textColor" value="#1a202c">
-                <input type="text" id="themeTextColorText" value="#1a202c" placeholder="#1a202c">
-              </div>
+            <div class="color-preview" id="primaryColorPreview">
+              <span class="preview-label">Primary</span>
+              <div class="preview-swatch primary-swatch"></div>
             </div>
           </div>
+          <div class="form-group">
+            <label for="themeSecondaryColor">Secondary Color</label>
+            <div class="color-input-group">
+              <input type="color" id="themeSecondaryColor" name="secondaryColor" value="#e53e3e">
+              <input type="text" id="themeSecondaryColorText" value="#e53e3e" placeholder="#e53e3e">
+            </div>
+            <div class="color-preview" id="secondaryColorPreview">
+              <span class="preview-label">Secondary</span>
+              <div class="preview-swatch secondary-swatch"></div>
+            </div>
+          </div>
+
+          <!-- Hidden inputs for all theme colors -->
+          <input type="hidden" id="themeBackgroundColor" name="backgroundColor" value="#f8fafc">
+          <input type="hidden" id="themeTextColor" name="textColor" value="#1a202c">
+          <input type="hidden" id="themeBorderColor" name="borderColor" value="#e2e8f0">
+          <input type="hidden" id="themeMutedColor" name="mutedColor" value="#718096">
+          <input type="hidden" id="themeNodeBackgroundColor" name="nodeBackgroundColor" value="#ffffff">
+          <input type="hidden" id="themeButtonBackgroundColor" name="buttonBackgroundColor" value="#ffffff">
+          <input type="hidden" id="themeAccentBackgroundColor" name="accentBackgroundColor" value="#ffe6d5">
+          <input type="hidden" id="themeTreeItemBackgroundColor" name="treeItemBackgroundColor" value="#fff4ed">
+          <input type="hidden" id="themeHoverColor" name="hoverColor" value="#ff5a00">
+          <input type="hidden" id="themeSelectedColor" name="selectedColor" value="#ff5a00">
+          <input type="hidden" id="themeNodeStrokeColor" name="nodeStrokeColor" value="#ff5a00">
           
-          <div class="color-grid">
-            <div class="form-group">
-              <label for="themeBorderColor">Border Color</label>
-              <div class="color-input-group">
-                <input type="color" id="themeBorderColor" name="borderColor" value="#e2e8f0">
-                <input type="text" id="themeBorderColorText" value="#e2e8f0" placeholder="#e2e8f0">
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="themeMutedColor">Muted Text Color</label>
-              <div class="color-input-group">
-                <input type="color" id="themeMutedColor" name="mutedColor" value="#718096">
-                <input type="text" id="themeMutedColorText" value="#718096" placeholder="#718096">
-              </div>
-            </div>
+          <!-- Color preview elements for all theme colors -->
+          <div class="color-preview" id="backgroundcolorPreview" style="display: none;">
+            <span class="preview-label">Background</span>
+            <div class="preview-swatch background-swatch"></div>
+          </div>
+          <div class="color-preview" id="textcolorPreview" style="display: none;">
+            <span class="preview-label">Text</span>
+            <div class="preview-swatch text-swatch"></div>
+          </div>
+          <div class="color-preview" id="bordercolorPreview" style="display: none;">
+            <span class="preview-label">Border</span>
+            <div class="preview-swatch border-swatch"></div>
+          </div>
+          <div class="color-preview" id="mutedcolorPreview" style="display: none;">
+            <span class="preview-label">Muted</span>
+            <div class="preview-swatch muted-swatch"></div>
+          </div>
+          <div class="color-preview" id="nodebackgroundcolorPreview" style="display: none;">
+            <span class="preview-label">Node Background</span>
+            <div class="preview-swatch node-background-swatch"></div>
+          </div>
+          <div class="color-preview" id="buttonbackgroundcolorPreview" style="display: none;">
+            <span class="preview-label">Button Background</span>
+            <div class="preview-swatch button-background-swatch"></div>
+          </div>
+          <div class="color-preview" id="accentbackgroundcolorPreview" style="display: none;">
+            <span class="preview-label">Accent Background</span>
+            <div class="preview-swatch accent-background-swatch"></div>
+          </div>
+          <div class="color-preview" id="treeitembackgroundcolorPreview" style="display: none;">
+            <span class="preview-label">Tree Item Background</span>
+            <div class="preview-swatch tree-item-background-swatch"></div>
+          </div>
+          <div class="color-preview" id="hovercolorPreview" style="display: none;">
+            <span class="preview-label">Hover</span>
+            <div class="preview-swatch hover-swatch"></div>
+          </div>
+          <div class="color-preview" id="selectedcolorPreview" style="display: none;">
+            <span class="preview-label">Selected</span>
+            <div class="preview-swatch selected-swatch"></div>
+          </div>
+          <div class="color-preview" id="nodestrokecolorPreview" style="display: none;">
+            <span class="preview-label">Node Stroke</span>
+            <div class="preview-swatch node-stroke-swatch"></div>
           </div>
         </div>
 
@@ -422,6 +585,9 @@
       <div class="org-info">
         <h1 id="orgName" class="org-title">Organization Chart</h1>
         <span id="orgDescription" class="org-description">Visualize and manage your organization structure</span>
+      </div>
+      <div class="org-logo">
+        <img id="orgLogo" src="" alt="Organization Logo" style="display: none; max-height: 60px; max-width: 200px; object-fit: contain;">
       </div>
     </header>
 
