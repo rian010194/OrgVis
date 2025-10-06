@@ -11,7 +11,7 @@ npx supabase login
 
 ### Steg 2: Skapa nytt projekt (om du inte har ett)
 ```bash
-npx supabase projects create jumpyard-org-chart
+npx supabase projects create organization-chart
 ```
 
 ### Steg 3: Länka till ditt projekt
@@ -38,7 +38,7 @@ Kör dessa kommandon i ordning:
 npx supabase login
 
 # 2. Skapa projekt (om du inte har ett)
-npx supabase projects create jumpyard-org-chart
+npx supabase projects create organization-chart
 
 # 3. Länka till projektet (ersätt YOUR_PROJECT_REF med ditt projekt-ref)
 npx supabase link --project-ref YOUR_PROJECT_REF

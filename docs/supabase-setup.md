@@ -1,4 +1,4 @@
-# JumpYard Organization Chart - Supabase Backend
+# Organization Chart - Supabase Backend
 
 Detta projekt använder Supabase som backend för att hantera organisationsdata, metrics och relationer.
 

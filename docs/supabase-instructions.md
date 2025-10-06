@@ -9,7 +9,7 @@ Detta skript skapar:
 - `nodes` tabell
 - `metrics` tabell  
 - `relations` tabell
-- JumpYard demo-organisation med exempeldata
+- Demo-organisation med exempeldata
 
 ## Steg 2: Skapa Demo-organisation
 

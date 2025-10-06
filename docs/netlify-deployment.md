@@ -1,6 +1,6 @@
 # Netlify Deployment Guide
 
-## 🚀 Deploya JumpYard Organization Chart på Netlify
+## 🚀 Deploya Organization Chart på Netlify
 
 ### Steg 1: Skapa Netlify-konto
 1. Gå till [netlify.com](https://netlify.com)
@@ -20,7 +20,7 @@
 ### Steg 3: Konfigurera Custom Domain (valfritt)
 1. I site settings, gå till **"Domain management"**
 2. Klicka **"Add custom domain"**
-3. Ange din domän (t.ex. `jumpyard-org.yourdomain.com`)
+3. Ange din domän (t.ex. `org-chart.yourdomain.com`)
 4. Följ instruktionerna för DNS-konfiguration
 
 ### Steg 4: Konfigurera Environment Variables (för Supabase)

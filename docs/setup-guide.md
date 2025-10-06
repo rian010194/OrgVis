@@ -1,6 +1,6 @@
-# JumpYard Organization Chart - Setup Guide
+# Organization Chart - Setup Guide
 
-Denna guide hjälper dig att komma igång med JumpYard Organization Chart med Supabase backend.
+Denna guide hjälper dig att komma igång med Organization Chart med Supabase backend.
 
 ## 🚀 Snabbstart
 
@@ -13,7 +13,7 @@ Denna guide hjälper dig att komma igång med JumpYard Organization Chart med Su
 ```bash
 # Klona projektet (om du inte redan har det)
 git clone <your-repo-url>
-cd jumpyard-org-chart
+cd organization-chart
 
 # Installera dependencies
 npm install

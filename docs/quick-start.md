@@ -8,7 +8,7 @@
 3. Logga in med GitHub/GitLab/Google
 4. Klicka "New Project"
 5. Fyll i:
-   - **Name**: `jumpyard-org-chart`
+   - **Name**: `organization-chart`
    - **Database Password**: Välj ett starkt lösenord
    - **Region**: Stockholm (närmast Sverige)
 6. Klicka "Create new project"
