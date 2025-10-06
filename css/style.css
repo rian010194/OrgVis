@@ -126,7 +126,7 @@ body.admin-mode-active .app-toolbar .toolbar-actions button:hover {
     display: none;
   }
 }
-/* Updated: 2024-12-21 - Cache busting test */
+/* Updated: October 2025 - Cache busting test */
 /* Supabase theme override support */
 :root {
   /* Default brand colors - can be overridden by Supabase theme */
