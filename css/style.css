@@ -4,6 +4,8 @@
   --brand-light: #ffe6d5;
   --brand-red: #e53e3e;
   --brand-gradient: linear-gradient(135deg, #ff5a00 0%, #e53e3e 100%);
+  --primary-color: #ff5a00;
+  --secondary-color: #e53e3e;
   --surface: #ffffff;
   --border: #e2e8f0;
   --text: #1a202c;
@@ -361,14 +363,14 @@ header .logo {
   gap: 0.5rem;
   padding: 0.6rem 1rem;
   border: 2px solid var(--brand-orange);
-  background: var(--accent-background, rgba(255, 90, 0, 0.1));
+  background: var(--accent-background);
   color: var(--brand-orange);
   border-radius: 12px;
   font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(255, 90, 0, 0.1);
+  box-shadow: 0 2px 8px var(--accent-light);
   min-width: auto;
   white-space: nowrap;
   min-height: 48px;
@@ -1253,14 +1255,14 @@ body.detail-expanded .map-view {
 
 .admin-toggle {
   border: 2px solid var(--brand-orange);
-  background: var(--accent-background, rgba(255, 90, 0, 0.1));
+  background: var(--accent-background);
   color: var(--brand-orange);
   border-radius: 12px;
   padding: 0.6rem 1rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(255, 90, 0, 0.1);
+  box-shadow: 0 2px 8px var(--accent-light);
   font-size: 0.9rem;
   display: flex;
   align-items: center;
@@ -1295,14 +1297,14 @@ body.detail-expanded .map-view {
 
 .user-management-button {
   border: 2px solid var(--brand-orange);
-  background: var(--accent-background, rgba(255, 90, 0, 0.1));
+  background: var(--accent-background);
   color: var(--brand-orange);
   border-radius: 12px;
   padding: 0.6rem 1rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(255, 90, 0, 0.1);
+  box-shadow: 0 2px 8px var(--accent-light);
   font-size: 0.9rem;
   display: flex;
   align-items: center;
@@ -1334,14 +1336,14 @@ body.detail-expanded .map-view {
 
 .logout-button {
   border: 2px solid var(--brand-orange);
-  background: var(--accent-background, rgba(255, 90, 0, 0.1));
+  background: var(--accent-background);
   color: var(--brand-orange);
   border-radius: 12px;
   padding: 0.6rem 1rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(255, 90, 0, 0.1);
+  box-shadow: 0 2px 8px var(--accent-light);
   font-size: 0.9rem;
   display: flex;
   align-items: center;
@@ -1835,7 +1837,7 @@ body.detail-expanded .map-view {
 
 .relation-link {
   border: none;
-  background: var(--accent-background, rgba(255, 90, 0, 0.1));
+  background: var(--accent-background);
   color: var(--hover-color, var(--brand-orange));
   border-radius: 999px;
   padding: 0.2rem 0.65rem;

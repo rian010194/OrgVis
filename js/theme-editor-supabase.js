@@ -39,6 +39,7 @@ class SupabaseThemeEditor {
 
     // Color input synchronization
     this.setupColorInputSync();
+    this.setupThemePresets();
     
     // Logo upload
     const themeUploadLogoBtn = document.getElementById('themeUploadLogoBtn');
@@ -89,7 +90,10 @@ class SupabaseThemeEditor {
 
         // Apply branding if available (but only if we're in main app)
         if (orgData.branding && (orgData.branding.primaryColor || orgData.branding.secondaryColor)) {
+          console.log('SupabaseThemeEditor: Applying branding with logo:', orgData.branding.logo);
           this.applyTheme(orgData.branding, orgData);
+        } else {
+          console.log('SupabaseThemeEditor: No branding data found for organization');
         }
       } catch (error) {
         console.error('SupabaseThemeEditor: Error loading organization data:', error);
@@ -182,7 +186,14 @@ class SupabaseThemeEditor {
       { color: 'themeBackgroundColor', text: 'themeBackgroundColorText' },
       { color: 'themeTextColor', text: 'themeTextColorText' },
       { color: 'themeBorderColor', text: 'themeBorderColorText' },
-      { color: 'themeMutedColor', text: 'themeMutedColorText' }
+      { color: 'themeMutedColor', text: 'themeMutedColorText' },
+      { color: 'themeNodeBackgroundColor', text: 'themeNodeBackgroundColorText' },
+      { color: 'themeButtonBackgroundColor', text: 'themeButtonBackgroundColorText' },
+      { color: 'themeAccentBackgroundColor', text: 'themeAccentBackgroundColorText' },
+      { color: 'themeTreeItemBackgroundColor', text: 'themeTreeItemBackgroundColorText' },
+      { color: 'themeHoverColor', text: 'themeHoverColorText' },
+      { color: 'themeSelectedColor', text: 'themeSelectedColorText' },
+      { color: 'themeNodeStrokeColor', text: 'themeNodeStrokeColorText' }
     ];
 
     colorInputs.forEach(({ color, text }) => {
@@ -205,6 +216,9 @@ class SupabaseThemeEditor {
         });
       }
     });
+
+    // Setup theme presets
+    this.setupThemePresets();
 
     // Setup real-time title/description updates
     const orgNameInput = document.getElementById('themeOrgName');
@@ -263,9 +277,43 @@ class SupabaseThemeEditor {
     }
 
     try {
-      // Load organization data from Supabase
-      const orgData = await window.orgDb.getOrganization(currentOrgId);
-      const brandingData = orgData.branding || {};
+      // Try Supabase first, fallback to localStorage if not available
+      let orgData = null;
+      let brandingData = {};
+      
+      if (window.orgDb && typeof window.orgDb.getOrganization === 'function') {
+        try {
+          orgData = await window.orgDb.getOrganization(currentOrgId);
+          brandingData = orgData.branding || {};
+          console.log('SupabaseThemeEditor: Loaded theme from Supabase');
+        } catch (supabaseError) {
+          console.warn('SupabaseThemeEditor: Supabase load failed, trying localStorage:', supabaseError);
+          // Fallback to localStorage
+          const localOrgData = localStorage.getItem(`org_${currentOrgId}`);
+          const localBrandingData = localStorage.getItem(`org_branding_${currentOrgId}`);
+          
+          if (localOrgData) {
+            orgData = JSON.parse(localOrgData);
+          }
+          if (localBrandingData) {
+            brandingData = JSON.parse(localBrandingData);
+          }
+          console.log('SupabaseThemeEditor: Loaded theme from localStorage fallback');
+        }
+      } else {
+        console.warn('SupabaseThemeEditor: Supabase not available, using localStorage');
+        // Fallback to localStorage
+        const localOrgData = localStorage.getItem(`org_${currentOrgId}`);
+        const localBrandingData = localStorage.getItem(`org_branding_${currentOrgId}`);
+        
+        if (localOrgData) {
+          orgData = JSON.parse(localOrgData);
+        }
+        if (localBrandingData) {
+          brandingData = JSON.parse(localBrandingData);
+        }
+        console.log('SupabaseThemeEditor: Loaded theme from localStorage');
+      }
 
       // Update form fields
       const orgNameInput = document.getElementById('themeOrgName');
@@ -286,7 +334,14 @@ class SupabaseThemeEditor {
         { key: 'backgroundColor', input: 'themeBackgroundColor', text: 'themeBackgroundColorText', default: '#f8fafc' },
         { key: 'textColor', input: 'themeTextColor', text: 'themeTextColorText', default: '#1a202c' },
         { key: 'borderColor', input: 'themeBorderColor', text: 'themeBorderColorText', default: '#e2e8f0' },
-        { key: 'mutedColor', input: 'themeMutedColor', text: 'themeMutedColorText', default: '#718096' }
+        { key: 'mutedColor', input: 'themeMutedColor', text: 'themeMutedColorText', default: '#718096' },
+        { key: 'nodeBackgroundColor', input: 'themeNodeBackgroundColor', text: 'themeNodeBackgroundColorText', default: '#ffffff' },
+        { key: 'buttonBackgroundColor', input: 'themeButtonBackgroundColor', text: 'themeButtonBackgroundColorText', default: '#ffffff' },
+        { key: 'accentBackgroundColor', input: 'themeAccentBackgroundColor', text: 'themeAccentBackgroundColorText', default: '#ffe6d5' },
+        { key: 'treeItemBackgroundColor', input: 'themeTreeItemBackgroundColor', text: 'themeTreeItemBackgroundColorText', default: '#fff4ed' },
+        { key: 'hoverColor', input: 'themeHoverColor', text: 'themeHoverColorText', default: '#ff5a00' },
+        { key: 'selectedColor', input: 'themeSelectedColor', text: 'themeSelectedColorText', default: '#ff5a00' },
+        { key: 'nodeStrokeColor', input: 'themeNodeStrokeColor', text: 'themeNodeStrokeColorText', default: '#ff5a00' }
       ];
 
       colorMappings.forEach(({ key, input, text, default: defaultValue }) => {
@@ -379,6 +434,168 @@ class SupabaseThemeEditor {
     } else {
       console.log('Preview element not found:', previewId);
     }
+  }
+
+  setupThemePresets() {
+    const themePresets = {
+      orange: {
+        primaryColor: '#ff5a00',
+        secondaryColor: '#e53e3e',
+        backgroundColor: '#f8fafc',
+        textColor: '#1a202c',
+        borderColor: '#e2e8f0',
+        mutedColor: '#718096',
+        nodeBackgroundColor: '#ffffff',
+        buttonBackgroundColor: '#ffffff',
+        accentBackgroundColor: '#ffe6d5',
+        treeItemBackgroundColor: '#fff4ed',
+        hoverColor: '#ff5a00',
+        selectedColor: '#ff5a00',
+        nodeStrokeColor: '#ff5a00'
+      },
+      blue: {
+        primaryColor: '#2563eb',
+        secondaryColor: '#1d4ed8',
+        backgroundColor: '#f8fafc',
+        textColor: '#1a202c',
+        borderColor: '#e2e8f0',
+        mutedColor: '#718096',
+        nodeBackgroundColor: '#ffffff',
+        buttonBackgroundColor: '#ffffff',
+        accentBackgroundColor: '#dbeafe',
+        treeItemBackgroundColor: '#eff6ff',
+        hoverColor: '#2563eb',
+        selectedColor: '#2563eb',
+        nodeStrokeColor: '#2563eb'
+      },
+      green: {
+        primaryColor: '#059669',
+        secondaryColor: '#047857',
+        backgroundColor: '#f8fafc',
+        textColor: '#1a202c',
+        borderColor: '#e2e8f0',
+        mutedColor: '#718096',
+        nodeBackgroundColor: '#ffffff',
+        buttonBackgroundColor: '#ffffff',
+        accentBackgroundColor: '#d1fae5',
+        treeItemBackgroundColor: '#ecfdf5',
+        hoverColor: '#059669',
+        selectedColor: '#059669',
+        nodeStrokeColor: '#059669'
+      },
+      purple: {
+        primaryColor: '#7c3aed',
+        secondaryColor: '#6d28d9',
+        backgroundColor: '#f8fafc',
+        textColor: '#1a202c',
+        borderColor: '#e2e8f0',
+        mutedColor: '#718096',
+        nodeBackgroundColor: '#ffffff',
+        buttonBackgroundColor: '#ffffff',
+        accentBackgroundColor: '#e9d5ff',
+        treeItemBackgroundColor: '#f3e8ff',
+        hoverColor: '#7c3aed',
+        selectedColor: '#7c3aed',
+        nodeStrokeColor: '#7c3aed'
+      },
+      red: {
+        primaryColor: '#dc2626',
+        secondaryColor: '#b91c1c',
+        backgroundColor: '#f8fafc',
+        textColor: '#1a202c',
+        borderColor: '#e2e8f0',
+        mutedColor: '#718096',
+        nodeBackgroundColor: '#ffffff',
+        buttonBackgroundColor: '#ffffff',
+        accentBackgroundColor: '#fecaca',
+        treeItemBackgroundColor: '#fef2f2',
+        hoverColor: '#dc2626',
+        selectedColor: '#dc2626',
+        nodeStrokeColor: '#dc2626'
+      },
+      dark: {
+        primaryColor: '#f59e0b',
+        secondaryColor: '#d97706',
+        backgroundColor: '#111827',
+        textColor: '#f9fafb',
+        borderColor: '#374151',
+        mutedColor: '#9ca3af',
+        nodeBackgroundColor: '#1f2937',
+        buttonBackgroundColor: '#1f2937',
+        accentBackgroundColor: '#451a03',
+        treeItemBackgroundColor: '#1c1917',
+        hoverColor: '#f59e0b',
+        selectedColor: '#f59e0b',
+        nodeStrokeColor: '#f59e0b'
+      }
+    };
+
+    const presetSelect = document.getElementById('themePreset');
+    if (presetSelect) {
+      presetSelect.addEventListener('change', (e) => {
+        const selectedTheme = themePresets[e.target.value];
+        if (selectedTheme) {
+          this.applyThemePreset(selectedTheme);
+        }
+      });
+    }
+  }
+
+  applyThemePreset(theme) {
+    // Apply colors to form inputs (both visible and hidden)
+    Object.keys(theme).forEach(key => {
+      const colorInput = document.getElementById(`theme${key.charAt(0).toUpperCase() + key.slice(1)}`);
+      const textInput = document.getElementById(`theme${key.charAt(0).toUpperCase() + key.slice(1)}Text`);
+      
+      if (colorInput) colorInput.value = theme[key];
+      if (textInput) textInput.value = theme[key];
+    });
+
+    // Update preview boxes
+    this.updateThemePreview(theme);
+    
+    // Update CSS variables immediately
+    document.documentElement.style.setProperty('--brand-orange', theme.primaryColor);
+    document.documentElement.style.setProperty('--brand-red', theme.secondaryColor);
+    document.documentElement.style.setProperty('--hover-color', theme.hoverColor);
+    document.documentElement.style.setProperty('--selected-color', theme.selectedColor);
+    document.documentElement.style.setProperty('--accent-background', theme.accentBackgroundColor);
+    document.documentElement.style.setProperty('--tree-item-background', theme.treeItemBackgroundColor);
+    document.documentElement.style.setProperty('--button-background', theme.buttonBackgroundColor);
+    document.documentElement.style.setProperty('--node-background', theme.nodeBackgroundColor);
+    
+    // Update opacity-based colors
+    const hexToRgba = (hex, alpha) => {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    };
+    
+    document.documentElement.style.setProperty('--accent-light', hexToRgba(theme.primaryColor, 0.08));
+    document.documentElement.style.setProperty('--accent-medium', hexToRgba(theme.primaryColor, 0.1));
+    document.documentElement.style.setProperty('--accent-dark', hexToRgba(theme.primaryColor, 0.15));
+    document.documentElement.style.setProperty('--accent-darker', hexToRgba(theme.primaryColor, 0.25));
+    document.documentElement.style.setProperty('--accent-darkest', hexToRgba(theme.primaryColor, 0.3));
+    document.documentElement.style.setProperty('--brand-light-opacity', hexToRgba(theme.primaryColor, 0.06));
+    document.documentElement.style.setProperty('--brand-medium-opacity', hexToRgba(theme.primaryColor, 0.55));
+    document.documentElement.style.setProperty('--brand-strong-opacity', hexToRgba(theme.primaryColor, 0.7));
+    
+    console.log('Theme preset applied:', theme);
+    console.log('CSS variables updated immediately');
+  }
+
+  updateThemePreview(theme) {
+    // Update the theme preview boxes
+    const primaryPreview = document.querySelector('.primary-preview');
+    const secondaryPreview = document.querySelector('.secondary-preview');
+    const hoverPreview = document.querySelector('.hover-preview');
+    const selectedPreview = document.querySelector('.selected-preview');
+    
+    if (primaryPreview) primaryPreview.style.background = theme.primaryColor;
+    if (secondaryPreview) secondaryPreview.style.background = theme.secondaryColor;
+    if (hoverPreview) hoverPreview.style.background = theme.hoverColor;
+    if (selectedPreview) selectedPreview.style.background = theme.selectedColor;
   }
 
   previewThemeChanges() {
@@ -519,6 +736,13 @@ class SupabaseThemeEditor {
         textColor: formData.get('textColor') || '#1a202c',
         borderColor: formData.get('borderColor') || '#e2e8f0',
         mutedColor: formData.get('mutedColor') || '#718096',
+        nodeBackgroundColor: formData.get('nodeBackgroundColor') || '#ffffff',
+        buttonBackgroundColor: formData.get('buttonBackgroundColor') || '#ffffff',
+        accentBackgroundColor: formData.get('accentBackgroundColor') || '#ffe6d5',
+        treeItemBackgroundColor: formData.get('treeItemBackgroundColor') || '#fff4ed',
+        hoverColor: formData.get('hoverColor') || '#ff5a00',
+        selectedColor: formData.get('selectedColor') || '#ff5a00',
+        nodeStrokeColor: formData.get('nodeStrokeColor') || '#ff5a00',
         fontFamily: formData.get('fontFamily') || 'system',
         fontSize: formData.get('fontSize') || '16',
         logo: null
@@ -570,9 +794,33 @@ class SupabaseThemeEditor {
         throw new Error('Invalid theme data');
       }
       
-      // Check if orgDb is available
+      // Check if orgDb is available, fallback to localStorage if not
       if (!window.orgDb || typeof window.orgDb.updateOrganization !== 'function') {
-        throw new Error('Supabase database not available. Please check your configuration.');
+        console.warn('SupabaseThemeEditor: Supabase not available, using localStorage fallback');
+        
+        // Fallback to localStorage
+        localStorage.setItem(`org_${currentOrgId}`, JSON.stringify({
+          ...orgUpdates,
+          branding: brandingData
+        }));
+        
+        // Also save branding separately for easier access
+        localStorage.setItem(`org_branding_${currentOrgId}`, JSON.stringify(brandingData));
+        
+        console.log('SupabaseThemeEditor: Theme saved to localStorage as fallback');
+        
+        // Apply theme immediately
+        this.applyTheme(brandingData, orgUpdates);
+        
+        // Update header with new organization data
+        this.updateHeader(orgUpdates);
+        
+        // Hide modal
+        this.hideEditThemeModal();
+        
+        // Show success message
+        this.showSuccessMessage('Theme updated successfully! (Saved locally)');
+        return;
       }
       
       // First, check if organization exists
@@ -706,6 +954,49 @@ class SupabaseThemeEditor {
     if (brandingData.mutedColor) {
       document.documentElement.style.setProperty('--muted', brandingData.mutedColor);
     }
+    if (brandingData.nodeBackgroundColor) {
+      document.documentElement.style.setProperty('--node-background', brandingData.nodeBackgroundColor);
+    }
+    if (brandingData.buttonBackgroundColor) {
+      document.documentElement.style.setProperty('--button-background', brandingData.buttonBackgroundColor);
+    }
+    if (brandingData.accentBackgroundColor) {
+      document.documentElement.style.setProperty('--accent-background', brandingData.accentBackgroundColor);
+    }
+    if (brandingData.treeItemBackgroundColor) {
+      document.documentElement.style.setProperty('--tree-item-background', brandingData.treeItemBackgroundColor);
+    }
+    if (brandingData.hoverColor) {
+      document.documentElement.style.setProperty('--hover-color', brandingData.hoverColor);
+    }
+    if (brandingData.selectedColor) {
+      document.documentElement.style.setProperty('--selected-color', brandingData.selectedColor);
+    }
+    // Update all opacity-based colors
+    const hexToRgba = (hex, alpha) => {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    };
+    
+    const primaryColor = brandingData.primaryColor || '#ff5a00';
+    
+    // Set all opacity-based CSS variables
+    document.documentElement.style.setProperty('--accent-light', hexToRgba(primaryColor, 0.08));
+    document.documentElement.style.setProperty('--accent-medium', hexToRgba(primaryColor, 0.1));
+    document.documentElement.style.setProperty('--accent-dark', hexToRgba(primaryColor, 0.15));
+    document.documentElement.style.setProperty('--accent-darker', hexToRgba(primaryColor, 0.25));
+    document.documentElement.style.setProperty('--accent-darkest', hexToRgba(primaryColor, 0.3));
+    document.documentElement.style.setProperty('--brand-light-opacity', hexToRgba(primaryColor, 0.06));
+    document.documentElement.style.setProperty('--brand-medium-opacity', hexToRgba(primaryColor, 0.55));
+    document.documentElement.style.setProperty('--brand-strong-opacity', hexToRgba(primaryColor, 0.7));
+    
+    if (brandingData.nodeStrokeColor) {
+      document.documentElement.style.setProperty('--node-stroke-color', hexToRgba(brandingData.nodeStrokeColor, 0.3));
+      document.documentElement.style.setProperty('--node-stroke-hover', hexToRgba(brandingData.nodeStrokeColor, 0.08));
+      document.documentElement.style.setProperty('--node-stroke-selected', hexToRgba(brandingData.nodeStrokeColor, 0.12));
+    }
 
     // Apply font family
     const fontFamily = this.getFontFamily(brandingData.fontFamily);
@@ -717,20 +1008,21 @@ class SupabaseThemeEditor {
     document.body.style.fontSize = `${brandingData.fontSize}px`;
 
     // Apply logo (only to main app header, not landing page)
+    console.log('SupabaseThemeEditor: Applying logo - brandingData.logo:', brandingData.logo, 'mainApp:', !!mainApp);
     if (brandingData.logo && mainApp) {
-      const mainAppHeader = mainApp.querySelector('header');
-      if (mainAppHeader) {
-        const existingLogo = mainAppHeader.querySelector('.organization-logo');
-        if (existingLogo) {
-          existingLogo.src = brandingData.logo;
-        } else {
-          const logo = document.createElement('img');
-          logo.src = brandingData.logo;
-          logo.alt = 'Organization Logo';
-          logo.className = 'organization-logo';
-          logo.style.cssText = 'height: 45px; margin-right: 1rem; filter: brightness(0) invert(1);';
-          mainAppHeader.insertBefore(logo, mainAppHeader.firstChild);
-        }
+      const orgLogo = document.getElementById('orgLogo');
+      console.log('SupabaseThemeEditor: Found orgLogo element:', !!orgLogo);
+      if (orgLogo) {
+        orgLogo.src = brandingData.logo;
+        orgLogo.style.display = 'block';
+        console.log('SupabaseThemeEditor: Logo applied successfully');
+      }
+    } else if (mainApp) {
+      // Hide logo if no branding data
+      const orgLogo = document.getElementById('orgLogo');
+      console.log('SupabaseThemeEditor: Hiding logo - no branding data');
+      if (orgLogo) {
+        orgLogo.style.display = 'none';
       }
     }
   }
@@ -844,6 +1136,166 @@ document.addEventListener('DOMContentLoaded', () => {
       window.ThemeEditor.refreshHeader();
     } else {
       console.log('SupabaseThemeEditor not initialized yet');
+    }
+  };
+  
+  // Add debug method to check logo status
+  window.debugLogo = async () => {
+    const currentOrgId = localStorage.getItem('current_organization_id');
+    console.log('Debug Logo - Current Org ID:', currentOrgId);
+    
+    if (currentOrgId) {
+      try {
+        const orgData = await window.orgDb.getOrganization(currentOrgId);
+        console.log('Debug Logo - Org Data:', orgData);
+        console.log('Debug Logo - Branding:', orgData.branding);
+        console.log('Debug Logo - Logo:', orgData.branding?.logo);
+        
+        const orgLogo = document.getElementById('orgLogo');
+        console.log('Debug Logo - Logo Element:', orgLogo);
+        console.log('Debug Logo - Logo src:', orgLogo?.src);
+        console.log('Debug Logo - Logo display:', orgLogo?.style.display);
+      } catch (error) {
+        console.error('Debug Logo - Error:', error);
+      }
+    }
+  };
+  
+  // Add test method to manually set a logo
+  window.testLogo = () => {
+    const orgLogo = document.getElementById('orgLogo');
+    if (orgLogo) {
+      // Create a simple test logo (orange square with "T" in it)
+      const testLogo = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjZmY1YTAwIi8+Cjx0ZXh0IHg9IjUwIiB5PSI1NSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlQ8L3RleHQ+Cjwvc3ZnPg==';
+      orgLogo.src = testLogo;
+      orgLogo.style.display = 'block';
+      console.log('Test logo applied successfully');
+    } else {
+      console.error('Logo element not found');
+    }
+  };
+  
+  // Add method to set a logo for the current organization
+  window.setOrgLogo = async (logoDataUrl) => {
+    const currentOrgId = localStorage.getItem('current_organization_id');
+    if (!currentOrgId) {
+      console.error('No current organization ID found');
+      return;
+    }
+    
+    try {
+      // Get current organization data
+      const orgData = await window.orgDb.getOrganization(currentOrgId);
+      if (!orgData) {
+        console.error('Organization not found');
+        return;
+      }
+      
+      // Update branding with new logo
+      const updatedBranding = {
+        ...orgData.branding,
+        logo: logoDataUrl
+      };
+      
+      // Save to Supabase
+      await window.orgDb.updateOrganization(currentOrgId, {
+        branding: updatedBranding
+      });
+      
+      // Apply immediately
+      const orgLogo = document.getElementById('orgLogo');
+      if (orgLogo) {
+        orgLogo.src = logoDataUrl;
+        orgLogo.style.display = 'block';
+      }
+      
+      console.log('Logo saved and applied successfully');
+    } catch (error) {
+      console.error('Error setting logo:', error);
+    }
+  };
+  
+  // Add debug method to check current CSS variables
+  window.checkCSSVariables = () => {
+    const styles = getComputedStyle(document.documentElement);
+    console.log('Current CSS Variables:');
+    console.log('--brand-orange:', styles.getPropertyValue('--brand-orange'));
+    console.log('--hover-color:', styles.getPropertyValue('--hover-color'));
+    console.log('--selected-color:', styles.getPropertyValue('--selected-color'));
+    console.log('--accent-background:', styles.getPropertyValue('--accent-background'));
+    console.log('--tree-item-background:', styles.getPropertyValue('--tree-item-background'));
+    console.log('--button-background:', styles.getPropertyValue('--button-background'));
+    console.log('--node-background:', styles.getPropertyValue('--node-background'));
+  };
+
+  // Add debug method to test theme presets
+  window.testThemePreset = (themeName = 'blue') => {
+    const themePresets = {
+      orange: {
+        primaryColor: '#ff5a00',
+        secondaryColor: '#e53e3e',
+        backgroundColor: '#f8fafc',
+        textColor: '#1a202c',
+        borderColor: '#e2e8f0',
+        mutedColor: '#718096',
+        nodeBackgroundColor: '#ffffff',
+        buttonBackgroundColor: '#ffffff',
+        accentBackgroundColor: '#ffe6d5',
+        treeItemBackgroundColor: '#fff4ed',
+        hoverColor: '#ff5a00',
+        selectedColor: '#ff5a00',
+        nodeStrokeColor: '#ff5a00'
+      },
+      blue: {
+        primaryColor: '#2563eb',
+        secondaryColor: '#1d4ed8',
+        backgroundColor: '#f8fafc',
+        textColor: '#1a202c',
+        borderColor: '#e2e8f0',
+        mutedColor: '#718096',
+        nodeBackgroundColor: '#ffffff',
+        buttonBackgroundColor: '#ffffff',
+        accentBackgroundColor: '#dbeafe',
+        treeItemBackgroundColor: '#eff6ff',
+        hoverColor: '#2563eb',
+        selectedColor: '#2563eb',
+        nodeStrokeColor: '#2563eb'
+      }
+    };
+    
+    const theme = themePresets[themeName];
+    if (theme) {
+      // Apply theme directly to CSS variables
+      Object.keys(theme).forEach(key => {
+        const cssVarName = `--${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
+        document.documentElement.style.setProperty(cssVarName, theme[key]);
+        console.log(`Set ${cssVarName} = ${theme[key]}`);
+      });
+      
+      // Update brand colors
+      document.documentElement.style.setProperty('--brand-orange', theme.primaryColor);
+      document.documentElement.style.setProperty('--brand-red', theme.secondaryColor);
+      
+      // Update all opacity-based colors
+      const hexToRgba = (hex, alpha) => {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      };
+      
+      document.documentElement.style.setProperty('--accent-light', hexToRgba(theme.primaryColor, 0.08));
+      document.documentElement.style.setProperty('--accent-medium', hexToRgba(theme.primaryColor, 0.1));
+      document.documentElement.style.setProperty('--accent-dark', hexToRgba(theme.primaryColor, 0.15));
+      document.documentElement.style.setProperty('--accent-darker', hexToRgba(theme.primaryColor, 0.25));
+      document.documentElement.style.setProperty('--accent-darkest', hexToRgba(theme.primaryColor, 0.3));
+      document.documentElement.style.setProperty('--brand-light-opacity', hexToRgba(theme.primaryColor, 0.06));
+      document.documentElement.style.setProperty('--brand-medium-opacity', hexToRgba(theme.primaryColor, 0.55));
+      document.documentElement.style.setProperty('--brand-strong-opacity', hexToRgba(theme.primaryColor, 0.7));
+      
+      console.log(`Applied ${themeName} theme successfully!`);
+    } else {
+      console.error(`Theme ${themeName} not found. Available:`, Object.keys(themePresets));
     }
   };
 });
