@@ -564,32 +564,20 @@ main.app-layout,
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Move desktop view switch to mobile position on small screens */
+/* Move view switch to header on small screens */
 @media (max-width: 768px) {
-  .desktop-view-switch {
+  .view-switch-floating {
     position: fixed !important;
     top: 1rem !important;
     right: 9.5rem !important; /* placed left of view-toggle */
     z-index: 1001 !important;
-    background: var(--surface, #fff) !important;
-    border: 2px solid var(--brand-orange) !important;
-    border-radius: 8px !important;
-    width: 44px !important;
-    height: 44px !important;
-    box-shadow: var(--shadow) !important;
-    transition: all 0.2s ease !important;
-    cursor: pointer !important;
-    align-items: center !important;
-    justify-content: center !important;
+    left: auto !important;
+    bottom: auto !important;
   }
   
-  .desktop-view-switch:hover {
-    background: var(--brand-orange) !important;
-  }
-  
-  .desktop-view-switch:hover .desktop-view-switch-icon {
-    color: #fff !important;
-    transform: scale(1.05);
+  .view-switch-floating .desktop-view-switch {
+    width: 42px !important;
+    height: 42px !important;
   }
 }
 
@@ -612,9 +600,19 @@ main.app-layout,
   transition: all 0.2s ease;
 }
 
-/* Hide desktop view switch in fullscreen mode */
-body.detail-expanded .desktop-view-switch {
-  display: none !important;
+/* Keep view switch visible in fullscreen mode */
+body.detail-expanded .view-switch-floating .desktop-view-switch {
+  display: flex !important;
+}
+
+/* On mobile, keep view switch in header even in fullscreen */
+@media (max-width: 768px) {
+  body.detail-expanded .view-switch-floating {
+    position: fixed !important;
+    top: 1rem !important;
+    right: 9.5rem !important;
+    z-index: 1001 !important;
+  }
 }
 
 /* Hide entire toolbar in fullscreen mode */
@@ -622,13 +620,10 @@ body.detail-expanded .app-toolbar {
   display: none !important;
 }
 
-/* MOBILE OVERRIDES: keep view switch visible when a node is selected */
+/* MOBILE OVERRIDES: keep toolbar in DOM but collapsed */
 @media (max-width: 768px) {
-  body.detail-expanded .desktop-view-switch {
-    display: flex !important; /* override fullscreen hide on mobile */
-  }
   body.detail-expanded .app-toolbar {
-    display: block !important; /* keep in DOM so fixed child renders */
+    display: block !important; /* keep in DOM but collapsed */
     height: 0 !important;
     padding: 0 !important;
     border: 0 !important;
