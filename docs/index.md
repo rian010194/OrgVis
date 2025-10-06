@@ -47,4 +47,4 @@ If you can't find what you're looking for:
 
 ---
 
-**Last updated**: January 2025
+**Last updated**: October 2025
