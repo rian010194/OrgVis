@@ -326,17 +326,21 @@
   const getAll = () => Array.from(state.nodesById.values()).map((node) => clone(node));
 
   const setParent = (nodeId, parentId) => {
+    console.log(`setParent called: nodeId=${nodeId}, parentId=${parentId}`);
+    
     const node = state.nodesById.get(nodeId);
     if (!node) {
       throw new Error(`Nod med id ${nodeId} saknas`);
     }
     if (node.parent === parentId) {
+      console.log(`Node ${nodeId} already has parent ${parentId}, returning`);
       return;
     }
     if (parentId === nodeId) {
       throw new Error("En nod kan inte vara sin egen parent");
     }
     if (parentId && !state.nodesById.has(parentId)) {
+      console.error(`Parent node ${parentId} not found in nodesById. Available nodes:`, Array.from(state.nodesById.keys()));
       throw new Error(`Parent-nod ${parentId} finns inte`);
     }
     if (parentId && isDescendant(parentId, nodeId)) {
@@ -355,8 +359,10 @@
       const newParent = state.nodesById.get(node.parent);
       newParent.children = Array.from(new Set([...newParent.children, nodeId]));
       state.rootIds = state.rootIds.filter((id) => id !== nodeId);
+      console.log(`Node ${nodeId} set as child of ${node.parent}. Parent now has children:`, newParent.children);
     } else if (!state.rootIds.includes(nodeId)) {
       state.rootIds.push(nodeId);
+      console.log(`Node ${nodeId} added to rootIds. Root nodes now:`, state.rootIds);
     }
   };
   const isDescendant = (potentialParentId, nodeId) => {

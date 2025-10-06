@@ -1,6 +1,42 @@
 const OrgUI = (() => {
 
   const expandState = new Map();
+  
+  // Utility function to debounce button clicks
+  const debounceClick = (func, delay = 300) => {
+    let timeoutId;
+    return function (...args) {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func.apply(this, args), delay);
+    };
+  };
+  
+  // Utility function to prevent multiple simultaneous clicks
+  const preventMultipleClicks = (func) => {
+    let isExecuting = false;
+    return function (...args) {
+      if (isExecuting) {
+        console.log('Function already executing, ignoring call');
+        return;
+      }
+      isExecuting = true;
+      try {
+        const result = func.apply(this, args);
+        // Handle both sync and async functions
+        if (result && typeof result.then === 'function') {
+          return result.finally(() => {
+            isExecuting = false;
+          });
+        } else {
+          isExecuting = false;
+          return result;
+        }
+      } catch (error) {
+        isExecuting = false;
+        throw error;
+      }
+    };
+  };
 
   let selectedNodeId = null;
 
@@ -375,14 +411,17 @@ const OrgUI = (() => {
   };
 
   const renderOrgChart = () => {
+    console.log('renderOrgChart called');
 
     if (!elements.treeContainer) {
-
+      console.log('renderOrgChart: No treeContainer found');
       return;
 
     }
 
     const roots = OrgStore.getRoots();
+    console.log('renderOrgChart - roots:', roots.map(r => ({ id: r.id, name: r.name, children: r.children })));
+    console.log('renderOrgChart - all nodes:', OrgStore.getAll().map(n => ({ id: n.id, name: n.name, parent: n.parent, children: n.children })));
 
     elements.treeContainer.innerHTML = "";
 
@@ -1138,25 +1177,37 @@ const OrgUI = (() => {
 
   };
 
-  const toggleAdminPanel = () => {
-
+  // Debounce admin toggle to prevent multiple rapid clicks
+  let adminToggleInProgress = false;
+  
+  const toggleAdminPanel = (event) => {
     if (!elements.adminPanel) {
-
       return;
-
     }
-
-    const willOpen = !elements.adminPanel.classList.contains("open");
-
-    elements.adminPanel.classList.toggle("open", willOpen);
-
+    
+    // Prevent multiple simultaneous toggle attempts
+    if (adminToggleInProgress) {
+      console.log('Admin toggle already in progress, ignoring click');
+      return;
+    }
+    
+    adminToggleInProgress = true;
+    
+    // Disable the admin toggle button temporarily
     if (elements.toggleAdmin) {
-
-      elements.toggleAdmin.classList.toggle("active", willOpen);
-
-      elements.toggleAdmin.setAttribute("aria-pressed", String(willOpen));
-
+      elements.toggleAdmin.disabled = true;
+      elements.toggleAdmin.style.pointerEvents = 'none';
     }
+    
+    try {
+      const willOpen = !elements.adminPanel.classList.contains("open");
+
+      elements.adminPanel.classList.toggle("open", willOpen);
+
+      if (elements.toggleAdmin) {
+        elements.toggleAdmin.classList.toggle("active", willOpen);
+        elements.toggleAdmin.setAttribute("aria-pressed", String(willOpen));
+      }
 
     // Show/hide Users and Edit Theme buttons based on admin state
     const userManagementBtn = document.getElementById('userManagementBtn');
@@ -1178,12 +1229,22 @@ const OrgUI = (() => {
       }
     }
 
-    if (willOpen) {
-
-      updateAdminTabsUI();
-
+      if (willOpen) {
+        updateAdminTabsUI();
+      }
+      
+    } catch (error) {
+      console.error('Admin toggle error:', error);
+    } finally {
+      // Re-enable the admin toggle button after a short delay
+      setTimeout(() => {
+        adminToggleInProgress = false;
+        if (elements.toggleAdmin) {
+          elements.toggleAdmin.disabled = false;
+          elements.toggleAdmin.style.pointerEvents = '';
+        }
+      }, 100); // Short delay to prevent rapid clicking
     }
-
   };
 
   const refreshAdminPanel = () => {
@@ -1239,6 +1300,8 @@ const OrgUI = (() => {
     }
 
     const nodes = OrgStore.getAll().sort((a, b) => a.name.localeCompare(b.name, "sv"));
+    
+    console.log('Populating node options, available nodes:', nodes.map(n => ({ id: n.id, name: n.name, type: n.type })));
 
     nodes.forEach((node) => {
 
@@ -1400,7 +1463,11 @@ const OrgUI = (() => {
 
     try {
 
-      OrgStore.addNode({ id, name, type, parent, role, supportOffice, responsibilities, activities, outcomes });
+      const newNode = await OrgStore.addNode({ id, name, type, parent, role, supportOffice, responsibilities, activities, outcomes });
+      
+      console.log('Node created:', { id, name, parent, hasParent: !!parent });
+      console.log('All nodes after creation:', OrgStore.getAll().map(n => ({ id: n.id, name: n.name, parent: n.parent, children: n.children })));
+      console.log('Root nodes after creation:', OrgStore.getRoots().map(n => ({ id: n.id, name: n.name })));
 
       form.reset();
 
@@ -2118,11 +2185,49 @@ const OrgUI = (() => {
 
   };
 
+  // Debug function to test node creation
+  const debugCreateNode = (id, name, parentId = null) => {
+    console.log('=== DEBUG: Creating test node ===');
+    console.log('Parameters:', { id, name, parentId });
+    
+    try {
+      const allNodesBefore = OrgStore.getAll();
+      console.log('Nodes before creation:', allNodesBefore.map(n => ({ id: n.id, name: n.name, parent: n.parent })));
+      
+      const newNode = OrgStore.addNode({ 
+        id, 
+        name, 
+        type: 'Unit', 
+        parent: parentId, 
+        role: 'Test role',
+        supportOffice: null,
+        responsibilities: [],
+        activities: [],
+        outcomes: []
+      });
+      
+      console.log('New node created:', newNode);
+      
+      const allNodesAfter = OrgStore.getAll();
+      console.log('Nodes after creation:', allNodesAfter.map(n => ({ id: n.id, name: n.name, parent: n.parent, children: n.children })));
+      
+      const roots = OrgStore.getRoots();
+      console.log('Root nodes:', roots.map(n => ({ id: n.id, name: n.name })));
+      
+      return newNode;
+    } catch (error) {
+      console.error('Error creating node:', error);
+      return null;
+    }
+  };
+
   return {
 
     init,
 
-    openNode
+    openNode,
+
+    debugCreateNode
 
   };
 

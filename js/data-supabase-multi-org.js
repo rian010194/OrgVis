@@ -239,6 +239,77 @@ const OrgStore = (() => {
     await load();
   };
 
+  const ensureOrganizationExists = async (organizationId) => {
+    try {
+      console.log('Checking if organization exists:', organizationId);
+      
+      // Try to get organization data from localStorage first
+      const orgData = JSON.parse(localStorage.getItem(`org_${organizationId}`) || '{}');
+      
+      if (orgData.id && orgData.name) {
+        console.log('Organization data found in localStorage:', orgData);
+        
+        // Try to create the organization in Supabase
+        try {
+          await window.orgDb.createOrganization({
+            id: organizationId,
+            name: orgData.name,
+            description: orgData.description || `${orgData.name} organization`,
+            type: orgData.type || 'company',
+            password_hash: orgData.password_hash || null
+          });
+          console.log('Organization created in Supabase:', organizationId);
+        } catch (createError) {
+          // Check for various duplicate key error formats
+          const isDuplicateError = createError.message && (
+            createError.message.includes('already exists') ||
+            createError.message.includes('duplicate key') ||
+            createError.message.includes('violates unique constraint') ||
+            createError.code === '23505' // PostgreSQL unique violation code
+          );
+          
+          if (isDuplicateError) {
+            console.log('Organization already exists in Supabase:', organizationId);
+          } else {
+            console.error('Error creating organization in Supabase:', createError);
+            // Don't throw here - let the load continue with local-only mode
+          }
+        }
+      } else {
+        console.log('No organization data found in localStorage for:', organizationId);
+        // Create a basic organization entry
+        try {
+          await window.orgDb.createOrganization({
+            id: organizationId,
+            name: `Organization ${organizationId}`,
+            description: `Auto-created organization`,
+            type: 'company',
+            password_hash: null
+          });
+          console.log('Basic organization created in Supabase:', organizationId);
+        } catch (createError) {
+          // Check for various duplicate key error formats
+          const isDuplicateError = createError.message && (
+            createError.message.includes('already exists') ||
+            createError.message.includes('duplicate key') ||
+            createError.message.includes('violates unique constraint') ||
+            createError.code === '23505' // PostgreSQL unique violation code
+          );
+          
+          if (isDuplicateError) {
+            console.log('Basic organization already exists in Supabase:', organizationId);
+          } else {
+            console.error('Error creating basic organization in Supabase:', createError);
+            // Don't throw here - let the load continue with local-only mode
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error ensuring organization exists:', error);
+      // Don't throw here - let the load continue with local-only mode
+    }
+  };
+
   const load = async (organizationId = null) => {
     // If no organization ID provided, try to get from localStorage
     if (!organizationId) {
@@ -260,8 +331,16 @@ const OrgStore = (() => {
 
     state.loadPromise = (async () => {
       try {
+        console.log('Loading data for organization:', organizationId);
+        
+        // First, ensure the organization exists in the database
+        await ensureOrganizationExists(organizationId);
+        
         // Load nodes with metrics from Supabase for specific organization
         const supabaseData = await window.orgDb.getNodesWithMetrics(organizationId);
+        
+        console.log('Loaded from Supabase:', supabaseData.length, 'nodes');
+        console.log('Raw Supabase data:', supabaseData);
         
         state.nodesById.clear();
         supabaseData.forEach((rawNode) => {
@@ -293,6 +372,13 @@ const OrgStore = (() => {
         state.isLoaded = true;
         state.currentOrganizationId = organizationId;
         state.lastError = null;
+        
+        console.log('Load completed. Final state:', {
+          nodesCount: state.nodesById.size,
+          rootIds: state.rootIds,
+          nodes: Array.from(state.nodesById.values()).map(n => ({ id: n.id, name: n.name, parent: n.parent, children: n.children }))
+        });
+        
         notify();
         return getSnapshot();
       } catch (error) {
@@ -414,6 +500,13 @@ const OrgStore = (() => {
   const addNode = async (nodeInput) => {
     const node = normaliseNode(nodeInput);
     
+    console.log('Supabase addNode called:', { 
+      id: node.id, 
+      name: node.name, 
+      parent: node.parent, 
+      organizationId: state.currentOrganizationId 
+    });
+    
     try {
       if (state.nodesById.has(node.id)) {
         throw new Error(`Nod med id ${node.id} finns redan`);
@@ -430,7 +523,10 @@ const OrgStore = (() => {
       // Save to Supabase with organization ID
       const supabaseData = window.convertFrontendToSupabase(node);
       supabaseData.organization_id = state.currentOrganizationId;
-      await window.orgDb.createNode(supabaseData);
+      
+      console.log('Saving to Supabase:', supabaseData);
+      const result = await window.orgDb.createNode(supabaseData);
+      console.log('Supabase createNode result:', result);
 
       state.nodesById.set(node.id, node);
       if (node.parent) {
@@ -439,10 +535,13 @@ const OrgStore = (() => {
         state.rootIds.push(node.id);
       }
       
+      console.log('Node added successfully to local store. Total nodes:', state.nodesById.size);
       notify();
       return clone(node);
     } catch (error) {
       console.error("Kunde inte skapa nod i Supabase", error);
+      console.log('Falling back to local-only mode');
+      
       // In memory-only mode, still add the node locally
       state.nodesById.set(node.id, node);
       if (node.parent) {

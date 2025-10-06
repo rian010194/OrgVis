@@ -461,7 +461,7 @@ export function convertSupabaseToFrontend(supabaseData) {
 export function convertFrontendToSupabase(frontendData) {
   if (!frontendData) return null;
 
-  return {
+  const result = {
     id: frontendData.id,
     name: frontendData.name,
     type: frontendData.type,
@@ -471,6 +471,9 @@ export function convertFrontendToSupabase(frontendData) {
     responsibilities: frontendData.responsibilities || [],
     outcomes: frontendData.outcomes || []
   };
+  
+  console.log('convertFrontendToSupabase:', { input: frontendData, output: result });
+  return result;
 }
 
 // Helper function to convert frontend metric to Supabase format

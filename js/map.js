@@ -170,6 +170,8 @@ const OrgMap = (() => {
   };
 
   const buildHierarchy = (nodes) => {
+    console.log('buildHierarchy called with nodes:', nodes.map(n => ({ id: n.id, name: n.name, parent: n.parent, children: n.children })));
+    
     const wrappers = new Map();
     nodes.forEach((node) => {
       wrappers.set(node.id, { node, children: [] });
@@ -187,9 +189,11 @@ const OrgMap = (() => {
         const parentWrapper = wrappers.get(parentId);
         if (parentWrapper.node.type !== "SupportOffice") {
           parentWrapper.children.push(wrapper);
+          console.log(`Added ${currentNode.id} as child of ${parentId}`);
         }
       } else if (!parentId) {
         roots.push(wrapper);
+        console.log(`Added ${currentNode.id} as root`);
       }
     });
 
@@ -249,6 +253,14 @@ const OrgMap = (() => {
     const actualNodes = hierarchyRoot
       .descendants()
       .filter((node) => node.data && node.data.node && node.data.node.id !== "__root__");
+    
+    console.log('computeLayout - actualNodes to render:', actualNodes.map(n => ({ 
+      id: n.data.node.id, 
+      name: n.data.node.name, 
+      depth: n.depth,
+      hasChildren: n.children && n.children.length > 0,
+      childrenCount: n.children ? n.children.length : 0
+    })));
 
     const maxDepth = actualNodes.length
       ? d3.max(actualNodes, (node) => Math.max(node.depth - 1, 0))
@@ -496,10 +508,37 @@ const OrgMap = (() => {
 
   const toggleSupportVisibility = (parentId) => {
     console.log('toggleSupportVisibility called with parentId:', parentId);
-    if (supportVisibility.has(parentId)) {
-      // Close the current support office
-      supportVisibility.delete(parentId);
-      console.log('Removed from supportVisibility');
+    const isExplicitlyVisible = supportVisibility.has(parentId);
+    const isParentExpanded = state.expanded.has(parentId);
+    const isCurrentlyVisible = isExplicitlyVisible || isParentExpanded;
+    
+    if (isCurrentlyVisible) {
+      // Hide the support office
+      if (isExplicitlyVisible) {
+        supportVisibility.delete(parentId);
+        console.log('Removed from supportVisibility');
+      }
+      
+      // If the node is expanded, collapse it to hide the support office
+      if (isParentExpanded) {
+        console.log('Collapsing node to hide support office:', parentId);
+        state.expanded.delete(parentId);
+        // Also collapse any descendants to maintain clean state
+        const layout = lastLayout;
+        if (layout && layout.nodeLookup) {
+          const collapseDescendants = (nodeId) => {
+            const node = layout.nodeLookup.get(nodeId);
+            if (node && node.hasChildren) {
+              const children = layout.nodeData.filter(n => n.parentId === nodeId);
+              children.forEach(child => {
+                state.expanded.delete(child.id);
+                collapseDescendants(child.id);
+              });
+            }
+          };
+          collapseDescendants(parentId);
+        }
+      }
       
       // When closing support offices, ensure focus is maintained on selected node
       if (state.selectedId) {
@@ -508,6 +547,7 @@ const OrgMap = (() => {
         }, 100);
       }
     } else {
+      // Show the support office
       // Close all other support offices first (only allow one open at a time)
       supportVisibility.clear();
       // Open the new support office
@@ -535,6 +575,7 @@ const OrgMap = (() => {
       }
     }
     console.log('Current supportVisibility:', Array.from(supportVisibility));
+    console.log('Current expanded state:', Array.from(state.expanded));
     console.log('lastLayout exists:', !!lastLayout);
     if (lastLayout) {
       console.log('lastLayout.supportMap exists:', !!lastLayout.supportMap);
@@ -573,7 +614,12 @@ const OrgMap = (() => {
       .attr('y', (node) => node.y + NODE_HEIGHT / 2 + SUPPORT_TOGGLE_OFFSET);
 
     merged.select('button.support-toggle-button')
-      .text((node) => (supportVisibility.has(node.id) ? 'Hide Support Office' : 'Show Support Office'))
+      .text((node) => {
+        const isExplicitlyVisible = supportVisibility.has(node.id);
+        const isParentExpanded = state.expanded.has(node.id);
+        const isCurrentlyVisible = isExplicitlyVisible || isParentExpanded;
+        return isCurrentlyVisible ? 'Hide Support Office' : 'Show Support Office';
+      })
       .on('click', (event, node) => {
         event.stopPropagation();
         toggleSupportVisibility(node.id);
@@ -602,15 +648,21 @@ const OrgMap = (() => {
         console.log('Skipping - no parentId');
         return;
       }
-      if (!supportVisibility.has(parentId)) {
-        console.log('Skipping - not in supportVisibility:', parentId);
-        return;
-      }
       const parentNode = nodeLookup.get(parentId);
       if (!parentNode) {
         console.log('Skipping - parentNode not found:', parentId);
         return;
       }
+      
+      // Show support office if explicitly toggled OR if parent node is expanded
+      const isExplicitlyVisible = supportVisibility.has(parentId);
+      const isParentExpanded = state.expanded.has(parentId);
+      
+      if (!isExplicitlyVisible && !isParentExpanded) {
+        console.log('Skipping - not in supportVisibility and parent not expanded:', parentId);
+        return;
+      }
+      
       console.log('Adding to data:', parentId, 'with children:', entry.children.length);
       data.push({ parent: parentNode, office: entry.office, children: entry.children || [], parentId });
     });
@@ -813,13 +865,20 @@ const OrgMap = (() => {
 
     nodes.forEach((node) => {
       if (!node || !node.children || node.children.length === 0) {
+        console.log(`Node ${node?.id} has no children, skipping expansion`);
         return;
       }
       const depth = computeDepth(node.id);
+      console.log(`Node ${node.id} depth: ${depth}, children: ${node.children.length}`);
       if (Number.isFinite(depth) && depth < 2) {
         state.expanded.add(node.id);
+        console.log(`Expanded node ${node.id}`);
+      } else {
+        console.log(`Did not expand node ${node.id} (depth: ${depth})`);
       }
     });
+    
+    console.log('Final expanded state:', Array.from(state.expanded));
   };
 
   const pruneExpanded = (validIds) => {

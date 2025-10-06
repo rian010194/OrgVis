@@ -41,6 +41,7 @@ class ThemeEditor {
     // Logo upload
     const themeUploadLogoBtn = document.getElementById('themeUploadLogoBtn');
     const themeOrgLogoInput = document.getElementById('themeOrgLogo');
+    const themeRemoveLogoBtn = document.getElementById('themeRemoveLogoBtn');
     
     if (themeUploadLogoBtn && themeOrgLogoInput) {
       themeUploadLogoBtn.addEventListener('click', () => themeOrgLogoInput.click());
@@ -48,6 +49,10 @@ class ThemeEditor {
     
     if (themeOrgLogoInput) {
       themeOrgLogoInput.addEventListener('change', (e) => this.handleLogoUpload(e));
+    }
+    
+    if (themeRemoveLogoBtn) {
+      themeRemoveLogoBtn.addEventListener('click', () => this.handleRemoveLogo());
     }
   }
 
@@ -364,8 +369,20 @@ class ThemeEditor {
     // Update logo preview
     if (brandingData.logo) {
       const logoPreview = document.getElementById('themeLogoPreview');
+      const removeLogoBtn = document.getElementById('themeRemoveLogoBtn');
       if (logoPreview) {
         logoPreview.innerHTML = `<img src="${brandingData.logo}" alt="Organization Logo" style="max-width: 100px; max-height: 60px;">`;
+      }
+      if (removeLogoBtn) {
+        removeLogoBtn.classList.remove('hidden');
+        removeLogoBtn.removeAttribute('data-logo-removed'); // Clear removal flag
+      }
+    } else {
+      // Hide remove button if no logo exists
+      const removeLogoBtn = document.getElementById('themeRemoveLogoBtn');
+      if (removeLogoBtn) {
+        removeLogoBtn.classList.add('hidden');
+        removeLogoBtn.removeAttribute('data-logo-removed'); // Clear removal flag
       }
     }
   }
@@ -376,12 +393,45 @@ class ThemeEditor {
       const reader = new FileReader();
       reader.onload = (e) => {
         const logoPreview = document.getElementById('themeLogoPreview');
+        const removeLogoBtn = document.getElementById('themeRemoveLogoBtn');
         if (logoPreview) {
           logoPreview.innerHTML = `<img src="${e.target.result}" alt="Organization Logo" style="max-width: 100px; max-height: 60px;">`;
+        }
+        if (removeLogoBtn) {
+          removeLogoBtn.classList.remove('hidden');
+          // Clear the removal flag when new logo is uploaded
+          removeLogoBtn.removeAttribute('data-logo-removed');
         }
       };
       reader.readAsDataURL(file);
     }
+  }
+
+  handleRemoveLogo() {
+    const logoPreview = document.getElementById('themeLogoPreview');
+    const removeLogoBtn = document.getElementById('themeRemoveLogoBtn');
+    const logoInput = document.getElementById('themeOrgLogo');
+    
+    if (logoPreview) {
+      logoPreview.innerHTML = '<span class="logo-placeholder">No logo selected</span>';
+    }
+    if (removeLogoBtn) {
+      removeLogoBtn.classList.add('hidden');
+      // Add a data attribute to track that logo was removed
+      removeLogoBtn.setAttribute('data-logo-removed', 'true');
+    }
+    if (logoInput) {
+      logoInput.value = ''; // Clear the file input
+    }
+    
+    // Also remove logo from header if it exists
+    const headers = document.querySelectorAll('header');
+    headers.forEach(header => {
+      const existingLogo = header.querySelector('.organization-logo');
+      if (existingLogo) {
+        existingLogo.remove();
+      }
+    });
   }
 
   updateColorPreview(inputId, colorValue) {
@@ -572,13 +622,21 @@ class ThemeEditor {
       };
       reader.readAsDataURL(logoFile);
     } else {
-      // Keep existing logo if no new one uploaded
-      try {
-        const existingBranding = JSON.parse(localStorage.getItem(`org_branding_${currentOrgId}`) || '{}');
-        brandingData.logo = existingBranding.logo;
-      } catch (error) {
-        console.error('Error parsing existing branding data:', error);
+      // Check if logo was removed
+      const removeLogoBtn = document.getElementById('themeRemoveLogoBtn');
+      
+      if (removeLogoBtn && removeLogoBtn.hasAttribute('data-logo-removed')) {
+        // Logo was explicitly removed
         brandingData.logo = null;
+      } else {
+        // Keep existing logo if no new one uploaded and not explicitly removed
+        try {
+          const existingBranding = JSON.parse(localStorage.getItem(`org_branding_${currentOrgId}`) || '{}');
+          brandingData.logo = existingBranding.logo;
+        } catch (error) {
+          console.error('Error parsing existing branding data:', error);
+          brandingData.logo = null;
+        }
       }
       this.saveThemeAndApply(brandingData, orgData);
     }

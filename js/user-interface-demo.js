@@ -55,11 +55,11 @@ class UserInterfaceDemo {
           <div class="dashboard-charts">
             <div class="chart-container">
               <h4>Användare per roll</h4>
-              <canvas id="roleChart"></canvas>
+              <div id="roleChart" class="d3-chart"></div>
             </div>
             <div class="chart-container">
               <h4>Användare per nivå</h4>
-              <canvas id="levelChart"></canvas>
+              <div id="levelChart" class="d3-chart"></div>
             </div>
           </div>
         </div>
@@ -179,12 +179,54 @@ class UserInterfaceDemo {
       }
     });
 
-    // Show user panel
+    // Show user panel - improved touch handling
     document.addEventListener('click', (e) => {
-      if (e.target.id === 'userManagementBtn') {
+      if (e.target.id === 'userManagementBtn' || e.target.closest('#userManagementBtn')) {
+        e.preventDefault();
+        e.stopPropagation();
         this.showUserPanel();
       }
     });
+    
+    // Also handle touch events for better mobile support
+    document.addEventListener('touchend', (e) => {
+      if (e.target.id === 'userManagementBtn' || e.target.closest('#userManagementBtn')) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.showUserPanel();
+      }
+    });
+
+    // Handle user panel navigation
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('nav-btn')) {
+        this.switchView(e.target.dataset.view);
+      }
+    });
+  }
+
+  switchView(viewName) {
+    // Hide all views
+    document.querySelectorAll('.view-content').forEach(view => {
+      view.classList.remove('active');
+    });
+    
+    // Remove active class from all nav buttons
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    
+    // Show selected view
+    const targetView = document.getElementById(viewName + 'View');
+    if (targetView) {
+      targetView.classList.add('active');
+    }
+    
+    // Add active class to clicked nav button
+    const activeBtn = document.querySelector(`[data-view="${viewName}"]`);
+    if (activeBtn) {
+      activeBtn.classList.add('active');
+    }
   }
 
   showUserPanel() {
@@ -192,6 +234,8 @@ class UserInterfaceDemo {
     if (panel) {
       panel.classList.remove('hidden');
       this.createDemoCharts();
+    } else {
+      console.warn('User management panel not found');
     }
   }
 
@@ -217,113 +261,234 @@ class UserInterfaceDemo {
   }
 
   createDemoCharts() {
-    // Simple demo charts
-    const roleCanvas = document.getElementById('roleChart');
-    const levelCanvas = document.getElementById('levelChart');
+    // Check if D3 is available
+    if (typeof d3 === "undefined" || !d3.pie || !d3.arc) {
+      console.warn('D3.js not available, falling back to simple text display');
+      this.createFallbackCharts();
+      return;
+    }
+
+    // Create D3.js charts
+    this.createRoleChart();
+    this.createLevelChart();
+  }
+
+  createFallbackCharts() {
+    const roleContainer = document.getElementById('roleChart');
+    const levelContainer = document.getElementById('levelChart');
     
-    if (roleCanvas) {
-      // Set canvas size - much wider for better spacing
-      roleCanvas.width = 900;
-      roleCanvas.height = 300;
-      
-      const ctx = roleCanvas.getContext('2d');
-      ctx.clearRect(0, 0, roleCanvas.width, roleCanvas.height);
-      
-      // Simple bar chart with better spacing
-      const data = [150, 300, 500, 200, 50]; // member, team_lead, department_admin, org_admin, super_admin
-      const labels = ['Medlem', 'Teamledare', 'Avdelningsadmin', 'Org Admin', 'Super Admin'];
-      const colors = ['#6c757d', '#20c997', '#ffc107', '#fd7e14', '#dc3545'];
-      
-      const barWidth = 80; // Wider bars for better visibility
-      const barSpacing = 40; // More space between bars
-      const maxValue = Math.max(...data);
-      const chartHeight = roleCanvas.height - 80; // More space for labels
-      const chartStartY = 20;
-      
-      data.forEach((value, index) => {
-        const barHeight = (value / maxValue) * chartHeight;
-        const x = index * (barWidth + barSpacing) + 60;
-        const y = chartStartY + (chartHeight - barHeight);
-        
-        // Draw bar
-        ctx.fillStyle = colors[index];
-        ctx.fillRect(x, y, barWidth, barHeight);
-        
-        // Draw value on top
-        ctx.fillStyle = '#333';
-        ctx.font = 'bold 12px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(value.toString(), x + barWidth/2, y - 8);
-        
-        // Draw label rotated for better fit
-        ctx.save();
-        ctx.translate(x + barWidth/2, roleCanvas.height - 15);
-        ctx.rotate(-Math.PI / 4); // Rotate 45 degrees
-        ctx.font = '11px Arial';
-        ctx.fillStyle = '#666';
-        ctx.textAlign = 'center';
-        ctx.fillText(labels[index], 0, 0);
-        ctx.restore();
-      });
+    if (roleContainer) {
+      roleContainer.innerHTML = `
+        <div style="padding: 20px; text-align: center; color: #666;">
+          <p>Medlem: 150</p>
+          <p>Teamledare: 300</p>
+          <p>Träningsadmin: 500</p>
+          <p>Org Admin: 200</p>
+          <p>Super Admin: 50</p>
+        </div>
+      `;
     }
     
-    if (levelCanvas) {
-      // Set canvas size
-      levelCanvas.width = 700;
-      levelCanvas.height = 250;
-      
-      const ctx = levelCanvas.getContext('2d');
-      ctx.clearRect(0, 0, levelCanvas.width, levelCanvas.height);
-      
-      // Simple line chart with better spacing
-      const data = [5, 25, 150, 400, 600, 200, 50]; // levels 1-7
-      const chartWidth = levelCanvas.width - 120; // Leave more space for labels
-      const chartHeight = levelCanvas.height - 80;
-      const chartStartX = 80;
-      const chartStartY = 20;
-      
-      const stepX = chartWidth / (data.length - 1);
-      const maxValue = Math.max(...data);
-      
-      // Draw line
-      ctx.strokeStyle = '#007bff';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      
-      data.forEach((value, index) => {
-        const x = chartStartX + index * stepX;
-        const y = chartStartY + chartHeight - (value / maxValue) * chartHeight;
-        
-        if (index === 0) {
-          ctx.moveTo(x, y);
-        } else {
-          ctx.lineTo(x, y);
-        }
-        
-        // Draw point
-        ctx.fillStyle = '#007bff';
-        ctx.beginPath();
-        ctx.arc(x, y, 4, 0, 2 * Math.PI);
-        ctx.fill();
-        
-        // Draw value above point
-        ctx.fillStyle = '#333';
-        ctx.font = 'bold 11px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(value.toString(), x, y - 10);
-      });
-      
-      ctx.stroke();
-      
-      // Add labels with better spacing
-      ctx.fillStyle = '#666';
-      ctx.font = '11px Arial';
-      ctx.textAlign = 'center';
-      data.forEach((value, index) => {
-        const x = chartStartX + index * stepX;
-        ctx.fillText(`Nivå ${index + 1}`, x, levelCanvas.height - 10);
-      });
+    if (levelContainer) {
+      levelContainer.innerHTML = `
+        <div style="padding: 20px; text-align: center; color: #666;">
+          <p>Nivå 1: 5 användare</p>
+          <p>Nivå 2: 25 användare</p>
+          <p>Nivå 3: 150 användare</p>
+          <p>Nivå 4: 400 användare</p>
+          <p>Nivå 5: 600 användare</p>
+          <p>Nivå 6: 200 användare</p>
+          <p>Nivå 7: 50 användare</p>
+        </div>
+      `;
     }
+  }
+
+  createRoleChart() {
+    const container = document.getElementById('roleChart');
+    if (!container) return;
+
+    // Clear container
+    container.innerHTML = '';
+
+    // Data for roles
+    const data = [
+      { role: 'Medlem', value: 150, color: '#6c757d' },
+      { role: 'Teamledare', value: 300, color: '#20c997' },
+      { role: 'Träningsadmin', value: 500, color: '#ffc107' },
+      { role: 'Org Admin', value: 200, color: '#fd7e14' },
+      { role: 'Super Admin', value: 50, color: '#dc3545' }
+    ];
+
+    // Get container dimensions
+    const containerRect = container.getBoundingClientRect();
+    const width = containerRect.width || 400;
+    const height = 300;
+    const radius = Math.min(width, height) / 2 - 20;
+
+    // Create SVG
+    const svg = d3.select(container)
+      .append('svg')
+      .attr('width', width)
+      .attr('height', height);
+
+    const g = svg.append('g')
+      .attr('transform', `translate(${width / 2}, ${height / 2})`);
+
+    // Create pie generator
+    const pie = d3.pie()
+      .sort(null)
+      .value(d => d.value);
+
+    // Create arc generator
+    const arc = d3.arc()
+      .innerRadius(radius * 0.4)
+      .outerRadius(radius);
+
+    // Create arcs
+    const arcs = g.selectAll('.arc')
+      .data(pie(data))
+      .enter()
+      .append('g')
+      .attr('class', 'arc');
+
+    // Add path elements
+    arcs.append('path')
+      .attr('d', arc)
+      .attr('fill', d => d.data.color)
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 2);
+
+    // Add labels
+    arcs.append('text')
+      .attr('transform', d => `translate(${arc.centroid(d)})`)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '12px')
+      .attr('font-weight', 'bold')
+      .attr('fill', '#333')
+      .text(d => d.data.value);
+
+    // Add legend
+    const legend = svg.append('g')
+      .attr('class', 'legend')
+      .attr('transform', `translate(${width - 150}, 20)`);
+
+    const legendItems = legend.selectAll('.legend-item')
+      .data(data)
+      .enter()
+      .append('g')
+      .attr('class', 'legend-item')
+      .attr('transform', (d, i) => `translate(0, ${i * 20})`);
+
+    legendItems.append('rect')
+      .attr('width', 12)
+      .attr('height', 12)
+      .attr('fill', d => d.color);
+
+    legendItems.append('text')
+      .attr('x', 18)
+      .attr('y', 9)
+      .attr('font-size', '11px')
+      .attr('fill', '#333')
+      .text(d => d.role);
+  }
+
+  createLevelChart() {
+    const container = document.getElementById('levelChart');
+    if (!container) return;
+
+    // Clear container
+    container.innerHTML = '';
+
+    // Data for levels
+    const data = [
+      { level: 1, value: 5 },
+      { level: 2, value: 25 },
+      { level: 3, value: 150 },
+      { level: 4, value: 400 },
+      { level: 5, value: 600 },
+      { level: 6, value: 200 },
+      { level: 7, value: 50 }
+    ];
+
+    // Get container dimensions
+    const containerRect = container.getBoundingClientRect();
+    const width = containerRect.width || 400;
+    const height = 300;
+    const margin = { top: 20, right: 30, bottom: 40, left: 40 };
+    const chartWidth = width - margin.left - margin.right;
+    const chartHeight = height - margin.top - margin.bottom;
+
+    // Create SVG
+    const svg = d3.select(container)
+      .append('svg')
+      .attr('width', width)
+      .attr('height', height);
+
+    const g = svg.append('g')
+      .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+    // Create scales
+    const xScale = d3.scaleBand()
+      .domain(data.map(d => d.level))
+      .range([0, chartWidth])
+      .padding(0.1);
+
+    const yScale = d3.scaleLinear()
+      .domain([0, d3.max(data, d => d.value)])
+      .range([chartHeight, 0]);
+
+    // Create bars
+    g.selectAll('.bar')
+      .data(data)
+      .enter()
+      .append('rect')
+      .attr('class', 'bar')
+      .attr('x', d => xScale(d.level))
+      .attr('y', d => yScale(d.value))
+      .attr('width', xScale.bandwidth())
+      .attr('height', d => chartHeight - yScale(d.value))
+      .attr('fill', '#007bff')
+      .attr('rx', 4)
+      .attr('ry', 4);
+
+    // Add value labels on top of bars
+    g.selectAll('.bar-label')
+      .data(data)
+      .enter()
+      .append('text')
+      .attr('class', 'bar-label')
+      .attr('x', d => xScale(d.level) + xScale.bandwidth() / 2)
+      .attr('y', d => yScale(d.value) - 5)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '11px')
+      .attr('font-weight', 'bold')
+      .attr('fill', '#333')
+      .text(d => d.value);
+
+    // Add x-axis
+    g.append('g')
+      .attr('transform', `translate(0, ${chartHeight})`)
+      .call(d3.axisBottom(xScale).tickFormat(d => `Nivå ${d}`))
+      .attr('font-size', '11px')
+      .selectAll('text')
+      .attr('fill', '#666');
+
+    // Add y-axis
+    g.append('g')
+      .call(d3.axisLeft(yScale).ticks(5))
+      .attr('font-size', '11px')
+      .selectAll('text')
+      .attr('fill', '#666');
+
+    // Add grid lines
+    g.append('g')
+      .attr('class', 'grid')
+      .call(d3.axisLeft(yScale)
+        .tickSize(-chartWidth)
+        .tickFormat('')
+      )
+      .attr('opacity', 0.1);
   }
 }
 

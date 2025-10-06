@@ -325,6 +325,184 @@
   </div>
 
 
+  <!-- User Management Panel -->
+  <div id="userManagementPanel" class="user-panel hidden">
+    <div class="user-panel-header">
+      <div class="header-left">
+        <h3>User Management</h3>
+        <span class="org-stats">Manage users and permissions</span>
+      </div>
+      <button id="closeUserPanel" class="close-btn">&times;</button>
+    </div>
+    
+    <div class="user-panel-nav">
+      <button class="nav-btn active" data-view="dashboard">Dashboard</button>
+      <button class="nav-btn" data-view="users">Users</button>
+      <button class="nav-btn" data-view="permissions">Permissions</button>
+      <button class="nav-btn" data-view="departments">Departments</button>
+      <button class="nav-btn" data-view="profile">Profile</button>
+    </div>
+    
+    <div class="user-panel-content">
+      <div id="dashboardView" class="view-content active">
+        <div class="dashboard-grid">
+          <div class="stat-card">
+            <h4>Total Users</h4>
+            <div class="stat-number">0</div>
+          </div>
+          <div class="stat-card">
+            <h4>Active Users</h4>
+            <div class="stat-number">0</div>
+          </div>
+          <div class="stat-card">
+            <h4>Departments</h4>
+            <div class="stat-number">0</div>
+          </div>
+          <div class="stat-card">
+            <h4>Pending Invites</h4>
+            <div class="stat-number">0</div>
+          </div>
+        </div>
+        
+        <div class="dashboard-charts">
+          <div class="chart-container">
+            <h4>User Activity</h4>
+            <div class="d3-chart" id="userActivityChart"></div>
+          </div>
+          <div class="chart-container">
+            <h4>Department Distribution</h4>
+            <div class="d3-chart" id="departmentChart"></div>
+          </div>
+        </div>
+      </div>
+      
+      <div id="usersView" class="view-content">
+        <div class="view-header">
+          <h4>Users</h4>
+          <div class="view-actions">
+            <button class="btn btn-primary">Add User</button>
+            <button class="btn btn-secondary">Import CSV</button>
+          </div>
+        </div>
+        
+        <div class="filters-section">
+          <div class="filter-group">
+            <input type="text" class="filter-input" placeholder="Search users...">
+            <select class="filter-select">
+              <option value="">All Departments</option>
+            </select>
+            <select class="filter-select">
+              <option value="">All Roles</option>
+            </select>
+            <select class="filter-select">
+              <option value="">All Status</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="users-table-container">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Department</th>
+                <th>Role</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="6" class="text-center text-muted">No users found</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div id="permissionsView" class="view-content">
+        <div class="view-header">
+          <h4>Permissions</h4>
+          <div class="view-actions">
+            <button class="btn btn-primary">Add Permission</button>
+          </div>
+        </div>
+        
+        <div class="permissions-table-container">
+          <table class="permissions-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>Permissions</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="4" class="text-center text-muted">No permissions found</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div id="departmentsView" class="view-content">
+        <div class="view-header">
+          <h4>Departments</h4>
+          <div class="view-actions">
+            <button class="btn btn-primary">Add Department</button>
+          </div>
+        </div>
+        
+        <div class="departments-grid">
+          <div class="department-card">
+            <div class="department-header">
+              <h5>Sample Department</h5>
+              <span class="department-code">SD</span>
+            </div>
+            <div class="department-content">
+              <p>This is a sample department for demonstration purposes.</p>
+              <div class="department-stats">5 users</div>
+            </div>
+            <div class="department-actions">
+              <button class="btn btn-sm btn-secondary">Edit</button>
+              <button class="btn btn-sm btn-danger">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div id="profileView" class="view-content">
+        <div class="view-header">
+          <h4>My Profile</h4>
+          <div class="view-actions">
+            <button class="btn btn-primary">Edit Profile</button>
+          </div>
+        </div>
+        
+        <div class="profile-content">
+          <div class="profile-info">
+            <div class="profile-avatar">
+              <div class="avatar-circle">U</div>
+            </div>
+            <div class="profile-details">
+              <h5>Demo User</h5>
+              <p>demo@example.com</p>
+              <p>System Administrator</p>
+              <p>IT Department</p>
+            </div>
+          </div>
+          <div class="profile-actions">
+            <button class="btn btn-primary">Change Password</button>
+            <button class="btn btn-secondary">Update Profile</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Edit Theme Panel -->
   <div id="editThemePanel" class="theme-panel hidden">
     <div class="theme-panel-header">
@@ -358,7 +536,10 @@
               <div class="logo-preview" id="themeLogoPreview">
                 <span class="logo-placeholder">No logo selected</span>
               </div>
-              <button type="button" id="themeUploadLogoBtn" class="button secondary">Choose Logo</button>
+              <div class="logo-actions">
+                <button type="button" id="themeUploadLogoBtn" class="button secondary">Choose Logo</button>
+                <button type="button" id="themeRemoveLogoBtn" class="button danger hidden">Remove Logo</button>
+              </div>
             </div>
           </div>
         </div>
@@ -610,7 +791,7 @@
       </div>
     </div>
     <div class="toolbar-actions">
-      <button id="userManagementBtn" type="button" class="user-management-button hidden" title="User Management">
+      <button id="userManagementBtn" type="button" class="user-management-button" title="User Management">
         <span class="user-icon">👥</span>
         <span class="user-text">Users</span>
       </button>
