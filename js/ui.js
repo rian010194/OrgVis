@@ -2343,10 +2343,10 @@ const OrgUI = (() => {
         const selectedNodeId = getSelectedNodeId();
         if (selectedNodeId) {
           console.log('switchToView - focusing on selected node:', selectedNodeId);
-          // Use a small delay to ensure map is visible before focusing
+          // Use a longer delay to ensure map is visible and dimensions are updated
           setTimeout(() => {
             OrgMap.reveal(selectedNodeId);
-          }, 100);
+          }, 300);
         } else {
           console.log('switchToView - no selected node, using resetView');
           // If no node is selected, use resetView

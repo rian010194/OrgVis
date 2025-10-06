@@ -37,6 +37,7 @@ const OrgMap = (() => {
   let unsubscribe = null;
   let zoomBehavior = null;
   let currentTransform = d3.zoomIdentity;
+  let lastUserZoomTime = 0;
   let lastLayout = null;
   let isInitialised = false;
 
@@ -51,12 +52,37 @@ const OrgMap = (() => {
     if (canvasGroup) {
       canvasGroup.attr("transform", currentTransform);
     }
+    lastUserZoomTime = Date.now();
   };
 
   const applyCurrentTransform = () => {
     if (canvasGroup) {
       canvasGroup.attr("transform", currentTransform);
     }
+  };
+
+  // Wait for stable, non-zero container dimensions before proceeding
+  const waitForStableDimensions = (timeoutMs = 800, intervalMs = 50) => {
+    return new Promise((resolve) => {
+      const start = performance.now();
+      let prev = null;
+      const check = () => {
+        if (!container) container = document.getElementById("mapView");
+        const rect = container ? container.getBoundingClientRect() : null;
+        const w = rect ? rect.width : 0;
+        const h = rect ? rect.height : 0;
+        const now = performance.now();
+        if (w > 0 && h > 0) {
+          if (prev && Math.abs(prev.w - w) < 1 && Math.abs(prev.h - h) < 1) {
+            return resolve({ width: w, height: h });
+          }
+          prev = { w, h };
+        }
+        if (now - start >= timeoutMs) return resolve({ width: w, height: h });
+        setTimeout(check, intervalMs);
+      };
+      check();
+    });
   };
 
   const ensureTransformConsistency = () => {
@@ -68,6 +94,13 @@ const OrgMap = (() => {
 
   const focusNode = (nodeId, options = {}) => {
     if (!lastLayout || !Array.isArray(lastLayout.nodeData) || !nodeId) {
+      return;
+    }
+    // Ensure dimensions are stable after UI changes (e.g., detail panel opens)
+    if (options && options.ensureStable !== false) {
+      waitForStableDimensions().then(() => {
+        focusNode(nodeId, Object.assign({}, options, { ensureStable: false }));
+      });
       return;
     }
     
@@ -97,20 +130,97 @@ const OrgMap = (() => {
       return;
     }
 
-    const bounds = container ? container.getBoundingClientRect() : null;
-    const width = (bounds && bounds.width > 0) ? bounds.width : (container ? container.clientWidth : 0) || lastLayout.outerWidth || minInnerWidth + margins.left + margins.right;
-    const height = (bounds && bounds.height > 0) ? bounds.height : (container ? container.clientHeight : 0) || lastLayout.outerHeight || minInnerHeight + margins.top + margins.bottom;
+    // Prefer actual SVG dimensions for accurate centering, fallback to container
+    let width = 0;
+    let height = 0;
+    if (svg && typeof svg.node === 'function') {
+      const svgEl = svg.node();
+      width = svgEl && (svgEl.clientWidth || svgEl.getBoundingClientRect().width || 0);
+      height = svgEl && (svgEl.clientHeight || svgEl.getBoundingClientRect().height || 0);
+      if ((!width || !height) && svgEl) {
+        // Fallback to attributes if present
+        const attrW = parseFloat(svgEl.getAttribute('width'));
+        const attrH = parseFloat(svgEl.getAttribute('height'));
+        if (!isNaN(attrW)) width = width || attrW;
+        if (!isNaN(attrH)) height = height || attrH;
+      }
+    }
+    if (!width || !height) {
+      const bounds = container ? container.getBoundingClientRect() : null;
+      width = bounds && bounds.width ? bounds.width : (container ? container.clientWidth : 0);
+      height = bounds && bounds.height ? bounds.height : (container ? container.clientHeight : 0);
+    }
+    // last resort fallbacks to avoid zeros
+    if (!width || width < 10) width = window.innerWidth || 1024;
+    if (!height || height < 10) height = Math.min(window.innerHeight || 768, 700);
+    if (!width) width = (lastLayout ? lastLayout.outerWidth : 0) || minInnerWidth + margins.left + margins.right;
+    if (!height) height = (lastLayout ? lastLayout.outerHeight : 0) || minInnerHeight + margins.top + margins.bottom;
+    
+    // In fullscreen mode, use viewport dimensions for better centering
+    if (document.body.classList.contains('detail-expanded')) {
+      width = Math.max(width, window.innerWidth * 0.8); // Use 80% of viewport width
+      height = Math.max(height, window.innerHeight * 0.8); // Use 80% of viewport height
+      console.log('focusNode - fullscreen mode detected, using viewport dimensions:', { width, height, viewportWidth: window.innerWidth, viewportHeight: window.innerHeight });
+    }
 
-    // Use a more zoomed-out scale to show context of where the node is in the tree
-    const contextScale = Math.max(zoomSettings.min, 0.6); // More zoomed out for better context
-    const desiredScale = options.scale !== undefined ? options.scale : contextScale;
+    // Respect current zoom if no scale is specified; otherwise use provided scale.
+    // If the user interacted very recently, keep their scale unless caller overrides.
+    const currentScale = currentTransform && typeof currentTransform.k === 'number' ? currentTransform.k : 1;
+    const userInteractedRecently = Date.now() - lastUserZoomTime < 1500; // 1.5s window
+    const desiredScale = options.scale !== undefined
+      ? options.scale
+      : (userInteractedRecently ? currentScale : currentScale);
     const scale = Math.max(zoomSettings.min, Math.min(zoomSettings.max, desiredScale));
+    // Center horizontally in the actual rendered area
     const centerX = width / 2;
-    // Adjust centerY to be slightly higher to avoid nodes appearing too far down
-    const centerY = height * 0.4; // Center at 40% of height instead of 50%
+    // Center at 50% of height for better centering
+    const centerY = height / 2;
+    
+    // Node coordinates are already in screen space (include margins), so we need to account for that
+    // Simple and correct transform: translate so node appears at center
     const tx = centerX - target.x * scale;
     const ty = centerY - (focusY || target.y) * scale;
     const transform = d3.zoomIdentity.translate(tx, ty).scale(scale);
+    
+    console.log('=== FOCUS DEBUG ===');
+    console.log('Node:', nodeId, 'at position:', target.x, target.y);
+    console.log('Container/SVG size used for centering:', width, 'x', height);
+    console.log('Center point:', centerX, centerY);
+    console.log('Scale:', scale);
+    console.log('Transform calculation:');
+    console.log('  tx = centerX - target.x * scale =', centerX, '-', target.x, '*', scale, '=', tx);
+    console.log('  ty = centerY - target.y * scale =', centerY, '-', (focusY || target.y), '*', scale, '=', ty);
+    console.log('Final transform:', transform.toString());
+    console.log('==================');
+    
+    // Add visual debug indicator (only when DEBUG_MAP enabled)
+    const DEBUG_MAP = (typeof window !== 'undefined' && (window.DEBUG_MAP || localStorage.getItem('debugMap') === '1'));
+    if (svg && DEBUG_MAP) {
+      // Remove any existing debug indicators
+      svg.selectAll('.debug-center').remove();
+      
+      // Add center point indicator
+      svg.append('circle')
+        .attr('class', 'debug-center')
+        .attr('cx', centerX)
+        .attr('cy', centerY)
+        .attr('r', 10)
+        .attr('fill', 'red')
+        .attr('opacity', 0.7)
+        .attr('stroke', 'white')
+        .attr('stroke-width', 2);
+      
+      // Add node position indicator
+      svg.append('circle')
+        .attr('class', 'debug-center')
+        .attr('cx', target.x)
+        .attr('cy', focusY || target.y)
+        .attr('r', 8)
+        .attr('fill', 'blue')
+        .attr('opacity', 0.7)
+        .attr('stroke', 'white')
+        .attr('stroke-width', 2);
+    }
 
     currentTransform = transform;
     if (svg && zoomBehavior) {
@@ -178,6 +288,12 @@ const OrgMap = (() => {
     // Additional fallback for mobile
     if (svgWidth < 300) svgWidth = 800;
     if (svgHeight < 300) svgHeight = 600;
+    
+    // In fullscreen mode, use viewport dimensions for better centering
+    if (document.body.classList.contains('detail-expanded')) {
+      svgWidth = Math.max(svgWidth, window.innerWidth * 0.8); // Use 80% of viewport width
+      svgHeight = Math.max(svgHeight, window.innerHeight * 0.8); // Use 80% of viewport height
+    }
 
     // Calculate scale to fit content with some margin
     const scaleX = svgWidth / contentWidth;
@@ -185,13 +301,56 @@ const OrgMap = (() => {
     const scale = Math.min(scaleX, scaleY, zoomSettings.max) * 0.8; // 80% to add margin
 
     // Calculate translation to center the content
-    const tx = svgWidth / 2 - centerX * scale;
-    const ty = svgHeight / 2 - centerY * scale;
-
-    const transform = d3.zoomIdentity.translate(tx, ty).scale(scale);
+    // Compose transform: center content point, then scale
+    const transform = d3.zoomIdentity
+      .translate(svgWidth / 2, svgHeight / 2)
+      .scale(scale)
+      .translate(-centerX, -centerY);
     currentTransform = transform;
 
     const duration = options.duration !== undefined ? options.duration : 300;
+    svg.transition().duration(duration).call(zoomBehavior.transform, transform);
+  };
+
+  // Keep tree centered while preserving current zoom level
+  const recenterPreservingScale = (options = {}) => {
+    if (!lastLayout || !svg || !zoomBehavior || !container) {
+      return;
+    }
+    const nodes = lastLayout.nodeData;
+    if (!nodes || nodes.length === 0) return;
+
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    nodes.forEach(n => {
+      minX = Math.min(minX, n.x - NODE_WIDTH / 2);
+      maxX = Math.max(maxX, n.x + NODE_WIDTH / 2);
+      minY = Math.min(minY, n.y - NODE_HEIGHT / 2);
+      maxY = Math.max(maxY, n.y + NODE_HEIGHT / 2);
+    });
+    if (!isFinite(minX) || !isFinite(minY)) return;
+
+    const contentCenterX = (minX + maxX) / 2;
+    const contentCenterY = (minY + maxY) / 2;
+
+    let viewW = 0, viewH = 0;
+    if (svg && typeof svg.node === 'function') {
+      const el = svg.node();
+      viewW = el && (el.clientWidth || el.getBoundingClientRect().width || parseFloat(el.getAttribute('width')) || 0);
+      viewH = el && (el.clientHeight || el.getBoundingClientRect().height || parseFloat(el.getAttribute('height')) || 0);
+    }
+    if (!viewW || !viewH) {
+      const rect = container.getBoundingClientRect();
+      viewW = rect.width || container.clientWidth || 800;
+      viewH = rect.height || container.clientHeight || 600;
+    }
+
+    const scale = currentTransform && typeof currentTransform.k === 'number' ? currentTransform.k : 1;
+    const transform = d3.zoomIdentity
+      .translate(viewW / 2, viewH / 2)
+      .scale(scale)
+      .translate(-contentCenterX, -contentCenterY);
+    currentTransform = transform;
+    const duration = options.duration !== undefined ? options.duration : 200;
     svg.transition().duration(duration).call(zoomBehavior.transform, transform);
   };
 
@@ -451,6 +610,7 @@ const OrgMap = (() => {
         if (typeof OrgUI !== "undefined" && OrgUI && typeof OrgUI.openNode === "function") {
           OrgUI.openNode(node.id);
         }
+        // Do not change pan/zoom when selecting a node
       })
       .on("dblclick", (event, node) => {
         event.stopPropagation();
@@ -994,6 +1154,7 @@ const OrgMap = (() => {
         // Restore and apply the preserved transform
         currentTransform = preservedTransform;
         ensureTransformConsistency();
+        // Keep user's current pan without forcing recenter on every refresh
         
         console.log(`Refresh execution completed #${refreshCallCount}`);
       } catch (error) {
@@ -1010,13 +1171,9 @@ const OrgMap = (() => {
     }
     refresh();
     
-    // Also update the view after resize to ensure proper centering
+    // After resize, do not pan to selected node; just reset fit
     setTimeout(() => {
-      if (state.selectedId) {
-        focusNode(state.selectedId, { duration: 200 });
-      } else {
-        resetView({ duration: 200 });
-      }
+      resetView({ duration: 200 });
     }, 100);
   };
 
@@ -1030,11 +1187,8 @@ const OrgMap = (() => {
     
     // Use a longer delay to ensure container dimensions are properly updated
     setTimeout(() => {
-      if (state.selectedId) {
-        focusNode(state.selectedId, { duration: 0 });
-      } else {
-        resetView({ duration: 0 });
-      }
+      // Do not pan/zoom to selected node automatically
+      resetView({ duration: 0 });
     }, 100); // 100ms delay to ensure dimensions are updated
   };
 
@@ -1089,12 +1243,9 @@ const OrgMap = (() => {
     if (!container) {
       return;
     }
+    // Only ensure the node's ancestors are expanded and selection is set;
+    // do not change pan/zoom automatically on reveal.
     refresh();
-    if (nodeId) {
-      requestAnimationFrame(() => {
-        focusNode(nodeId, { scale: 0.6 }); // Use context scale for better overview
-      });
-    }
   };
 
   const teardown = () => {

@@ -1008,39 +1008,20 @@
       </div>
     </div>
 
-  <div class="app-toolbar" role="toolbar" aria-label="View and admin controls">
-    <div class="toolbar-group">
-      <div class="view-switch-container">
-        <button type="button" id="desktopViewSwitch" class="desktop-view-switch" aria-label="Switch view">
-          <span class="desktop-view-switch-icon">🌳</span>
-        </button>
-      </div>
-    </div>
-    <div class="toolbar-actions">
-      <button id="userManagementBtn" type="button" class="user-management-button hidden" title="Configure Users">
-        <span class="user-icon">👥</span>
-        <span class="user-text">Configure Users</span>
-      </button>
-      <button id="editThemeBtn" type="button" class="theme-edit-button hidden" title="Edit Theme">
-        <span class="theme-icon">🎨</span>
-        <span class="theme-text">Edit Theme</span>
-      </button>
-      <button id="editNodesBtn" type="button" class="edit-nodes-button hidden" title="Edit Nodes">
-        <span class="edit-nodes-icon">✏️</span>
-        <span class="edit-nodes-text">Edit Nodes</span>
-      </button>
-      <button id="resourcesBtn" type="button" class="resources-button hidden" title="Resources & Info">
-        <span class="resources-icon">📚</span>
-        <span class="resources-text">Resources</span>
-      </button>
-    </div>
-  </div>
+  <div class="app-toolbar" role="toolbar" aria-label="View and admin controls"></div>
 
   <main class="app-layout">
     <section class="org-section">
       <div id="appStatus" class="app-status"></div>
-      <div id="orgchart" class="tree-container"></div>
-      <div id="mapView" class="map-view hidden"></div>
+      <div class="org-sticky">
+        <div id="orgchart" class="tree-container"></div>
+        <div id="mapView" class="map-view hidden"></div>
+        <div class="view-switch-floating">
+          <button type="button" id="desktopViewSwitch" class="desktop-view-switch" aria-label="Switch view">
+            <span class="desktop-view-switch-icon">🌳</span>
+          </button>
+        </div>
+      </div>
     </section>
 
     <aside class="side-section">
