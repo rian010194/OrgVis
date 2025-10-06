@@ -96,6 +96,13 @@ const OrgMap = (() => {
     if (!lastLayout || !Array.isArray(lastLayout.nodeData) || !nodeId) {
       return;
     }
+    
+    // Skip focus if admin panel transition is in progress
+    if (window._adminPanelTransition) {
+      console.log('focusNode - skipping focus due to admin panel transition');
+      return;
+    }
+    
     // Ensure dimensions are stable after UI changes (e.g., detail panel opens)
     if (options && options.ensureStable !== false) {
       waitForStableDimensions().then(() => {
@@ -237,6 +244,12 @@ const OrgMap = (() => {
       if (canvasGroup) {
         canvasGroup.attr("transform", currentTransform);
       }
+      return;
+    }
+    
+    // Skip reset if admin panel transition is in progress
+    if (window._adminPanelTransition) {
+      console.log('resetView - skipping reset due to admin panel transition');
       return;
     }
 
@@ -1215,6 +1228,12 @@ const OrgMap = (() => {
     }
 
     if (!nodeId) {
+      return;
+    }
+    
+    // Skip reveal if admin panel transition is in progress
+    if (window._adminPanelTransition) {
+      console.log('reveal - skipping reveal due to admin panel transition');
       return;
     }
     

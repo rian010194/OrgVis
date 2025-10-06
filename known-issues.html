@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Known Issues - Organization Chart</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #1a202c;
+            background: #f8fafc;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff5a00, #e53e3e);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #ff5a00;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            padding: 0.5rem 1rem;
+            border: 2px solid #ff5a00;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .back-link:hover {
+            background: #ff5a00;
+            color: white;
+        }
+
+        .issue-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #ff5a00;
+        }
+
+        .issue-card.critical {
+            border-left-color: #dc2626;
+            background: #fef2f2;
+        }
+
+        .issue-card.warning {
+            border-left-color: #f59e0b;
+            background: #fffbeb;
+        }
+
+        .issue-card.info {
+            border-left-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .issue-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #1a202c;
+        }
+
+        .issue-status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .status-active {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .status-investigating {
+            background: #fffbeb;
+            color: #f59e0b;
+        }
+
+        .status-fixed {
+            background: #f0fdf4;
+            color: #16a34a;
+        }
+
+        .issue-description {
+            margin-bottom: 1rem;
+            color: #4a5568;
+        }
+
+        .issue-workaround {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .workaround-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+
+        .workaround-text {
+            color: #4a5568;
+            font-size: 0.95rem;
+        }
+
+        .last-updated {
+            font-size: 0.875rem;
+            color: #718096;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .no-issues {
+            text-align: center;
+            padding: 3rem;
+            color: #718096;
+        }
+
+        .no-issues h2 {
+            color: #16a34a;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .issue-card {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Known Issues</h1>
+            <p>Current issues and their status</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <a href="index.html" class="back-link">
+            ← Back to Organization Chart
+        </a>
+
+        <!-- Issue 1: Theme Saving -->
+        <div class="issue-card critical">
+            <div class="issue-title">Theme Saving Not Working</div>
+            <div class="issue-status status-active">Active</div>
+            <div class="issue-description">
+                <p>When editing theme settings (colors, organization name, description, logo), the "Save Theme" button does not save changes to the database. This affects all theme customization features.</p>
+            </div>
+            <div class="issue-workaround">
+                <div class="workaround-title">Workaround:</div>
+                <div class="workaround-text">
+                    <p>• Try refreshing the page and editing theme again</p>
+                    <p>• Check browser console for error messages</p>
+                    <p>• Ensure you have a stable internet connection</p>
+                    <p>• Try logging out and back in</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Issue 2: Map Focus -->
+        <div class="issue-card warning">
+            <div class="issue-title">Map Focus Issues</div>
+            <div class="issue-status status-investigating">Investigating</div>
+            <div class="issue-description">
+                <p>When switching from tree view to map view, the map may not focus on the correct node location. The camera sometimes moves to unexpected positions.</p>
+            </div>
+            <div class="issue-workaround">
+                <div class="workaround-title">Workaround:</div>
+                <div class="workaround-text">
+                    <p>• Use manual pan/zoom to navigate to the desired location</p>
+                    <p>• Switch back to tree view and select the node again</p>
+                    <p>• Try refreshing the page</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Issue 3: Organization Switching -->
+        <div class="issue-card info">
+            <div class="issue-title">Organization Switching During Theme Save</div>
+            <div class="issue-status status-investigating">Investigating</div>
+            <div class="issue-description">
+                <p>Sometimes when saving theme changes, the application may switch to a different organization unexpectedly. This appears to be related to database queries.</p>
+            </div>
+            <div class="issue-workaround">
+                <div class="workaround-title">Workaround:</div>
+                <div class="workaround-text">
+                    <p>• Use the logout button to return to the landing page</p>
+                    <p>• Select your organization again from the landing page</p>
+                    <p>• Avoid making multiple rapid theme changes</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Issue 4: Admin Panel -->
+        <div class="issue-card info">
+            <div class="issue-title">Admin Panel "Edit Nodes" Temporarily Unavailable</div>
+            <div class="issue-status status-fixed">Fixed</div>
+            <div class="issue-description">
+                <p>The "Edit Nodes" admin panel was showing "temporarily unavailable" message. This has been resolved.</p>
+            </div>
+            <div class="issue-workaround">
+                <div class="workaround-title">Status:</div>
+                <div class="workaround-text">
+                    <p>✅ This issue has been fixed and should work normally now.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="last-updated">
+            Last updated: December 21, 2024
+        </div>
+    </div>
+
+    <script>
+        // Add some interactivity
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click tracking for analytics (if needed)
+            const issueCards = document.querySelectorAll('.issue-card');
+            issueCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const title = this.querySelector('.issue-title').textContent;
+                    console.log('Issue clicked:', title);
+                });
+            });
+
+            // Auto-refresh status (optional)
+            // setInterval(() => {
+            //     // Could fetch updated status from API
+            // }, 30000);
+        });
+    </script>
+</body>
+</html>

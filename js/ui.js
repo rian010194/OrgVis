@@ -2227,6 +2227,12 @@ const OrgUI = (() => {
     // Populate edit form when switching to Edit tab
     if (tab === "edit") {
       populateEditForm();
+      // Reset button text to "Save changes"
+      const saveButton = document.querySelector('#adminEditForm button[type="submit"]');
+      if (saveButton) {
+        saveButton.textContent = "Save changes";
+        saveButton.style.backgroundColor = ""; // Reset color
+      }
     }
 
   };
@@ -2826,6 +2832,12 @@ const OrgUI = (() => {
 
       }
 
+      // Reset button text to "Save changes" when clearing form
+      const saveButton = elements.editForm.querySelector('button[type="submit"]');
+      if (saveButton) {
+        saveButton.textContent = "Save changes";
+        saveButton.style.backgroundColor = ""; // Reset color
+      }
 
       return;
 
@@ -2878,6 +2890,12 @@ const OrgUI = (() => {
 
     }
 
+    // Reset button text to "Save changes" when populating form
+    const saveButton = elements.editForm.querySelector('button[type="submit"]');
+    if (saveButton) {
+      saveButton.textContent = "Save changes";
+      saveButton.style.backgroundColor = ""; // Reset color
+    }
 
     // Clear visualization type, name and unit for new metrics
     if (elements.visualizationTypeSelect) {
@@ -3668,7 +3686,15 @@ const OrgUI = (() => {
     elements.detailPanel.innerHTML = "";
     elements.detailPanel.appendChild(container);
     elements.detailPanel.classList.add("expanded");
+    
+    // Set flag to prevent map focus during admin panel transitions
+    window._adminPanelTransition = true;
     document.body.classList.add("detail-expanded");
+    
+    // Clear the flag after a short delay
+    setTimeout(() => {
+      window._adminPanelTransition = false;
+    }, 500);
     
     // Re-initialize user management functionality since we moved the content
     setTimeout(() => {
@@ -3816,13 +3842,42 @@ const OrgUI = (() => {
     elements.detailPanel.innerHTML = "";
     elements.detailPanel.appendChild(container);
     elements.detailPanel.classList.add("expanded");
+    
+    // Set flag to prevent map focus during admin panel transitions
+    window._adminPanelTransition = true;
     document.body.classList.add("detail-expanded");
+    
+    // Clear the flag after a short delay
+    setTimeout(() => {
+      window._adminPanelTransition = false;
+    }, 500);
     
     // Re-initialize theme editor functionality since we moved the content
     setTimeout(() => {
       if (typeof SupabaseThemeEditor !== 'undefined' && SupabaseThemeEditor.init) {
         SupabaseThemeEditor.init();
         console.log('Theme editor re-initialized in detail panel');
+      }
+      
+      // Re-attach event listener to the moved form
+      const movedForm = document.querySelector('#editThemeForm');
+      if (movedForm && typeof SupabaseThemeEditor !== 'undefined') {
+        // Remove any existing event listeners
+        const newForm = movedForm.cloneNode(true);
+        movedForm.parentNode.replaceChild(newForm, movedForm);
+        
+        // Re-attach the event listener
+        newForm.addEventListener('submit', (e) => SupabaseThemeEditor.handleThemeSubmit(e));
+        console.log('Theme form event listener re-attached');
+        
+        // Also add a click listener to the save button for debugging
+        const saveButton = newForm.querySelector('button[type="submit"]');
+        if (saveButton) {
+          saveButton.addEventListener('click', (e) => {
+            console.log('Save button clicked!', e);
+          });
+          console.log('Save button click listener added');
+        }
       }
       
       // Reset the progress flag
@@ -3832,6 +3887,11 @@ const OrgUI = (() => {
 
   const showEditNodesInDetailPanel = () => {
     console.log('showEditNodesInDetailPanel called');
+    
+    // Show warning about admin panel issues
+    if (window.warningBanner) {
+      window.warningBanner.showAdminPanelIssue();
+    }
     
     // Prevent multiple simultaneous calls
     if (window._showEditNodesInProgress) {
@@ -3960,7 +4020,15 @@ const OrgUI = (() => {
     elements.detailPanel.innerHTML = "";
     elements.detailPanel.appendChild(container);
     elements.detailPanel.classList.add("expanded");
+    
+    // Set flag to prevent map focus during admin panel transitions
+    window._adminPanelTransition = true;
     document.body.classList.add("detail-expanded");
+    
+    // Clear the flag after a short delay
+    setTimeout(() => {
+      window._adminPanelTransition = false;
+    }, 500);
     
     console.log('Detail panel populated with admin content');
     
@@ -4068,7 +4136,15 @@ const OrgUI = (() => {
     elements.detailPanel.innerHTML = "";
     elements.detailPanel.appendChild(container);
     elements.detailPanel.classList.add("expanded");
+    
+    // Set flag to prevent map focus during admin panel transitions
+    window._adminPanelTransition = true;
     document.body.classList.add("detail-expanded");
+    
+    // Clear the flag after a short delay
+    setTimeout(() => {
+      window._adminPanelTransition = false;
+    }, 500);
     
     console.log('Fallback admin interface created');
   };
@@ -4199,7 +4275,15 @@ const OrgUI = (() => {
     elements.detailPanel.innerHTML = "";
     elements.detailPanel.appendChild(container);
     elements.detailPanel.classList.add("expanded");
+    
+    // Set flag to prevent map focus during admin panel transitions
+    window._adminPanelTransition = true;
     document.body.classList.add("detail-expanded");
+    
+    // Clear the flag after a short delay
+    setTimeout(() => {
+      window._adminPanelTransition = false;
+    }, 500);
   };
 
   const showProfileInfoInDetailPanel = () => {
@@ -4340,7 +4424,15 @@ const OrgUI = (() => {
     elements.detailPanel.innerHTML = "";
     elements.detailPanel.appendChild(container);
     elements.detailPanel.classList.add("expanded");
+    
+    // Set flag to prevent map focus during admin panel transitions
+    window._adminPanelTransition = true;
     document.body.classList.add("detail-expanded");
+    
+    // Clear the flag after a short delay
+    setTimeout(() => {
+      window._adminPanelTransition = false;
+    }, 500);
   };
 
   // Mobile hamburger menu functionality (removed duplicate - using functions defined above)

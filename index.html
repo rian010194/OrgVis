@@ -13,6 +13,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@300;400;500;600;700&family=Lato:wght@300;400;700&family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+  <!-- Warning Banner -->
+  <div id="warningBanner" class="warning-banner hidden">
+    <div class="warning-banner-content">
+      <div class="warning-icon">⚠️</div>
+      <div class="warning-text">
+        <strong>Known Issues:</strong>
+        <span id="warningMessage">Theme saving may cause organization switching. Working on a fix.</span>
+      </div>
+      <button id="warningClose" class="warning-close" aria-label="Close warning">×</button>
+    </div>
+  </div>
+
   <!-- Landing Page -->
   <div id="landingPage" class="landing-page">
     <header class="landing-header">
@@ -34,6 +46,11 @@
             <span class="link-icon">📁</span>
             <span class="link-text">View on GitHub</span>
           </a>
+          <span class="link-separator">•</span>
+          <button id="landingLogoutBtn" type="button" class="header-link logout-link" style="background: none; border: none; color: inherit; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s ease;">
+            <span class="link-icon">🚪</span>
+            <span class="link-text">Logout</span>
+          </button>
         </div>
       </div>
     </header>
@@ -1008,7 +1025,26 @@
       </div>
     </div>
 
-  <div class="app-toolbar" role="toolbar" aria-label="View and admin controls"></div>
+  <div class="app-toolbar" role="toolbar" aria-label="View and admin controls">
+    <div class="toolbar-actions">
+      <button id="userManagementBtn" type="button" class="user-management-button hidden" title="Configure Users">
+        <span class="user-icon">👥</span>
+        <span class="user-text">Configure Users</span>
+      </button>
+      <button id="editThemeBtn" type="button" class="theme-edit-button hidden" title="Edit Theme">
+        <span class="theme-icon">🎨</span>
+        <span class="theme-text">Edit Theme</span>
+      </button>
+      <button id="editNodesBtn" type="button" class="edit-nodes-button hidden" title="Edit Nodes">
+        <span class="edit-nodes-icon">✏️</span>
+        <span class="edit-nodes-text">Edit Nodes</span>
+      </button>
+      <button id="resourcesBtn" type="button" class="resources-button hidden" title="Resources & Info">
+        <span class="resources-icon">📚</span>
+        <span class="resources-text">Resources</span>
+      </button>
+    </div>
+  </div>
 
   <main class="app-layout">
     <section class="org-section">
@@ -1026,6 +1062,190 @@
 
     <aside class="side-section">
       <div id="detailPanel" class="detail-panel"></div>
+      <div id="adminPanel" class="admin-panel">
+        <div class="admin-tabs" role="tablist" aria-label="Admin Views">
+          <button type="button" class="admin-tab" id="adminTab-create" data-admin-tab="create" role="tab" aria-selected="false" tabindex="-1" aria-controls="adminPanel-create">Create</button>
+          <button type="button" class="admin-tab" id="adminTab-edit" data-admin-tab="edit" role="tab" aria-selected="true" tabindex="0" aria-controls="adminPanel-edit">Edit</button>
+          <button type="button" class="admin-tab" id="adminTab-relations" data-admin-tab="relations" role="tab" aria-selected="false" tabindex="-1" aria-controls="adminPanel-relations">Relations</button>
+          <button type="button" class="admin-tab" id="adminTab-metrics" data-admin-tab="metrics" role="tab" aria-selected="false" tabindex="-1" aria-controls="adminPanel-metrics">Metrics</button>
+        </div>
+        <p class="admin-hint">Changes are stored locally for this session.</p>
+        <div id="adminMessage" class="admin-message"></div>
+
+        <div class="admin-tab-panels">
+          <div class="admin-tab-panel" id="adminPanel-create" data-admin-panel="create" role="tabpanel" aria-labelledby="adminTab-create" hidden>
+            <form id="adminCreateForm" class="admin-form">
+              <h3>Create Node</h3>
+              <label>Id
+                <input name="id" type="text" required placeholder="e.g. new_node" />
+              </label>
+              <label>Name
+                <input name="name" type="text" required placeholder="Node name" />
+              </label>
+              <label>Type
+                <select name="type" id="adminCreateType">
+                  <option value="Unit">Unit</option>
+                  <option value="Group">Group</option>
+                  <option value="Department">Department</option>
+                  <option value="Individual">Individual</option>
+                  <option value="Cluster">Cluster</option>
+                  <option value="PO">PO</option>
+                  <option value="PA">PA</option>
+                  <option value="SupportOffice">SupportOffice</option>
+                </select>
+              </label>
+              <label>Parent
+                <select name="parent" id="adminCreateParent"></select>
+              </label>
+              <label>Support Office (id)
+                <input name="supportOffice" id="adminCreateSupportOffice" type="text" placeholder="e.g. support_office_iberia" />
+              </label>
+              <label>Role
+                <textarea name="role" rows="3" placeholder="Describe role"></textarea>
+              </label>
+              <label>Responsibilities
+                <textarea name="responsibilities" id="adminCreateResponsibilities" rows="3" placeholder="One per line"></textarea>
+              </label>
+              <label>Activities
+                <textarea name="activities" id="adminCreateActivities" rows="3" placeholder="One per line"></textarea>
+              </label>
+              <label>Outcomes
+                <textarea name="outcomes" id="adminCreateOutcomes" rows="3" placeholder="One per line"></textarea>
+              </label>
+              <button type="submit" class="primary">Create</button>
+            </form>
+          </div>
+
+          <div class="admin-tab-panel" id="adminPanel-edit" data-admin-panel="edit" role="tabpanel" aria-labelledby="adminTab-edit">
+            <form id="adminEditForm" class="admin-form">
+              <h3>Edit Node</h3>
+              <label>Select node
+                <select name="nodeId" id="adminEditNodeSelect"></select>
+              </label>
+              <label>Name
+                <input name="name" type="text" placeholder="Name" />
+              </label>
+              <label>Type
+                <select name="type" id="adminEditType">
+                  <option value="Unit">Unit</option>
+                  <option value="Group">Group</option>
+                  <option value="Department">Department</option>
+                  <option value="Individual">Individual</option>
+                  <option value="Cluster">Cluster</option>
+                  <option value="PO">PO</option>
+                  <option value="PA">PA</option>
+                  <option value="SupportOffice">SupportOffice</option>
+                </select>
+              </label>
+              <label>Parent
+                <select name="parent" id="adminEditParent"></select>
+              </label>
+              <label>Support Office (id)
+                <input name="supportOffice" id="adminEditSupportOffice" type="text" placeholder="Linked support office" />
+              </label>
+              <label>Role
+                <textarea name="role" rows="3" placeholder="Description"></textarea>
+              </label>
+              <label>Responsibilities
+                <textarea name="responsibilities" id="adminEditResponsibilities" rows="3" placeholder="One per line"></textarea>
+              </label>
+              <label>Activities
+                <textarea name="activities" id="adminEditActivities" rows="3" placeholder="One per line"></textarea>
+              </label>
+              <label>Outcomes
+                <textarea name="outcomes" id="adminEditOutcomes" rows="3" placeholder="One per line"></textarea>
+              </label>
+              <div id="adminMetricsSection" class="admin-metrics">
+                <div class="metrics-header">
+                  <h4>Metrics</h4>
+                  <div class="metrics-actions">
+                    <button type="button" id="adminCreatePieButton" class="secondary">Create piechart</button>
+                    <button type="button" id="adminAddMetricButton" class="secondary">Add metric</button>
+                  </div>
+                </div>
+                <div id="adminMetricsList" class="metrics-list"></div>
+                <button type="button" id="adminSaveMetricsButton" class="primary metrics-save">Save metrics</button>
+              </div>
+              <div class="admin-actions">
+                <button type="submit" class="primary">Save changes</button>
+                <button type="button" id="adminDeleteNodeButton" class="danger">Delete node</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="admin-tab-panel" id="adminPanel-relations" data-admin-panel="relations" role="tabpanel" aria-labelledby="adminTab-relations" hidden>
+            <form id="adminAddRelationForm" class="admin-form horizontal">
+              <h3>New relation</h3>
+              <div class="horizontal-row">
+                <label>From
+                  <select name="from"></select>
+                </label>
+                <span class="arrow">→</span>
+                <label>To
+                  <select name="to"></select>
+                </label>
+              </div>
+              <label>Description
+                <input name="desc" type="text" placeholder="What is delivered?" />
+              </label>
+              <button type="submit" class="primary">Add relation</button>
+            </form>
+
+            <form id="adminRemoveRelationForm" class="admin-form horizontal">
+              <h3>Remove relation</h3>
+              <div class="horizontal-row">
+                <label>From
+                  <select name="from"></select>
+                </label>
+                <span class="arrow">→</span>
+                <label>To
+                  <select name="to"></select>
+                </label>
+              </div>
+              <button type="submit" class="danger">Remove relation</button>
+            </form>
+          </div>
+
+          <div class="admin-tab-panel" id="adminPanel-metrics" data-admin-panel="metrics" role="tabpanel" aria-labelledby="adminTab-metrics" hidden>
+            <form id="adminAddMetricForm" class="admin-form">
+              <h3>Add metric</h3>
+              <label>
+                Node
+                <select name="nodeId"></select>
+              </label>
+              <label>
+                Name
+                <input name="metricName" type="text" placeholder="e.g. Customer Satisfaction" />
+              </label>
+              <label>
+                Unit
+                <input name="metricUnit" type="text" placeholder="e.g. % or SEK" />
+              </label>
+              <label>
+                Visualization
+                <select name="metricViz">
+                  <option value="pie">Pie</option>
+                  <option value="bar">Bar</option>
+                  <option value="line">Line</option>
+                </select>
+              </label>
+              <button type="submit" class="primary">Add metric</button>
+            </form>
+            <form id="adminRemoveMetricForm" class="admin-form">
+              <h3>Remove metric</h3>
+              <label>
+                Node
+                <select name="nodeId"></select>
+              </label>
+              <label>
+                Metric
+                <select name="metricIndex"></select>
+              </label>
+              <button type="submit" class="danger">Remove metric</button>
+            </form>
+          </div>
+        </div>
+      </div>
     </aside>
   </main>
 
@@ -1037,6 +1257,7 @@
     <script type="module" src="js/config.js?v=20241221"></script>
     <script type="module" src="js/supabase-multi-org.js?v=20241221a"></script>
     <script type="module" src="js/data-supabase-multi-org.js?v=20241221a"></script>
+    <script src="js/warning-banner.js?v=20241221"></script>
     <script src="js/charts.js?v=20241221b"></script>
       <script src="js/ui.js?v=20241221b"></script>
     <script src="js/map.js?v=20241221b"></script>
@@ -1045,7 +1266,7 @@
     <!-- <script type="module" src="js/user-interface.js?v=20241221"></script> -->
     <!-- Demo version for testing without Supabase -->
     <script src="js/user-interface-demo.js?v=20241221c"></script>
-    <script type="module" src="js/theme-editor-supabase.js?v=20241221f"></script>
+    <script src="js/theme-editor-supabase.js?v=20241221f"></script>
     <script src="js/app.js?v=20241221b"></script>
   </div>
 

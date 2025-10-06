@@ -3,6 +3,9 @@ const LandingPage = (() => {
   let currentState = 'landing'; // 'landing', 'creating', 'app'
   
   const init = () => {
+    // Clear current organization ID to ensure we always show landing page
+    localStorage.removeItem('current_organization_id');
+    
     // Initialize with JumpYard demo organization if none exists
     initializeJumpYardDemo();
     
@@ -12,11 +15,11 @@ const LandingPage = (() => {
       showLoadExistingOption();
     }
     
-    // Check if there's a current organization and load its branding
-    const currentOrgId = localStorage.getItem('current_organization_id');
-    if (currentOrgId) {
-      loadOrganizationBranding(currentOrgId);
-    }
+    // Don't automatically load current organization - always show landing page
+    // const currentOrgId = localStorage.getItem('current_organization_id');
+    // if (currentOrgId) {
+    //   loadOrganizationBranding(currentOrgId);
+    // }
     
     bindEvents();
   };
@@ -183,6 +186,14 @@ const LandingPage = (() => {
       headerDemoLink.addEventListener('click', (e) => {
         e.preventDefault();
         loadJumpYardDemo();
+      });
+    }
+    
+    const landingLogoutBtn = document.getElementById('landingLogoutBtn');
+    if (landingLogoutBtn) {
+      landingLogoutBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        handleLogout(e);
       });
     }
     

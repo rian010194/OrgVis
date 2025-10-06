@@ -7,9 +7,38 @@ class SupabaseThemeEditor {
   }
 
   init() {
+    console.log('SupabaseThemeEditor: Initializing...');
+    console.log('SupabaseThemeEditor: window.orgDb available:', !!window.orgDb);
+    console.log('SupabaseThemeEditor: window.supabase available:', !!window.supabase);
+    
+    // Test Supabase connection
+    this.testSupabaseConnection();
+    
     this.setupEventListeners();
     this.loadCurrentTheme();
     this.initializeHeader();
+  }
+  
+  async testSupabaseConnection() {
+    try {
+      console.log('SupabaseThemeEditor: Testing Supabase connection...');
+      if (window.orgDb && window.orgDb.supabase) {
+        const { data, error } = await window.orgDb.supabase
+          .from('organizations')
+          .select('id')
+          .limit(1);
+        
+        if (error) {
+          console.error('SupabaseThemeEditor: Supabase connection error:', error);
+        } else {
+          console.log('SupabaseThemeEditor: Supabase connection successful:', data);
+        }
+      } else {
+        console.error('SupabaseThemeEditor: orgDb or supabase not available');
+      }
+    } catch (error) {
+      console.error('SupabaseThemeEditor: Error testing Supabase connection:', error);
+    }
   }
 
   setupEventListeners() {
@@ -31,7 +60,13 @@ class SupabaseThemeEditor {
     // Form submission
     const editThemeForm = document.getElementById('editThemeForm');
     if (editThemeForm) {
-      editThemeForm.addEventListener('submit', (e) => this.handleThemeSubmit(e));
+      editThemeForm.addEventListener('submit', (e) => {
+        console.log('SupabaseThemeEditor: Form submit event triggered!');
+        this.handleThemeSubmit(e);
+      });
+      console.log('SupabaseThemeEditor: Form event listener attached to:', editThemeForm);
+    } else {
+      console.log('SupabaseThemeEditor: editThemeForm not found during init');
     }
 
     // Color input synchronization
@@ -57,6 +92,15 @@ class SupabaseThemeEditor {
     console.log('SupabaseThemeEditor: Initializing header with org ID:', currentOrgId);
     
     if (currentOrgId) {
+      // Check if orgDb is available
+      if (!window.orgDb || typeof window.orgDb.getOrganization !== 'function') {
+        console.log('SupabaseThemeEditor: orgDb not available for header init, retrying in 100ms');
+        setTimeout(() => {
+          this.initializeHeader();
+        }, 100);
+        return;
+      }
+
       try {
         const orgData = await window.orgDb.getOrganization(currentOrgId);
         console.log('SupabaseThemeEditor: Org data from Supabase:', orgData);
@@ -100,50 +144,21 @@ class SupabaseThemeEditor {
           console.error('SupabaseThemeEditor: Organization does not exist:', currentOrgId);
           // Clear invalid organization ID
           localStorage.removeItem('current_organization_id');
-          // Try to load a valid organization
-          await this.loadValidOrganization();
+          // Don't automatically load another organization - let user choose from landing page
           return;
         }
         
-        // Try fallback to demo organization
-        const demoOrgId = 'demo_org';
-        try {
-          const demoData = await window.orgDb.getOrganization(demoOrgId);
-          if (demoData && demoData.name) {
-            localStorage.setItem('current_organization_id', demoOrgId);
-            this.initializeHeader();
-          }
-        } catch (demoError) {
-          console.error('SupabaseThemeEditor: Error loading demo organization:', demoError);
-          // Try to load any valid organization
-          await this.loadValidOrganization();
-        }
+        // Don't try fallback organizations - let user choose from landing page
+        console.error('SupabaseThemeEditor: Error loading organization data:', error);
       }
     } else {
-      // No current org ID, try to load a valid organization
-      await this.loadValidOrganization();
+      // No current org ID, don't automatically load any organization
+      console.log('SupabaseThemeEditor: No current organization ID, not initializing header');
     }
   }
 
-  // Helper method to load a valid organization
-  async loadValidOrganization() {
-    try {
-      console.log('SupabaseThemeEditor: Loading valid organization...');
-      const orgList = await window.orgDb.getOrganizations();
-      if (orgList && orgList.length > 0) {
-        const firstOrg = orgList[0];
-        console.log('SupabaseThemeEditor: Setting current org to:', firstOrg.id);
-        localStorage.setItem('current_organization_id', firstOrg.id);
-        this.initializeHeader();
-      } else {
-        console.error('SupabaseThemeEditor: No organizations found in database');
-        this.showErrorMessage('No organizations found. Please create a new organization.');
-      }
-    } catch (error) {
-      console.error('SupabaseThemeEditor: Error loading organizations list:', error);
-      this.showErrorMessage('Error loading organizations. Please refresh the page.');
-    }
-  }
+  // Helper method to load a valid organization (removed - no longer needed)
+  // async loadValidOrganization() { ... }
 
   // Public method to refresh header from external calls
   async refreshHeader() {
@@ -258,25 +273,31 @@ class SupabaseThemeEditor {
   async loadCurrentTheme() {
     const currentOrgId = localStorage.getItem('current_organization_id');
     if (!currentOrgId) {
-      // If no current org ID, try to get from organizations list
-      try {
-        const orgList = await window.orgDb.getOrganizations();
-        if (orgList && orgList.length > 0) {
-          const firstOrg = orgList[0];
-          localStorage.setItem('current_organization_id', firstOrg.id);
-          this.loadCurrentTheme();
-          return;
-        }
-      } catch (error) {
-        console.error('SupabaseThemeEditor: Error loading organizations list:', error);
-      }
+      // Don't automatically load any organization - user should choose from landing page
+      console.log('SupabaseThemeEditor: No current organization ID, not loading theme');
       return;
     }
 
+    // Check if orgDb is available
+    if (!window.orgDb || typeof window.orgDb.getOrganization !== 'function') {
+      console.log('SupabaseThemeEditor: orgDb not available, retrying in 100ms');
+      console.log('SupabaseThemeEditor: window.orgDb:', window.orgDb);
+      console.log('SupabaseThemeEditor: typeof window.orgDb:', typeof window.orgDb);
+      setTimeout(() => {
+        this.loadCurrentTheme();
+      }, 100);
+      return;
+    }
+    
+    console.log('SupabaseThemeEditor: orgDb is available, proceeding with loadCurrentTheme');
+
     try {
+      console.log('SupabaseThemeEditor: Attempting to load organization data from Supabase...');
       // Load organization data from Supabase
       const orgData = await window.orgDb.getOrganization(currentOrgId);
+      console.log('SupabaseThemeEditor: Successfully loaded org data:', orgData);
       const brandingData = orgData.branding || {};
+      console.log('SupabaseThemeEditor: Branding data:', brandingData);
 
       // Update form fields
       const orgNameInput = document.getElementById('themeOrgName');
@@ -677,6 +698,8 @@ class SupabaseThemeEditor {
     e.preventDefault();
     
     console.log('SupabaseThemeEditor: Starting theme submit...');
+    console.log('SupabaseThemeEditor: Form element:', e.target);
+    console.log('SupabaseThemeEditor: Form ID:', e.target.id);
     
     const currentOrgId = localStorage.getItem('current_organization_id');
     if (!currentOrgId) {
@@ -684,6 +707,8 @@ class SupabaseThemeEditor {
       this.showErrorMessage('No organization found. Please refresh the page.');
       return;
     }
+    
+    console.log('SupabaseThemeEditor: Current org ID:', currentOrgId);
 
     const formData = new FormData(e.target);
     
@@ -752,12 +777,21 @@ class SupabaseThemeEditor {
   }
 
   async saveThemeAndApply(orgUpdates, brandingData) {
+    console.log('SupabaseThemeEditor: saveThemeAndApply called with:', { orgUpdates, brandingData });
+    
     const currentOrgId = localStorage.getItem('current_organization_id');
     
     if (!currentOrgId) {
       console.error('SupabaseThemeEditor: No current organization ID found');
       this.showErrorMessage('No organization found. Please refresh the page.');
       return;
+    }
+    
+    console.log('SupabaseThemeEditor: Saving theme for org ID:', currentOrgId);
+    
+    // Show warning about potential organization switching
+    if (window.warningBanner) {
+      window.warningBanner.showThemeIssue();
     }
     
     try {
@@ -814,7 +848,15 @@ class SupabaseThemeEditor {
       
       // Ensure header is updated with the latest data
       await this.refreshHeader();
-      
+
+      // Don't force main app to be visible - let user choose from landing page
+      // try {
+      //   const landingPage = document.getElementById('landingPage');
+      //   const mainApp = document.getElementById('mainApp');
+      //   if (landingPage) landingPage.classList.add('hidden');
+      //   if (mainApp) mainApp.classList.remove('hidden');
+      // } catch (_) {}
+
       // Hide modal
       this.hideEditThemeModal();
       
@@ -841,21 +883,22 @@ class SupabaseThemeEditor {
   }
 
   applyTheme(brandingData, orgData) {
-    // Only apply branding if we're in the main app, not on landing page
+    // Apply branding to main app header if present (even if landing page is visible)
     const landingPage = document.getElementById('landingPage');
     const mainApp = document.getElementById('mainApp');
     
-    // If we're on landing page, don't apply organization branding
-    if (landingPage && !landingPage.classList.contains('hidden')) {
-      console.log('SupabaseThemeEditor: Skipping theme application - on landing page');
-      return; // Don't apply branding to landing page
+    // Always try to apply to main app if it exists
+    if (!mainApp) {
+      console.log('SupabaseThemeEditor: Skipping theme application - main app not found');
+      return;
     }
-    
-    // Only apply branding to main app
-    if (!mainApp || mainApp.classList.contains('hidden')) {
-      console.log('SupabaseThemeEditor: Skipping theme application - main app not visible');
-      return; // Don't apply branding if main app is not visible
-    }
+    // Don't automatically show main app - let user choose from landing page
+    // try {
+    //   if (landingPage && !landingPage.classList.contains('hidden')) {
+    //     landingPage.classList.add('hidden');
+    //     mainApp.classList.remove('hidden');
+    //   }
+    // } catch (_) {}
     
     console.log('SupabaseThemeEditor: Applying theme to main app');
     
@@ -1283,4 +1326,5 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-export default SupabaseThemeEditor;
+// Make SupabaseThemeEditor globally available
+window.SupabaseThemeEditor = SupabaseThemeEditor;
