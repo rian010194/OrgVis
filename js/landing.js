@@ -178,10 +178,12 @@ const LandingPage = (() => {
       loadJumpYardBtn.addEventListener('click', loadJumpYardDemo);
     }
     
-    // Header demo button
-    const headerDemoBtn = document.getElementById('headerDemoBtn');
-    if (headerDemoBtn) {
-      headerDemoBtn.addEventListener('click', loadJumpYardDemo);
+    const headerDemoLink = document.getElementById('headerDemoLink');
+    if (headerDemoLink) {
+      headerDemoLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        loadJumpYardDemo();
+      });
     }
     
     // Create organization modal events

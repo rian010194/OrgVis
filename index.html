@@ -24,15 +24,15 @@
           who need to visualize, understand, and manage complex organizational structures. Perfect for 
           companies, non-profits, educational institutions, and government organizations.
         </p>
-        <div class="demo-notice">
-          <button id="headerDemoBtn" class="demo-notice-button">
-            Demo Available
-          </button>
-        </div>
-        <div class="github-link">
-          <a href="https://github.com/rian010194/OrgVis/blob/main/docs/index.md" target="_blank" rel="noopener noreferrer" class="github-button">
-            <span class="github-icon">📁</span>
-            <span class="github-text">View on GitHub</span>
+        <div class="header-links">
+          <a href="#" id="headerDemoLink" class="header-link demo-link">
+            <span class="link-icon">🎯</span>
+            <span class="link-text">Try Demo</span>
+          </a>
+          <span class="link-separator">•</span>
+          <a href="https://github.com/rian010194/OrgVis/blob/main/docs/index.md" target="_blank" rel="noopener noreferrer" class="header-link github-link">
+            <span class="link-icon">📁</span>
+            <span class="link-text">View on GitHub</span>
           </a>
         </div>
       </div>
@@ -102,31 +102,31 @@
               <p>Define and visualize complex relationships between departments, support offices, and cross-functional teams.</p>
             </div>
             
-            <div class="feature-card">
+            <div class="feature-card hidden">
               <div class="feature-icon-large">🎨</div>
               <h3>Custom Branding</h3>
               <p>Personalize your organization chart with custom colors, fonts, logos, and themes that match your brand identity.</p>
             </div>
             
-            <div class="feature-card">
+            <div class="feature-card hidden">
               <div class="feature-icon-large">👥</div>
               <h3>Multi-Organization</h3>
               <p>Manage multiple organizations from a single interface. Perfect for consultants, agencies, or holding companies.</p>
             </div>
             
-            <div class="feature-card">
+            <div class="feature-card hidden">
               <div class="feature-icon-large">📱</div>
               <h3>Mobile Optimized</h3>
               <p>Access and manage your organization chart on any device. Touch-friendly interface optimized for tablets and smartphones.</p>
             </div>
             
-            <div class="feature-card">
+            <div class="feature-card hidden">
               <div class="feature-icon-large">🔒</div>
               <h3>Secure & Private</h3>
               <p>Your data is protected with password authentication and secure storage. Choose between local storage or cloud-based Supabase backend.</p>
             </div>
             
-            <div class="feature-card">
+            <div class="feature-card hidden">
               <div class="feature-icon-large">🔓</div>
               <h3>Open Source & Extensible</h3>
               <p>Built with modern web technologies and comprehensive documentation. Your IT team can easily customize, extend, and integrate with existing systems.</p>
@@ -259,71 +259,6 @@
       </div>
     </footer>
   </div>
-
-  <!-- Create Organization Modal -->
-  <div id="createOrgModal" class="modal-overlay hidden">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Create New Organization</h2>
-        <button id="closeModalBtn" class="modal-close">&times;</button>
-      </div>
-      <form id="createOrgForm" class="modal-form">
-        <div class="form-group">
-          <label for="orgName">Organization Name</label>
-          <input type="text" id="orgName" name="orgName" required placeholder="Enter organization name">
-        </div>
-        <div class="form-group">
-          <label for="orgDescription">Description (Optional)</label>
-          <textarea id="orgDescription" name="orgDescription" placeholder="Brief description of your organization"></textarea>
-        </div>
-        <div class="form-group">
-          <label for="orgType">Organization Type</label>
-          <select id="orgType" name="orgType" required>
-            <option value="">Select organization type</option>
-            <option value="company">Company</option>
-            <option value="nonprofit">Non-profit</option>
-            <option value="government">Government</option>
-            <option value="educational">Educational</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="orgPassword">Password (Optional)</label>
-          <input type="password" id="orgPassword" name="orgPassword" placeholder="Set a password to protect your organization">
-          <small class="form-hint">Leave empty for no password protection</small>
-        </div>
-        <div class="form-actions">
-          <button type="button" id="cancelCreateBtn" class="button secondary">Cancel</button>
-          <button type="submit" class="button primary">Create Organization</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Login Modal -->
-  <div id="loginModal" class="modal-overlay hidden">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Access Organization</h2>
-        <button id="closeLoginBtn" class="modal-close">&times;</button>
-      </div>
-      <form id="loginForm" class="modal-form">
-        <div class="form-group">
-          <label for="loginOrgName">Organization Name</label>
-          <input type="text" id="loginOrgName" name="orgName" required placeholder="Enter organization name">
-        </div>
-        <div class="form-group">
-          <label for="loginPassword">Password</label>
-          <input type="password" id="loginPassword" name="password" placeholder="Enter password (if set)">
-        </div>
-        <div class="form-actions">
-          <button type="button" id="cancelLoginBtn" class="button secondary">Cancel</button>
-          <button type="submit" class="button primary">Access Organization</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
 
   <!-- User Management Panel -->
   <div id="userManagementPanel" class="user-panel hidden">
@@ -503,6 +438,172 @@
     </div>
   </div>
 
+  <!-- Create Organization Modal -->
+  <div id="createOrgModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Create New Organization</h2>
+        <button id="closeModalBtn" class="modal-close">&times;</button>
+      </div>
+      <form id="createOrgForm" class="modal-form">
+        <div class="form-group">
+          <label for="orgName">Organization Name</label>
+          <input type="text" id="orgName" name="orgName" required placeholder="Enter organization name">
+        </div>
+        <div class="form-group">
+          <label for="orgDescription">Description (Optional)</label>
+          <textarea id="orgDescription" name="orgDescription" placeholder="Brief description of your organization"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="orgType">Organization Type</label>
+          <select id="orgType" name="orgType" required>
+            <option value="">Select organization type</option>
+            <option value="company">Company</option>
+            <option value="nonprofit">Non-profit</option>
+            <option value="government">Government</option>
+            <option value="educational">Educational</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="orgPassword">Password (Optional)</label>
+          <input type="password" id="orgPassword" name="orgPassword" placeholder="Set a password to protect your organization">
+          <small class="form-hint">Leave empty for no password protection</small>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="cancelCreateBtn" class="button secondary">Cancel</button>
+          <button type="submit" class="button primary">Create Organization</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Login Modal -->
+  <div id="loginModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Access Organization</h2>
+        <button id="closeLoginBtn" class="modal-close">&times;</button>
+      </div>
+      <form id="loginForm" class="modal-form">
+        <div class="form-group">
+          <label for="loginOrgName">Organization Name</label>
+          <input type="text" id="loginOrgName" name="orgName" required placeholder="Enter organization name">
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" name="password" placeholder="Enter password (if set)">
+        </div>
+        <div class="form-actions">
+          <button type="button" id="cancelLoginBtn" class="button secondary">Cancel</button>
+          <button type="submit" class="button primary">Access Organization</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Customization Modal -->
+  <div id="customizationModal" class="modal-overlay hidden">
+    <div class="modal-content large">
+      <div class="modal-header">
+        <h2>Customize Your Organization</h2>
+        <button id="closeCustomizationBtn" class="modal-close">&times;</button>
+      </div>
+      <form id="customizationForm" class="modal-form">
+        <div class="customization-section">
+          <h3>Logo & Branding</h3>
+          <div class="form-group">
+            <label for="orgLogo">Organization Logo</label>
+            <div class="logo-upload">
+              <input type="file" id="orgLogo" name="orgLogo" accept="image/*" class="file-input">
+              <div class="logo-preview" id="logoPreview">
+                <span class="logo-placeholder">No logo selected</span>
+              </div>
+              <button type="button" id="uploadLogoBtn" class="button secondary">Choose Logo</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="customization-section">
+          <h3>Color Theme</h3>
+          <div class="form-group">
+            <label for="themePreset">Choose Theme</label>
+            <select id="themePreset" name="themePreset">
+              <option value="orange">Orange (Current)</option>
+              <option value="blue">Blue</option>
+              <option value="green">Green</option>
+              <option value="purple">Purple</option>
+              <option value="red">Red</option>
+              <option value="dark">Dark</option>
+            </select>
+          </div>
+          
+          <div class="theme-preview">
+            <h4>Theme Preview</h4>
+            <div class="theme-preview-boxes">
+              <div class="preview-box primary-preview">
+                <span>Primary</span>
+              </div>
+              <div class="preview-box secondary-preview">
+                <span>Secondary</span>
+              </div>
+              <div class="preview-box hover-preview">
+                <span>Hover</span>
+              </div>
+              <div class="preview-box selected-preview">
+                <span>Selected</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="primaryColor">Primary Color</label>
+            <div class="color-input-group">
+              <input type="color" id="primaryColor" name="primaryColor" value="#ff5a00">
+              <input type="text" id="primaryColorText" value="#ff5a00" placeholder="#ff5a00">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="secondaryColor">Secondary Color</label>
+            <div class="color-input-group">
+              <input type="color" id="secondaryColor" name="secondaryColor" value="#e53e3e">
+              <input type="text" id="secondaryColorText" value="#e53e3e" placeholder="#e53e3e">
+            </div>
+          </div>
+        </div>
+
+        <div class="customization-section">
+          <h3>Typography</h3>
+          <div class="form-group">
+            <label for="fontFamily">Font Family</label>
+            <select id="fontFamily" name="fontFamily">
+              <option value="system">System Font (Default)</option>
+              <option value="inter">Inter</option>
+              <option value="roboto">Roboto</option>
+              <option value="open-sans">Open Sans</option>
+              <option value="lato">Lato</option>
+              <option value="montserrat">Montserrat</option>
+              <option value="poppins">Poppins</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="fontSize">Base Font Size</label>
+            <select id="fontSize" name="fontSize">
+              <option value="14">Small (14px)</option>
+              <option value="16" selected>Medium (16px)</option>
+              <option value="18">Large (18px)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" id="skipCustomizationBtn" class="button secondary">Skip for Now</button>
+          <button type="submit" class="button primary">Save & Continue</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Edit Theme Panel -->
   <div id="editThemePanel" class="theme-panel hidden">
     <div class="theme-panel-header">
@@ -536,10 +637,7 @@
               <div class="logo-preview" id="themeLogoPreview">
                 <span class="logo-placeholder">No logo selected</span>
               </div>
-              <div class="logo-actions">
-                <button type="button" id="themeUploadLogoBtn" class="button secondary">Choose Logo</button>
-                <button type="button" id="themeRemoveLogoBtn" class="button danger hidden">Remove Logo</button>
-              </div>
+              <button type="button" id="themeUploadLogoBtn" class="button secondary">Choose Logo</button>
             </div>
           </div>
         </div>
@@ -547,8 +645,8 @@
         <div class="customization-section">
           <h3>Color Theme</h3>
           <div class="form-group">
-            <label for="themePreset">Choose Theme</label>
-            <select id="themePreset" name="themePreset">
+            <label for="themePreset2">Choose Theme</label>
+            <select id="themePreset2" name="themePreset">
               <option value="orange">Orange (Current)</option>
               <option value="blue">Blue</option>
               <option value="green">Green</option>
@@ -600,62 +698,126 @@
           </div>
 
           <!-- Hidden inputs for all theme colors -->
-          <input type="hidden" id="themeBackgroundColor" name="backgroundColor" value="#f8fafc">
-          <input type="hidden" id="themeTextColor" name="textColor" value="#1a202c">
-          <input type="hidden" id="themeBorderColor" name="borderColor" value="#e2e8f0">
-          <input type="hidden" id="themeMutedColor" name="mutedColor" value="#718096">
-          <input type="hidden" id="themeNodeBackgroundColor" name="nodeBackgroundColor" value="#ffffff">
-          <input type="hidden" id="themeButtonBackgroundColor" name="buttonBackgroundColor" value="#ffffff">
-          <input type="hidden" id="themeAccentBackgroundColor" name="accentBackgroundColor" value="#ffe6d5">
-          <input type="hidden" id="themeTreeItemBackgroundColor" name="treeItemBackgroundColor" value="#fff4ed">
-          <input type="hidden" id="themeHoverColor" name="hoverColor" value="#ff5a00">
-          <input type="hidden" id="themeSelectedColor" name="selectedColor" value="#ff5a00">
-          <input type="hidden" id="themeNodeStrokeColor" name="nodeStrokeColor" value="#ff5a00">
-          
-          <!-- Color preview elements for all theme colors -->
-          <div class="color-preview" id="backgroundcolorPreview" style="display: none;">
-            <span class="preview-label">Background</span>
-            <div class="preview-swatch background-swatch"></div>
+          <div class="form-group">
+            <label for="themeBackgroundColor">Background Color</label>
+            <div class="color-input-group">
+              <input type="color" id="themeBackgroundColor" name="backgroundColor" value="#f8fafc">
+              <input type="text" id="themeBackgroundColorText" value="#f8fafc" placeholder="#f8fafc">
+            </div>
+            <div class="color-preview" id="backgroundcolorPreview">
+              <span class="preview-label">Background</span>
+              <div class="preview-swatch background-swatch"></div>
+            </div>
           </div>
-          <div class="color-preview" id="textcolorPreview" style="display: none;">
-            <span class="preview-label">Text</span>
-            <div class="preview-swatch text-swatch"></div>
+          <div class="form-group">
+            <label for="themeTextColor">Text Color</label>
+            <div class="color-input-group">
+              <input type="color" id="themeTextColor" name="textColor" value="#1a202c">
+              <input type="text" id="themeTextColorText" value="#1a202c" placeholder="#1a202c">
+            </div>
+            <div class="color-preview" id="textcolorPreview">
+              <span class="preview-label">Text</span>
+              <div class="preview-swatch text-swatch"></div>
+            </div>
           </div>
-          <div class="color-preview" id="bordercolorPreview" style="display: none;">
-            <span class="preview-label">Border</span>
-            <div class="preview-swatch border-swatch"></div>
+          <div class="form-group">
+            <label for="themeBorderColor">Border Color</label>
+            <div class="color-input-group">
+              <input type="color" id="themeBorderColor" name="borderColor" value="#e2e8f0">
+              <input type="text" id="themeBorderColorText" value="#e2e8f0" placeholder="#e2e8f0">
+            </div>
+            <div class="color-preview" id="bordercolorPreview">
+              <span class="preview-label">Border</span>
+              <div class="preview-swatch border-swatch"></div>
+            </div>
           </div>
-          <div class="color-preview" id="mutedcolorPreview" style="display: none;">
-            <span class="preview-label">Muted</span>
-            <div class="preview-swatch muted-swatch"></div>
+          <div class="form-group">
+            <label for="themeMutedColor">Muted Color</label>
+            <div class="color-input-group">
+              <input type="color" id="themeMutedColor" name="mutedColor" value="#718096">
+              <input type="text" id="themeMutedColorText" value="#718096" placeholder="#718096">
+            </div>
+            <div class="color-preview" id="mutedcolorPreview">
+              <span class="preview-label">Muted</span>
+              <div class="preview-swatch muted-swatch"></div>
+            </div>
           </div>
-          <div class="color-preview" id="nodebackgroundcolorPreview" style="display: none;">
-            <span class="preview-label">Node Background</span>
-            <div class="preview-swatch node-background-swatch"></div>
+          <div class="form-group">
+            <label for="themeNodeBackgroundColor">Node Background</label>
+            <div class="color-input-group">
+              <input type="color" id="themeNodeBackgroundColor" name="nodeBackgroundColor" value="#ffffff">
+              <input type="text" id="themeNodeBackgroundColorText" value="#ffffff" placeholder="#ffffff">
+            </div>
+            <div class="color-preview" id="nodebackgroundcolorPreview">
+              <span class="preview-label">Node Background</span>
+              <div class="preview-swatch nodebackground-swatch"></div>
+            </div>
           </div>
-          <div class="color-preview" id="buttonbackgroundcolorPreview" style="display: none;">
-            <span class="preview-label">Button Background</span>
-            <div class="preview-swatch button-background-swatch"></div>
+          <div class="form-group">
+            <label for="themeButtonBackgroundColor">Button Background</label>
+            <div class="color-input-group">
+              <input type="color" id="themeButtonBackgroundColor" name="buttonBackgroundColor" value="#ffffff">
+              <input type="text" id="themeButtonBackgroundColorText" value="#ffffff" placeholder="#ffffff">
+            </div>
+            <div class="color-preview" id="buttonbackgroundcolorPreview">
+              <span class="preview-label">Button Background</span>
+              <div class="preview-swatch buttonbackground-swatch"></div>
+            </div>
           </div>
-          <div class="color-preview" id="accentbackgroundcolorPreview" style="display: none;">
-            <span class="preview-label">Accent Background</span>
-            <div class="preview-swatch accent-background-swatch"></div>
+          <div class="form-group">
+            <label for="themeAccentBackgroundColor">Accent Background</label>
+            <div class="color-input-group">
+              <input type="color" id="themeAccentBackgroundColor" name="accentBackgroundColor" value="#ffe6d5">
+              <input type="text" id="themeAccentBackgroundColorText" value="#ffe6d5" placeholder="#ffe6d5">
+            </div>
+            <div class="color-preview" id="accentbackgroundcolorPreview">
+              <span class="preview-label">Accent Background</span>
+              <div class="preview-swatch accentbackground-swatch"></div>
+            </div>
           </div>
-          <div class="color-preview" id="treeitembackgroundcolorPreview" style="display: none;">
-            <span class="preview-label">Tree Item Background</span>
-            <div class="preview-swatch tree-item-background-swatch"></div>
+          <div class="form-group">
+            <label for="themeTreeItemBackgroundColor">Tree Item Background</label>
+            <div class="color-input-group">
+              <input type="color" id="themeTreeItemBackgroundColor" name="treeItemBackgroundColor" value="#fff4ed">
+              <input type="text" id="themeTreeItemBackgroundColorText" value="#fff4ed" placeholder="#fff4ed">
+            </div>
+            <div class="color-preview" id="treeitembackgroundcolorPreview">
+              <span class="preview-label">Tree Item Background</span>
+              <div class="preview-swatch treeitembackground-swatch"></div>
+            </div>
           </div>
-          <div class="color-preview" id="hovercolorPreview" style="display: none;">
-            <span class="preview-label">Hover</span>
-            <div class="preview-swatch hover-swatch"></div>
+          <div class="form-group">
+            <label for="themeHoverColor">Hover Color</label>
+            <div class="color-input-group">
+              <input type="color" id="themeHoverColor" name="hoverColor" value="#ff5a00">
+              <input type="text" id="themeHoverColorText" value="#ff5a00" placeholder="#ff5a00">
+            </div>
+            <div class="color-preview" id="hovercolorPreview">
+              <span class="preview-label">Hover</span>
+              <div class="preview-swatch hover-swatch"></div>
+            </div>
           </div>
-          <div class="color-preview" id="selectedcolorPreview" style="display: none;">
-            <span class="preview-label">Selected</span>
-            <div class="preview-swatch selected-swatch"></div>
+          <div class="form-group">
+            <label for="themeSelectedColor">Selected Color</label>
+            <div class="color-input-group">
+              <input type="color" id="themeSelectedColor" name="selectedColor" value="#ff5a00">
+              <input type="text" id="themeSelectedColorText" value="#ff5a00" placeholder="#ff5a00">
+            </div>
+            <div class="color-preview" id="selectedcolorPreview">
+              <span class="preview-label">Selected</span>
+              <div class="preview-swatch selected-swatch"></div>
+            </div>
           </div>
-          <div class="color-preview" id="nodestrokecolorPreview" style="display: none;">
-            <span class="preview-label">Node Stroke</span>
-            <div class="preview-swatch node-stroke-swatch"></div>
+          <div class="form-group">
+            <label for="themeNodeStrokeColor">Node Stroke Color</label>
+            <div class="color-input-group">
+              <input type="color" id="themeNodeStrokeColor" name="nodeStrokeColor" value="#ff5a00">
+              <input type="text" id="themeNodeStrokeColorText" value="#ff5a00" placeholder="#ff5a00">
+            </div>
+            <div class="color-preview" id="nodestrokecolorPreview">
+              <span class="preview-label">Node Stroke</span>
+              <div class="preview-swatch nodestroke-swatch"></div>
+            </div>
           </div>
         </div>
 
@@ -769,43 +931,107 @@
       <div class="org-logo">
         <img id="orgLogo" src="" alt="Organization Logo" style="display: none; max-height: 60px; max-width: 200px; object-fit: contain;">
       </div>
+      <div class="header-actions">
+        <button id="toggleProfile" type="button" class="profile-toggle" aria-pressed="false" aria-controls="profilePanel">
+          <span class="profile-icon">👤</span>
+          <span class="profile-text">Profile</span>
+        </button>
+        <button id="toggleAdmin" type="button" class="admin-toggle" aria-pressed="false" aria-controls="adminPanel">
+          <span class="admin-icon">⚙️</span>
+          <span class="admin-text">Admin</span>
+        </button>
+        <button id="logoutBtn" type="button" class="logout-button" title="Logout and return to landing page">
+          <span class="logout-icon">🚪</span>
+          <span class="logout-text">Logout</span>
+        </button>
+      </div>
+      
+      <!-- Mobile hamburger menu - outside header-actions so it's always visible on mobile -->
+      <button id="mobileMenuToggle" type="button" class="mobile-menu-toggle" aria-label="Toggle mobile menu">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+      
+      <!-- Mobile view toggle - arrow to show/hide tree/map view -->
+      <button id="mobileViewToggle" type="button" class="mobile-view-toggle" aria-label="Toggle tree/map view">
+        <span class="view-toggle-arrow">▼</span>
+      </button>
+
     </header>
 
-  <div class="app-toolbar" role="toolbar" aria-label="View and admin controls">
-    <div class="toolbar-group">
-      <div class="view-dropdown">
-        <button type="button" id="viewDropdownToggle" class="view-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
-          <span class="view-current">Tree View</span>
-          <span class="dropdown-arrow">▼</span>
-        </button>
-        <div class="view-dropdown-menu" id="viewDropdownMenu">
-          <button type="button" data-view="tree" class="view-option active" aria-selected="true">
-            <span class="view-icon">🌳</span>
-            <span class="view-label">Tree View</span>
+
+    <!-- Mobile menu overlay -->
+    <div id="mobileMenuOverlay" class="mobile-menu-overlay hidden">
+      <div class="mobile-menu-content">
+        <div class="mobile-menu-header">
+          <h3>Menu</h3>
+          <button id="mobileMenuClose" type="button" class="mobile-menu-close" aria-label="Close menu">
+            <span>&times;</span>
           </button>
-          <button type="button" data-view="map" class="view-option" aria-selected="false">
-            <span class="view-icon">🗺️</span>
-            <span class="view-label">Map View</span>
+        </div>
+        <div class="mobile-menu-actions">
+          
+          <!-- User Actions -->
+          <div class="mobile-user-actions">
+            <h4>Account</h4>
+            <button id="mobileProfileToggle" type="button" class="mobile-menu-action">
+              <span class="mobile-action-icon">👤</span>
+              <span class="mobile-action-text">Profile</span>
+            </button>
+            <button id="mobileAdminToggle" type="button" class="mobile-menu-action">
+              <span class="mobile-admin-icon">⚙️</span>
+              <span class="mobile-admin-action-text">Admin Mode</span>
+            </button>
+          </div>
+          <button id="mobileUserManagementBtn" type="button" class="mobile-menu-action hidden">
+            <span class="mobile-action-icon">👥</span>
+            <span class="mobile-action-text">Configure Users</span>
+          </button>
+          <button id="mobileEditThemeBtn" type="button" class="mobile-menu-action hidden">
+            <span class="mobile-action-icon">🎨</span>
+            <span class="mobile-action-text">Edit Theme</span>
+          </button>
+          <button id="mobileEditNodesBtn" type="button" class="mobile-menu-action hidden">
+            <span class="mobile-action-icon">✏️</span>
+            <span class="mobile-action-text">Edit Nodes</span>
+          </button>
+          <button id="mobileResourcesBtn" type="button" class="mobile-menu-action hidden">
+            <span class="mobile-action-icon">📚</span>
+            <span class="mobile-action-text">Resources</span>
+          </button>
+          <button id="mobileLogoutBtn" type="button" class="mobile-menu-action mobile-logout-action">
+            <span class="mobile-action-icon">🚪</span>
+            <span class="mobile-action-text">Logout</span>
           </button>
         </div>
       </div>
     </div>
+
+  <div class="app-toolbar" role="toolbar" aria-label="View and admin controls">
+    <div class="toolbar-group">
+      <div class="view-switch-container">
+        <button type="button" id="desktopViewSwitch" class="desktop-view-switch" aria-label="Switch view">
+          <span class="desktop-view-switch-icon">🌳</span>
+        </button>
+      </div>
+    </div>
     <div class="toolbar-actions">
-      <button id="userManagementBtn" type="button" class="user-management-button" title="User Management">
+      <button id="userManagementBtn" type="button" class="user-management-button hidden" title="Configure Users">
         <span class="user-icon">👥</span>
-        <span class="user-text">Users</span>
+        <span class="user-text">Configure Users</span>
       </button>
       <button id="editThemeBtn" type="button" class="theme-edit-button hidden" title="Edit Theme">
         <span class="theme-icon">🎨</span>
         <span class="theme-text">Edit Theme</span>
       </button>
-      <button id="toggleAdmin" type="button" class="admin-toggle" aria-pressed="false" aria-controls="adminPanel">
-        <span class="admin-icon">⚙️</span>
-        <span class="admin-text">Admin</span>
+      <button id="editNodesBtn" type="button" class="edit-nodes-button hidden" title="Edit Nodes">
+        <span class="edit-nodes-icon">✏️</span>
+        <span class="edit-nodes-text">Edit Nodes</span>
       </button>
-      <button id="logoutBtn" type="button" class="logout-button" title="Logout and return to landing page">
-        <span class="logout-icon">🚪</span>
-        <span class="logout-text">Logout</span>
+      <button id="resourcesBtn" type="button" class="resources-button hidden" title="Resources & Info">
+        <span class="resources-icon">📚</span>
+        <span class="resources-text">Resources</span>
       </button>
     </div>
   </div>
@@ -819,233 +1045,6 @@
 
     <aside class="side-section">
       <div id="detailPanel" class="detail-panel"></div>
-      <div id="adminPanel" class="admin-panel">
-        <div class="admin-tabs" role="tablist" aria-label="Admin views">
-          <button type="button" class="admin-tab" id="adminTab-create" data-admin-tab="create" role="tab" aria-selected="false" tabindex="-1" aria-controls="adminPanel-create">Create Node</button>
-          <button type="button" class="admin-tab" id="adminTab-edit" data-admin-tab="edit" role="tab" aria-selected="true" tabindex="0" aria-controls="adminPanel-edit">Edit Node</button>
-          <button type="button" class="admin-tab" id="adminTab-relations" data-admin-tab="relations" role="tab" aria-selected="false" tabindex="-1" aria-controls="adminPanel-relations">Relations</button>
-          <button type="button" class="admin-tab" id="adminTab-metrics" data-admin-tab="metrics" role="tab" aria-selected="false" tabindex="-1" aria-controls="adminPanel-metrics">Metrics</button>
-        </div>
-        <p class="admin-hint">Changes are automatically saved to your browser. API connection will be added later.</p>
-        <div id="adminMessage" class="admin-message"></div>
-        <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-          <button type="button" id="clearDataButton" class="secondary" style="font-size: 0.8rem; padding: 0.3rem 0.6rem;">Reset to Original Data</button>
-          <button type="button" id="testStorageButton" class="secondary" style="font-size: 0.8rem; padding: 0.3rem 0.6rem;">Test localStorage</button>
-        </div>
-
-        <div class="admin-tab-panels">
-          <div class="admin-tab-panel" id="adminPanel-create" data-admin-panel="create" role="tabpanel" aria-labelledby="adminTab-create" hidden>
-            <form id="adminCreateForm" class="admin-form">
-              <h3>Create New Node</h3>
-              <label>
-                ID
-                <input name="id" type="text" required placeholder="e.g. new_node" />
-              </label>
-              <label>
-                Name
-                <input name="name" type="text" required placeholder="Node name" />
-              </label>
-              <label>
-                Type
-                <select name="type" id="adminCreateType">
-                  <option value="Unit">Unit</option>
-                  <option value="Group">Group</option>
-                  <option value="Department">Department</option>
-                  <option value="Individual">Individual</option>
-                  <option value="Cluster">Cluster</option>
-                  <option value="PO">PO</option>
-                  <option value="PA">PA</option>
-                  <option value="SupportOffice">SupportOffice</option>
-                </select>
-              </label>
-              <label>
-                Parent
-                <select name="parent" id="adminCreateParent"></select>
-              </label>
-              <label>
-                Support Office (ID)
-                <input name="supportOffice" id="adminCreateSupportOffice" type="text" placeholder="e.g. support_office_iberia" />
-              </label>
-              <label>
-                Role Description
-                <textarea name="role" rows="3" placeholder="Describe the node's mission"></textarea>
-              </label>
-              <label>
-                Responsibilities (one point per line)
-                <textarea name="responsibilities" id="adminCreateResponsibilities" rows="3" placeholder="One point per line"></textarea>
-              </label>
-              <label>
-                Outcomes (deliverables)
-                <textarea name="outcomes" id="adminCreateOutcomes" rows="3" placeholder="One point per line"></textarea>
-              </label>
-              <button type="submit" class="primary">Create Node</button>
-            </form>
-          </div>
-
-          <div class="admin-tab-panel" id="adminPanel-edit" data-admin-panel="edit" role="tabpanel" aria-labelledby="adminTab-edit">
-            <form id="adminEditForm" class="admin-form">
-              <h3>Edit Node</h3>
-              <label>
-                Select Node
-                <select name="nodeId" id="adminEditNodeSelect"></select>
-              </label>
-              <label>
-                Name
-                <input name="name" type="text" placeholder="Name" />
-              </label>
-              <label>
-                Type
-                <select name="type" id="adminEditType">
-                  <option value="Unit">Unit</option>
-                  <option value="Group">Group</option>
-                  <option value="Department">Department</option>
-                  <option value="Individual">Individual</option>
-                  <option value="Cluster">Cluster</option>
-                  <option value="PO">PO</option>
-                  <option value="PA">PA</option>
-                  <option value="SupportOffice">SupportOffice</option>
-                </select>
-              </label>
-              <label>
-                Parent
-                <select name="parent" id="adminEditParent"></select>
-              </label>
-              <label>
-                Support Office (ID)
-                <input name="supportOffice" id="adminEditSupportOffice" type="text" placeholder="Connected support office" />
-              </label>
-              <label>
-                Role Description
-                <textarea name="role" rows="3" placeholder="Description"></textarea>
-              </label>
-              <label>
-                Responsibilities (one point per line)
-                <textarea name="responsibilities" id="adminEditResponsibilities" rows="3" placeholder="One point per line"></textarea>
-              </label>
-              <label>
-                Outcomes (deliverables)
-                <textarea name="outcomes" id="adminEditOutcomes" rows="3" placeholder="One point per line"></textarea>
-              </label>
-              <div class="admin-actions">
-                <button type="submit" class="primary">Save Changes</button>
-                <button type="button" id="adminDeleteNodeButton" class="danger">Delete Node</button>
-              </div>
-            </form>
-          </div>
-
-          <div class="admin-tab-panel" id="adminPanel-relations" data-admin-panel="relations" role="tabpanel" aria-labelledby="adminTab-relations" hidden>
-            <form id="adminAddRelationForm" class="admin-form horizontal">
-              <h3>New Relation</h3>
-              <div class="horizontal-row">
-                <label>
-                  From
-                  <select name="from"></select>
-                </label>
-                <span class="arrow">&rarr;</span>
-                <label>
-                  To
-                  <select name="to"></select>
-                </label>
-              </div>
-              <label>
-                Description
-                <input name="desc" type="text" placeholder="What is delivered?" />
-              </label>
-              <button type="submit" class="primary">Add Relation</button>
-            </form>
-
-            <form id="adminRemoveRelationForm" class="admin-form horizontal">
-              <h3>Remove Relation</h3>
-              <div class="horizontal-row">
-                <label>
-                  From
-                  <select name="from"></select>
-                </label>
-                <span class="arrow">&rarr;</span>
-                <label>
-                  To
-                  <select name="to"></select>
-                </label>
-              </div>
-              <button type="submit" class="danger">Remove Relation</button>
-            </form>
-          </div>
-
-          <div class="admin-tab-panel" id="adminPanel-metrics" data-admin-panel="metrics" role="tabpanel" aria-labelledby="adminTab-metrics" hidden>
-            <form id="adminAddMetricForm" class="admin-form">
-              <h3>Add Metric</h3>
-              <label>
-                Node
-                <select name="nodeId" required>
-                  <option value="">Select a node...</option>
-                </select>
-              </label>
-              <label>
-                Metric Name
-                <input name="metricName" type="text" placeholder="e.g., Budget, Headcount, Revenue" required />
-              </label>
-              <div id="valuesContainer" style="display: none;">
-                <label>Data Points</label>
-                <div id="valuesList">
-                  <!-- Dynamic value inputs will be added here -->
-                </div>
-                <button type="button" id="addValueBtn" class="secondary" style="margin-top: 0.5rem; font-size: 0.9rem;">
-                  + Add Data Point
-                </button>
-              </div>
-              <label>
-                Unit
-                <input name="metricUnit" type="text" placeholder="e.g., SEK, people, %" />
-              </label>
-              <label>
-                Chart Type
-                <select name="metricChartType" required>
-                  <option value="">Select chart type...</option>
-                  <option value="pie">Pie Chart</option>
-                  <option value="bar">Bar Chart</option>
-                  <option value="line">Line Chart</option>
-                  <option value="doughnut">Doughnut Chart</option>
-                  <option value="table">Table</option>
-                </select>
-              </label>
-              <label>
-                Color Palette
-                <select name="metricColorPalette" required>
-                  <option value="">Select color palette...</option>
-                  <option value="orange">Orange Theme</option>
-                  <option value="blue">Blue Theme</option>
-                  <option value="green">Green Theme</option>
-                  <option value="purple">Purple Theme</option>
-                  <option value="red">Red Theme</option>
-                  <option value="teal">Teal Theme</option>
-                </select>
-              </label>
-              <label>
-                Description
-                <textarea name="metricDescription" placeholder="Optional description of the metric"></textarea>
-              </label>
-              <button type="submit" class="primary">Add Metric</button>
-            </form>
-
-            <form id="adminRemoveMetricForm" class="admin-form">
-              <h3>Remove Metric</h3>
-              <label>
-                Node
-                <select name="removeNodeId" required>
-                  <option value="">Select a node...</option>
-                </select>
-              </label>
-              <label>
-                Metric
-                <select name="metricToRemove" required>
-                  <option value="">Select a metric...</option>
-                </select>
-              </label>
-              <button type="submit" class="danger">Remove Metric</button>
-            </form>
-          </div>
-        </div>
-      </div>
     </aside>
   </main>
 

@@ -65,8 +65,8 @@ När du har konfigurerat Supabase enligt QUICK-START.md:
    ```html
    <script src="js/d3.v7.min.js"></script>
    <script type="module" src="js/config.js"></script>
-   <script type="module" src="js/supabase.js"></script>
-   <script type="module" src="js/data-supabase.js"></script>
+   <script type="module" src="js/supabase-multi-org.js"></script>
+   <script type="module" src="js/data-supabase-multi-org.js"></script>
    <script src="js/charts.js"></script>
    <script src="js/ui.js"></script>
    <script src="js/map.js"></script>

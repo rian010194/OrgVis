@@ -50,15 +50,15 @@ All existing tables now include `organization_id` foreign key:
    ```
 
 2. **Update your production files**:
-   - Replace `js/supabase.js` with `js/supabase-multi-org.js`
-   - Replace `js/data-supabase.js` with `js/data-supabase-multi-org.js`
+   - Use `js/supabase-multi-org.js` (replaces old `js/supabase.js`)
+   - Use `js/data-supabase-multi-org.js` (replaces old `js/data-supabase.js`)
    - Update `index-prod.html` to use the new files
 
 3. **Update script references in index-prod.html**:
    ```html
    <!-- Replace these lines -->
-   <script type="module" src="js/supabase.js?v=20241221"></script>
-   <script type="module" src="js/data-supabase.js?v=20241221"></script>
+   <script type="module" src="js/supabase-multi-org.js?v=20241221a"></script>
+   <script type="module" src="js/data-supabase-multi-org.js?v=20241221a"></script>
    
    <!-- With these -->
    <script type="module" src="js/supabase-multi-org.js?v=20241221"></script>
@@ -145,7 +145,7 @@ If you need to rollback to the single-organization setup:
    ```
 
 2. **Update production files**:
-   - Revert to original `js/supabase.js` and `js/data-supabase.js`
+   - Revert to original single-org version (files have been removed, use multi-org versions)
    - Update `index-prod.html` to use original files
 
 3. **Restore data**:
@@ -161,10 +161,8 @@ supabase/
 └── seed.sql                        # Sample data
 
 js/
-├── supabase.js                     # Original Supabase interface
-├── supabase-multi-org.js          # New multi-org Supabase interface
-├── data-supabase.js               # Original data handling
-└── data-supabase-multi-org.js     # New multi-org data handling
+├── supabase-multi-org.js          # Multi-org Supabase interface
+└── data-supabase-multi-org.js     # Multi-org data handling
 ```
 
 ## Support

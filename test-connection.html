@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supabase Connection Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .success { color: green; }
+    .error { color: red; }
+    .info { color: blue; }
+    .test-result { margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>Supabase Connection Test</h1>
+  <div id="results"></div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js@2';
+    
+    const SUPABASE_URL = 'https://cihgptcfhaeujxhpvame.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpaGdwdGNmaGFldWp4aHB2YW1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1MDUyMzMsImV4cCI6MjA3NTA4MTIzM30.ZnGwhkJ6tJWV_jyKMOQ7NE8oS0iZTmR7u3171KpX_SU';
+    
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    function addResult(message, type = 'info') {
+      const resultsDiv = document.getElementById('results');
+      const div = document.createElement('div');
+      div.className = `test-result ${type}`;
+      div.innerHTML = `<strong>${type.toUpperCase()}:</strong> ${message}`;
+      resultsDiv.appendChild(div);
+    }
+    
+    async function testConnection() {
+      addResult('Starting Supabase connection test...', 'info');
+      
+      try {
+        // Test 1: Basic connection
+        addResult('Testing basic connection...', 'info');
+        const { data, error } = await supabase.from('organizations').select('id').limit(1);
+        
+        if (error) {
+          addResult(`Connection failed: ${error.message}`, 'error');
+          addResult(`Error code: ${error.code}`, 'error');
+          addResult(`Error details: ${JSON.stringify(error.details)}`, 'error');
+          return;
+        }
+        
+        addResult('Basic connection successful!', 'success');
+        
+        // Test 2: Check if demo_org exists
+        addResult('Checking if demo_org exists...', 'info');
+        const { data: orgData, error: orgError } = await supabase
+          .from('organizations')
+          .select('*')
+          .eq('id', 'demo_org')
+          .single();
+        
+        if (orgError) {
+          addResult(`demo_org not found: ${orgError.message}`, 'error');
+          addResult(`Error code: ${orgError.code}`, 'error');
+        } else {
+          addResult(`demo_org found: ${orgData.name}`, 'success');
+        }
+        
+        // Test 3: Check nodes
+        addResult('Checking nodes for demo_org...', 'info');
+        const { data: nodesData, error: nodesError } = await supabase
+          .from('nodes')
+          .select('id, name, type')
+          .eq('organization_id', 'demo_org')
+          .limit(5);
+        
+        if (nodesError) {
+          addResult(`Nodes query failed: ${nodesError.message}`, 'error');
+        } else {
+          addResult(`Found ${nodesData.length} nodes (showing first 5)`, 'success');
+          nodesData.forEach(node => {
+            addResult(`- ${node.name} (${node.type})`, 'info');
+          });
+        }
+        
+        // Test 4: Check mock data
+        addResult('Testing mock data fallback...', 'info');
+        try {
+          const response = await fetch('mock/org.json');
+          if (!response.ok) {
+            addResult(`Mock data fetch failed: ${response.status} ${response.statusText}`, 'error');
+          } else {
+            const mockData = await response.json();
+            addResult(`Mock data loaded: ${mockData.nodes.length} nodes`, 'success');
+          }
+        } catch (mockError) {
+          addResult(`Mock data error: ${mockError.message}`, 'error');
+        }
+        
+      } catch (error) {
+        addResult(`Unexpected error: ${error.message}`, 'error');
+        console.error('Test error:', error);
+      }
+    }
+    
+    // Run test when page loads
+    window.addEventListener('load', testConnection);
+  </script>
+</body>
+</html>

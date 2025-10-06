@@ -11,11 +11,8 @@ class ThemeEditor {
   }
 
   setupEventListeners() {
-    // Edit Theme button
-    const editThemeBtn = document.getElementById('editThemeBtn');
-    if (editThemeBtn) {
-      editThemeBtn.addEventListener('click', () => this.showEditThemeModal());
-    }
+    // Note: Edit Theme button event listener is handled by ui.js
+    // to avoid duplicate event listeners
 
     // Modal close buttons
     const closeThemeBtn = document.getElementById('closeThemeBtn');

@@ -98,8 +98,8 @@ const OrgMap = (() => {
     }
 
     const bounds = container ? container.getBoundingClientRect() : null;
-    const width = (bounds && bounds.width) || lastLayout.outerWidth || minInnerWidth + margins.left + margins.right;
-    const height = (bounds && bounds.height) || lastLayout.outerHeight || minInnerHeight + margins.top + margins.bottom;
+    const width = (bounds && bounds.width > 0) ? bounds.width : (container ? container.clientWidth : 0) || lastLayout.outerWidth || minInnerWidth + margins.left + margins.right;
+    const height = (bounds && bounds.height > 0) ? bounds.height : (container ? container.clientHeight : 0) || lastLayout.outerHeight || minInnerHeight + margins.top + margins.bottom;
 
     // Use a more zoomed-out scale to show context of where the node is in the tree
     const contextScale = Math.max(zoomSettings.min, 0.6); // More zoomed out for better context
@@ -122,13 +122,77 @@ const OrgMap = (() => {
   };
 
   const resetView = (options = {}) => {
-    currentTransform = d3.zoomIdentity;
-    if (svg && zoomBehavior) {
-      const duration = options.duration !== undefined ? options.duration : 300;
-      svg.transition().duration(duration).call(zoomBehavior.transform, d3.zoomIdentity);
-    } else if (canvasGroup) {
-      canvasGroup.attr("transform", currentTransform);
+    if (!lastLayout || !svg || !zoomBehavior) {
+      currentTransform = d3.zoomIdentity;
+      if (canvasGroup) {
+        canvasGroup.attr("transform", currentTransform);
+      }
+      return;
     }
+
+    // Calculate bounds of all nodes to center the view
+    const nodes = lastLayout.nodeData;
+    if (!nodes || nodes.length === 0) {
+      currentTransform = d3.zoomIdentity;
+      if (canvasGroup) {
+        canvasGroup.attr("transform", currentTransform);
+      }
+      return;
+    }
+
+    // Find bounds of all nodes
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    nodes.forEach(node => {
+      minX = Math.min(minX, node.x - NODE_WIDTH / 2);
+      maxX = Math.max(maxX, node.x + NODE_WIDTH / 2);
+      minY = Math.min(minY, node.y - NODE_HEIGHT / 2);
+      maxY = Math.max(maxY, node.y + NODE_HEIGHT / 2);
+    });
+
+    // Add some padding
+    const padding = 100;
+    minX -= padding;
+    maxX += padding;
+    minY -= padding;
+    maxY += padding;
+
+    // Calculate center and scale
+    const contentWidth = maxX - minX;
+    const contentHeight = maxY - minY;
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+
+    // Get SVG dimensions - use container dimensions for better mobile support
+    const containerRect = container.getBoundingClientRect();
+    let svgWidth = containerRect.width;
+    let svgHeight = containerRect.height;
+    
+    // Fallback to client dimensions if getBoundingClientRect returns 0 or invalid values
+    if (!svgWidth || svgWidth <= 0) {
+      svgWidth = container.clientWidth || 800;
+    }
+    if (!svgHeight || svgHeight <= 0) {
+      svgHeight = container.clientHeight || 600;
+    }
+    
+    // Additional fallback for mobile
+    if (svgWidth < 300) svgWidth = 800;
+    if (svgHeight < 300) svgHeight = 600;
+
+    // Calculate scale to fit content with some margin
+    const scaleX = svgWidth / contentWidth;
+    const scaleY = svgHeight / contentHeight;
+    const scale = Math.min(scaleX, scaleY, zoomSettings.max) * 0.8; // 80% to add margin
+
+    // Calculate translation to center the content
+    const tx = svgWidth / 2 - centerX * scale;
+    const ty = svgHeight / 2 - centerY * scale;
+
+    const transform = d3.zoomIdentity.translate(tx, ty).scale(scale);
+    currentTransform = transform;
+
+    const duration = options.duration !== undefined ? options.duration : 300;
+    svg.transition().duration(duration).call(zoomBehavior.transform, transform);
   };
 
   const init = () => {
@@ -160,6 +224,11 @@ const OrgMap = (() => {
     // Ensure initial transform is applied
     applyCurrentTransform();
 
+    // Prevent multiple subscriptions
+    if (unsubscribe) {
+      unsubscribe();
+    }
+    
     unsubscribe = OrgStore.subscribe(() => {
       refresh();
     });
@@ -508,37 +577,10 @@ const OrgMap = (() => {
 
   const toggleSupportVisibility = (parentId) => {
     console.log('toggleSupportVisibility called with parentId:', parentId);
-    const isExplicitlyVisible = supportVisibility.has(parentId);
-    const isParentExpanded = state.expanded.has(parentId);
-    const isCurrentlyVisible = isExplicitlyVisible || isParentExpanded;
-    
-    if (isCurrentlyVisible) {
-      // Hide the support office
-      if (isExplicitlyVisible) {
-        supportVisibility.delete(parentId);
-        console.log('Removed from supportVisibility');
-      }
-      
-      // If the node is expanded, collapse it to hide the support office
-      if (isParentExpanded) {
-        console.log('Collapsing node to hide support office:', parentId);
-        state.expanded.delete(parentId);
-        // Also collapse any descendants to maintain clean state
-        const layout = lastLayout;
-        if (layout && layout.nodeLookup) {
-          const collapseDescendants = (nodeId) => {
-            const node = layout.nodeLookup.get(nodeId);
-            if (node && node.hasChildren) {
-              const children = layout.nodeData.filter(n => n.parentId === nodeId);
-              children.forEach(child => {
-                state.expanded.delete(child.id);
-                collapseDescendants(child.id);
-              });
-            }
-          };
-          collapseDescendants(parentId);
-        }
-      }
+    if (supportVisibility.has(parentId)) {
+      // Close the current support office
+      supportVisibility.delete(parentId);
+      console.log('Removed from supportVisibility');
       
       // When closing support offices, ensure focus is maintained on selected node
       if (state.selectedId) {
@@ -547,7 +589,6 @@ const OrgMap = (() => {
         }, 100);
       }
     } else {
-      // Show the support office
       // Close all other support offices first (only allow one open at a time)
       supportVisibility.clear();
       // Open the new support office
@@ -575,7 +616,6 @@ const OrgMap = (() => {
       }
     }
     console.log('Current supportVisibility:', Array.from(supportVisibility));
-    console.log('Current expanded state:', Array.from(state.expanded));
     console.log('lastLayout exists:', !!lastLayout);
     if (lastLayout) {
       console.log('lastLayout.supportMap exists:', !!lastLayout.supportMap);
@@ -586,9 +626,16 @@ const OrgMap = (() => {
 
   const renderSupportToggles = (layout) => {
     if (!supportToggleGroup || !layout || !layout.supportMap) {
+      console.log('renderSupportToggles: Missing requirements', {
+        supportToggleGroup: !!supportToggleGroup,
+        layout: !!layout,
+        supportMap: !!(layout && layout.supportMap)
+      });
       return;
     }
     const nodesWithSupport = layout.nodeData.filter((node) => layout.supportMap.has(node.id));
+    console.log('renderSupportToggles: nodesWithSupport', nodesWithSupport.length, nodesWithSupport.map(n => n.id));
+    
     const selection = supportToggleGroup
       .selectAll('foreignObject.support-toggle-fo')
       .data(nodesWithSupport, (node) => node.id);
@@ -614,18 +661,14 @@ const OrgMap = (() => {
       .attr('y', (node) => node.y + NODE_HEIGHT / 2 + SUPPORT_TOGGLE_OFFSET);
 
     merged.select('button.support-toggle-button')
-      .text((node) => {
-        const isExplicitlyVisible = supportVisibility.has(node.id);
-        const isParentExpanded = state.expanded.has(node.id);
-        const isCurrentlyVisible = isExplicitlyVisible || isParentExpanded;
-        return isCurrentlyVisible ? 'Hide Support Office' : 'Show Support Office';
-      })
+      .text((node) => (supportVisibility.has(node.id) ? 'Hide Support Office' : 'Show Support Office'))
       .on('click', (event, node) => {
         event.stopPropagation();
         toggleSupportVisibility(node.id);
       });
   };
 
+  
   const renderSupportBoxes = (layout) => {
     console.log('renderSupportBoxes called with layout:', layout);
     console.log('supportBoxGroup exists:', !!supportBoxGroup);
@@ -648,21 +691,15 @@ const OrgMap = (() => {
         console.log('Skipping - no parentId');
         return;
       }
+      if (!supportVisibility.has(parentId)) {
+        console.log('Skipping - not in supportVisibility:', parentId);
+        return;
+      }
       const parentNode = nodeLookup.get(parentId);
       if (!parentNode) {
         console.log('Skipping - parentNode not found:', parentId);
         return;
       }
-      
-      // Show support office if explicitly toggled OR if parent node is expanded
-      const isExplicitlyVisible = supportVisibility.has(parentId);
-      const isParentExpanded = state.expanded.has(parentId);
-      
-      if (!isExplicitlyVisible && !isParentExpanded) {
-        console.log('Skipping - not in supportVisibility and parent not expanded:', parentId);
-        return;
-      }
-      
       console.log('Adding to data:', parentId, 'with children:', entry.children.length);
       data.push({ parent: parentNode, office: entry.office, children: entry.children || [], parentId });
     });
@@ -892,39 +929,79 @@ const OrgMap = (() => {
     toDelete.forEach((id) => state.expanded.delete(id));
   };
 
+  let refreshTimeout = null;
+  let isRefreshing = false;
+  let refreshCallCount = 0;
+  let lastRefreshTime = 0;
+  const MIN_REFRESH_INTERVAL = 250; // Minimum 250ms between refreshes
+  
   const refresh = () => {
-    if (!svg) {
+    refreshCallCount++;
+    const now = Date.now();
+    const timeSinceLastRefresh = now - lastRefreshTime;
+    
+    console.log(`Refresh called #${refreshCallCount}, isRefreshing: ${isRefreshing}, svg: ${!!svg}, timeSinceLastRefresh: ${timeSinceLastRefresh}ms`);
+    
+    if (!svg || isRefreshing) {
+      console.log('Refresh skipped - svg missing or already refreshing');
       return;
     }
-    // Preserve current transform state during refresh
-    const preservedTransform = currentTransform;
     
-    const nodes = OrgStore.getAll();
-    pruneExpanded(nodes.map((node) => node.id));
-    ensureDefaultExpansion(nodes);
-    const layout = computeLayout(nodes);
-    if (!layout) {
+    // If we're calling refresh too frequently, skip it
+    if (timeSinceLastRefresh < MIN_REFRESH_INTERVAL) {
+      console.log(`Refresh skipped - too frequent (${timeSinceLastRefresh}ms < ${MIN_REFRESH_INTERVAL}ms)`);
       return;
     }
-    pruneSupportVisibility(layout.supportMap);
-    lastLayout = layout;
-    renderLinks(layout.linkData);
-    renderNodes(layout.nodeData);
-    renderSupportToggles(layout);
-    renderSupportBoxes(layout);
     
-    // Update selection state for all support items
-    if (state.selectedId) {
-      supportBoxGroup.selectAll('.support-box-fo').each(function() {
-        const fo = d3.select(this);
-        const supportBox = fo.select('div.support-box');
-        updateSupportItemsSelection(supportBox);
-      });
+    // Clear any existing timeout
+    if (refreshTimeout) {
+      clearTimeout(refreshTimeout);
     }
     
-    // Restore and apply the preserved transform
-    currentTransform = preservedTransform;
-    ensureTransformConsistency();
+    // Use a longer debounce delay to prevent rapid successive calls
+    refreshTimeout = setTimeout(() => {
+      isRefreshing = true;
+      lastRefreshTime = Date.now();
+      console.log(`Starting refresh execution #${refreshCallCount}`);
+      
+      try {
+        // Preserve current transform state during refresh
+        const preservedTransform = currentTransform;
+        
+        const nodes = OrgStore.getAll();
+        pruneExpanded(nodes.map((node) => node.id));
+        ensureDefaultExpansion(nodes);
+        const layout = computeLayout(nodes);
+        if (!layout) {
+          return;
+        }
+        pruneSupportVisibility(layout.supportMap);
+        lastLayout = layout;
+        renderLinks(layout.linkData);
+        renderNodes(layout.nodeData);
+        renderSupportToggles(layout);
+        renderSupportBoxes(layout);
+        
+        // Update selection state for all support items
+        if (state.selectedId) {
+          supportBoxGroup.selectAll('.support-box-fo').each(function() {
+            const fo = d3.select(this);
+            const supportBox = fo.select('div.support-box');
+            updateSupportItemsSelection(supportBox);
+          });
+        }
+        
+        // Restore and apply the preserved transform
+        currentTransform = preservedTransform;
+        ensureTransformConsistency();
+        
+        console.log(`Refresh execution completed #${refreshCallCount}`);
+      } catch (error) {
+        console.error('Error during refresh:', error);
+      } finally {
+        isRefreshing = false;
+      }
+    }, 150); // Increased debounce delay to 150ms
   };
 
   const handleResize = () => {
@@ -932,6 +1009,15 @@ const OrgMap = (() => {
       return;
     }
     refresh();
+    
+    // Also update the view after resize to ensure proper centering
+    setTimeout(() => {
+      if (state.selectedId) {
+        focusNode(state.selectedId, { duration: 200 });
+      } else {
+        resetView({ duration: 200 });
+      }
+    }, 100);
   };
 
   const show = () => {
@@ -941,13 +1027,15 @@ const OrgMap = (() => {
     }
     container.classList.remove("hidden");
     refresh();
-    requestAnimationFrame(() => {
+    
+    // Use a longer delay to ensure container dimensions are properly updated
+    setTimeout(() => {
       if (state.selectedId) {
         focusNode(state.selectedId, { duration: 0 });
       } else {
         resetView({ duration: 0 });
       }
-    });
+    }, 100); // 100ms delay to ensure dimensions are updated
   };
 
   const hide = () => {
@@ -955,6 +1043,16 @@ const OrgMap = (() => {
       return;
     }
     container.classList.add("hidden");
+    
+    // Clean up subscriptions and timeouts when hiding
+    if (unsubscribe) {
+      unsubscribe();
+      unsubscribe = null;
+    }
+    if (refreshTimeout) {
+      clearTimeout(refreshTimeout);
+      refreshTimeout = null;
+    }
   };
 
   const reveal = (nodeId) => {

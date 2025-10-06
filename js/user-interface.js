@@ -310,11 +310,8 @@ export class UserInterface {
     });
 
     // Show user panel
-    document.addEventListener('click', (e) => {
-      if (e.target.id === 'userManagementBtn') {
-        this.showUserPanel();
-      }
-    });
+    // Note: User Management button event listener is handled by ui.js
+    // to avoid duplicate event listeners
 
     // File upload
     document.addEventListener('click', (e) => {

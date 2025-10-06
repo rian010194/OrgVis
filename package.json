@@ -10,7 +10,12 @@
     "migrate": "supabase db push",
     "seed": "supabase db seed",
     "build": "echo 'Frontend build completed'",
-    "deploy": "supabase db push && supabase functions deploy"
+    "deploy": "supabase db push && supabase functions deploy",
+    "push": "supabase db push",
+    "push-seed": "supabase db push && supabase db seed",
+    "login": "supabase login",
+    "link": "supabase link --project-ref cihgptcfhaeujxhpvame",
+    "status": "supabase status"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.38.4"

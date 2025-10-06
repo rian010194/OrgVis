@@ -1174,6 +1174,11 @@ const OrgUI = (() => {
     activeAdminTab = tab;
 
     updateAdminTabsUI();
+    
+    // Populate edit form when switching to Edit tab
+    if (tab === "edit") {
+      populateEditForm();
+    }
 
   };
 

@@ -34,7 +34,7 @@ supabase db seed
 1. Gå till [Supabase Dashboard](https://supabase.com/dashboard)
 2. Skapa ett nytt projekt
 3. Kopiera din project URL och anon key
-4. Uppdatera `js/supabase.js` med dina credentials:
+4. Uppdatera `js/supabase-multi-org.js` med dina credentials:
 
 ```javascript
 const SUPABASE_URL = 'https://your-project-ref.supabase.co';

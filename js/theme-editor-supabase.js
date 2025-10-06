@@ -13,11 +13,8 @@ class SupabaseThemeEditor {
   }
 
   setupEventListeners() {
-    // Edit Theme button
-    const editThemeBtn = document.getElementById('editThemeBtn');
-    if (editThemeBtn) {
-      editThemeBtn.addEventListener('click', () => this.showEditThemeModal());
-    }
+    // Note: Edit Theme button event listener is handled by ui.js
+    // to avoid duplicate event listeners
 
     // Modal close buttons
     const closeThemeBtn = document.getElementById('closeThemeBtn');
@@ -277,43 +274,9 @@ class SupabaseThemeEditor {
     }
 
     try {
-      // Try Supabase first, fallback to localStorage if not available
-      let orgData = null;
-      let brandingData = {};
-      
-      if (window.orgDb && typeof window.orgDb.getOrganization === 'function') {
-        try {
-          orgData = await window.orgDb.getOrganization(currentOrgId);
-          brandingData = orgData.branding || {};
-          console.log('SupabaseThemeEditor: Loaded theme from Supabase');
-        } catch (supabaseError) {
-          console.warn('SupabaseThemeEditor: Supabase load failed, trying localStorage:', supabaseError);
-          // Fallback to localStorage
-          const localOrgData = localStorage.getItem(`org_${currentOrgId}`);
-          const localBrandingData = localStorage.getItem(`org_branding_${currentOrgId}`);
-          
-          if (localOrgData) {
-            orgData = JSON.parse(localOrgData);
-          }
-          if (localBrandingData) {
-            brandingData = JSON.parse(localBrandingData);
-          }
-          console.log('SupabaseThemeEditor: Loaded theme from localStorage fallback');
-        }
-      } else {
-        console.warn('SupabaseThemeEditor: Supabase not available, using localStorage');
-        // Fallback to localStorage
-        const localOrgData = localStorage.getItem(`org_${currentOrgId}`);
-        const localBrandingData = localStorage.getItem(`org_branding_${currentOrgId}`);
-        
-        if (localOrgData) {
-          orgData = JSON.parse(localOrgData);
-        }
-        if (localBrandingData) {
-          brandingData = JSON.parse(localBrandingData);
-        }
-        console.log('SupabaseThemeEditor: Loaded theme from localStorage');
-      }
+      // Load organization data from Supabase
+      const orgData = await window.orgDb.getOrganization(currentOrgId);
+      const brandingData = orgData.branding || {};
 
       // Update form fields
       const orgNameInput = document.getElementById('themeOrgName');
@@ -530,14 +493,23 @@ class SupabaseThemeEditor {
       }
     };
 
+    // Handle both themePreset elements
     const presetSelect = document.getElementById('themePreset');
+    const presetSelect2 = document.getElementById('themePreset2');
+    
+    const handlePresetChange = (e) => {
+      const selectedTheme = themePresets[e.target.value];
+      if (selectedTheme) {
+        this.applyThemePreset(selectedTheme);
+      }
+    };
+    
     if (presetSelect) {
-      presetSelect.addEventListener('change', (e) => {
-        const selectedTheme = themePresets[e.target.value];
-        if (selectedTheme) {
-          this.applyThemePreset(selectedTheme);
-        }
-      });
+      presetSelect.addEventListener('change', handlePresetChange);
+    }
+    
+    if (presetSelect2) {
+      presetSelect2.addEventListener('change', handlePresetChange);
     }
   }
 
@@ -794,33 +766,9 @@ class SupabaseThemeEditor {
         throw new Error('Invalid theme data');
       }
       
-      // Check if orgDb is available, fallback to localStorage if not
+      // Check if orgDb is available
       if (!window.orgDb || typeof window.orgDb.updateOrganization !== 'function') {
-        console.warn('SupabaseThemeEditor: Supabase not available, using localStorage fallback');
-        
-        // Fallback to localStorage
-        localStorage.setItem(`org_${currentOrgId}`, JSON.stringify({
-          ...orgUpdates,
-          branding: brandingData
-        }));
-        
-        // Also save branding separately for easier access
-        localStorage.setItem(`org_branding_${currentOrgId}`, JSON.stringify(brandingData));
-        
-        console.log('SupabaseThemeEditor: Theme saved to localStorage as fallback');
-        
-        // Apply theme immediately
-        this.applyTheme(brandingData, orgUpdates);
-        
-        // Update header with new organization data
-        this.updateHeader(orgUpdates);
-        
-        // Hide modal
-        this.hideEditThemeModal();
-        
-        // Show success message
-        this.showSuccessMessage('Theme updated successfully! (Saved locally)');
-        return;
+        throw new Error('Supabase database not available. Please check your configuration.');
       }
       
       // First, check if organization exists
@@ -1226,6 +1174,27 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('--tree-item-background:', styles.getPropertyValue('--tree-item-background'));
     console.log('--button-background:', styles.getPropertyValue('--button-background'));
     console.log('--node-background:', styles.getPropertyValue('--node-background'));
+    console.log('--accent-light:', styles.getPropertyValue('--accent-light'));
+    console.log('--accent-medium:', styles.getPropertyValue('--accent-medium'));
+  };
+
+  // Simple test function to change colors directly
+  window.testDirectColorChange = () => {
+    console.log('Testing direct color change...');
+    
+    // Change brand orange to blue
+    document.documentElement.style.setProperty('--brand-orange', '#2563eb');
+    document.documentElement.style.setProperty('--hover-color', '#2563eb');
+    document.documentElement.style.setProperty('--selected-color', '#2563eb');
+    
+    // Change accent colors to blue variants
+    document.documentElement.style.setProperty('--accent-light', 'rgba(37, 99, 235, 0.08)');
+    document.documentElement.style.setProperty('--accent-medium', 'rgba(37, 99, 235, 0.1)');
+    document.documentElement.style.setProperty('--accent-dark', 'rgba(37, 99, 235, 0.15)');
+    document.documentElement.style.setProperty('--accent-darker', 'rgba(37, 99, 235, 0.25)');
+    document.documentElement.style.setProperty('--accent-darkest', 'rgba(37, 99, 235, 0.3)');
+    
+    console.log('Direct color change applied! Check if buttons are now blue.');
   };
 
   // Add debug method to test theme presets

@@ -5,15 +5,32 @@ class UserInterfaceDemo {
   }
 
   init() {
+    console.log('UserInterfaceDemo init called');
+    console.log('Panel check at init:', {
+      userPanel: !!document.getElementById('userManagementPanel'),
+      themePanel: !!document.getElementById('editThemePanel'),
+      documentReadyState: document.readyState
+    });
+    
     this.createUserManagementUI();
+    this.createThemePanel();
     this.setupEventListeners();
   }
 
   createUserManagementUI() {
-    // Create user management panel
-    const userPanel = document.createElement('div');
-    userPanel.id = 'userManagementPanel';
-    userPanel.className = 'user-panel hidden';
+    // Use existing user management panel from HTML instead of creating a new one
+    let userPanel = document.getElementById('userManagementPanel');
+    
+    if (!userPanel) {
+      console.warn('userManagementPanel not found in HTML, creating one dynamically');
+      // Fallback: create panel if it doesn't exist
+      userPanel = document.createElement('div');
+      userPanel.id = 'userManagementPanel';
+      userPanel.className = 'user-panel hidden';
+      document.body.appendChild(userPanel);
+    } else {
+      console.log('Using existing userManagementPanel from HTML');
+    }
     
     userPanel.innerHTML = `
       <div class="user-panel-header">
@@ -172,30 +189,18 @@ class UserInterfaceDemo {
       }
     });
 
-    // Close panel
+    // Close panels
     document.addEventListener('click', (e) => {
       if (e.target.id === 'closeUserPanel') {
         this.hideUserPanel();
       }
+      if (e.target.id === 'closeThemeBtn') {
+        this.hideThemePanel();
+      }
     });
 
-    // Show user panel - improved touch handling
-    document.addEventListener('click', (e) => {
-      if (e.target.id === 'userManagementBtn' || e.target.closest('#userManagementBtn')) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.showUserPanel();
-      }
-    });
-    
-    // Also handle touch events for better mobile support
-    document.addEventListener('touchend', (e) => {
-      if (e.target.id === 'userManagementBtn' || e.target.closest('#userManagementBtn')) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.showUserPanel();
-      }
-    });
+    // Note: User Management button event listeners are handled by ui.js
+    // to avoid duplicate event listeners
 
     // Handle user panel navigation
     document.addEventListener('click', (e) => {
@@ -230,19 +235,74 @@ class UserInterfaceDemo {
   }
 
   showUserPanel() {
-    const panel = document.getElementById('userManagementPanel');
-    if (panel) {
-      panel.classList.remove('hidden');
-      this.createDemoCharts();
-    } else {
-      console.warn('User management panel not found');
+    console.log('showUserPanel called');
+    
+    // Prevent multiple simultaneous calls
+    if (this._showUserPanelInProgress) {
+      console.log('showUserPanel already in progress, skipping');
+      return;
     }
+    
+    this._showUserPanelInProgress = true;
+    
+    // Check if DOM is ready first
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        this._showUserPanelInProgress = false;
+        this.showUserPanel(); // Retry after DOM is ready
+      });
+      return;
+    }
+    
+    // Wait for DOM to be ready if needed
+    let retryCount = 0;
+    const maxRetries = 30; // Increased retries for better reliability
+    
+    const checkPanel = () => {
+      const panel = document.getElementById('userManagementPanel');
+      if (panel) {
+        console.log('User management panel found, showing it');
+        panel.classList.remove('hidden');
+        this.createDemoCharts();
+        this._showUserPanelInProgress = false; // Reset flag on success
+      } else if (retryCount < maxRetries) {
+        retryCount++;
+        console.warn(`User management panel not found - DOM may not be ready yet (attempt ${retryCount}/${maxRetries})`);
+        // Retry after a short delay
+        setTimeout(checkPanel, 200); // Faster retry for better responsiveness
+      } else {
+        console.error('User management panel not found after maximum retries - giving up');
+        console.log('Available panels:', {
+          userManagementPanel: !!document.getElementById('userManagementPanel'),
+          allPanels: document.querySelectorAll('[id*="Panel"]').length,
+          bodyChildren: document.body.children.length,
+          documentReadyState: document.readyState,
+          allPanelIds: Array.from(document.querySelectorAll('[id*="Panel"]')).map(p => p.id)
+        });
+        this._showUserPanelInProgress = false; // Reset flag on failure
+      }
+    };
+    checkPanel();
   }
 
   hideUserPanel() {
     const panel = document.getElementById('userManagementPanel');
     if (panel) {
       panel.classList.add('hidden');
+    }
+  }
+
+  hideThemePanel() {
+    const panel = document.getElementById('editThemePanel');
+    if (panel) {
+      panel.classList.add('hidden');
+    }
+  }
+
+  showThemePanel() {
+    const panel = document.getElementById('editThemePanel');
+    if (panel) {
+      panel.classList.remove('hidden');
     }
   }
 
@@ -490,7 +550,55 @@ class UserInterfaceDemo {
       )
       .attr('opacity', 0.1);
   }
+
+  createThemePanel() {
+    // Use existing theme panel from HTML instead of creating a new one
+    let themePanel = document.getElementById('editThemePanel');
+    
+    if (!themePanel) {
+      console.warn('editThemePanel not found in HTML, creating one dynamically');
+      // Fallback: create panel if it doesn't exist
+      themePanel = document.createElement('div');
+      themePanel.id = 'editThemePanel';
+      themePanel.className = 'theme-panel hidden';
+      
+      // Add basic theme panel structure
+      themePanel.innerHTML = `
+        <div class="theme-panel-header">
+          <div class="header-left">
+            <h3>Edit Theme</h3>
+            <span class="theme-stats">Customize your organization</span>
+          </div>
+          <button id="closeThemeBtn" class="close-btn">&times;</button>
+        </div>
+        <div class="theme-panel-content">
+          <div class="demo-notice">
+            <p>Theme editing is not available in demo mode. Please use the full version for theme customization.</p>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(themePanel);
+    } else {
+      console.log('Using existing editThemePanel from HTML');
+    }
+    
+    // Don't overwrite the existing theme panel content, just ensure it exists
+    // The theme panel should already have proper content from HTML
+  }
 }
 
-// Create global instance
-const userInterfaceDemo = new UserInterfaceDemo();
+// Create global instance when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    // Wait a bit more for all elements to be fully loaded
+    setTimeout(() => {
+      window.userInterfaceDemo = new UserInterfaceDemo();
+    }, 100);
+  });
+} else {
+  // DOM is already ready, but wait a bit for all elements
+  setTimeout(() => {
+    window.userInterfaceDemo = new UserInterfaceDemo();
+  }, 100);
+}

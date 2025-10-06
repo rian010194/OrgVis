@@ -29,15 +29,15 @@ export class OrgDatabase {
     try {
       const { data, error } = await this.supabase
         .from('organizations')
-        .select('*')
+        .select('id, name, description, type, password_hash')
         .order('name');
       
       if (error) throw error;
       return data;
     } catch (error) {
-      // If organizations table doesn't exist, return fallback organizations
-      if (error.code === '42P01' || error.message.includes('relation "organizations" does not exist')) {
-        console.warn('Organizations table not found, returning fallback organizations');
+      // If organizations table doesn't exist or other error, return fallback organizations
+      if (error.code === '42P01' || error.message.includes('relation "organizations" does not exist') || error.code === '409') {
+        console.warn('Organizations table not found or conflict, returning fallback organizations');
         return [
           {
             id: 'jumpyard',

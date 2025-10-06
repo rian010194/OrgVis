@@ -63,7 +63,7 @@ Organisation/
 │   ├── ui.js              # UI logic and event handling
 │   ├── data.js            # Data management and localStorage
 │   ├── map.js             # D3.js map visualization
-│   ├── supabase.js        # Supabase integration
+│   ├── supabase-multi-org.js        # Supabase integration with multi-org support
 │   └── theme-editor.js    # Theme customization functionality
 ├── supabase/
 │   ├── database_schema.sql    # Main database schema

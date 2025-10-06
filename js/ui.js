@@ -5,6 +5,7 @@ const OrgUI = (() => {
   let selectedNodeId = null;
 
   let unsubscribe = null;
+  let showingAdminContent = false;
 
   let activeAdminTab = "edit";
 
@@ -99,6 +100,8 @@ const OrgUI = (() => {
 
     relationView: null,
 
+    toggleProfile: null,
+
     toggleAdmin: null,
 
     adminPanel: null,
@@ -159,18 +162,21 @@ const OrgUI = (() => {
   const init = () => {
 
     cacheElements();
+    
+    // Verify critical elements are available
+    verifyCriticalElements();
 
     bindStaticListeners();
 
     updateAdminTabsUI();
 
     // Ensure detail panel is visible by default (not in admin mode)
-    if (elements.detailPanel && !elements.adminPanel.classList.contains("open")) {
+    if (elements.detailPanel && !document.body.classList.contains("admin-mode-active")) {
       elements.detailPanel.style.display = "flex";
     }
     
     // Initialize admin button text
-    updateAdminButtonText(elements.adminPanel.classList.contains("open"));
+    updateAdminButtonText(document.body.classList.contains("admin-mode-active"));
 
     // Set up resize observer for detail panel to sync heights
     setupDetailPanelResizeObserver();
@@ -459,6 +465,8 @@ const OrgUI = (() => {
 
     elements.relationView = document.getElementById("relationView");
 
+    elements.toggleProfile = document.getElementById("toggleProfile");
+
     elements.toggleAdmin = document.getElementById("toggleAdmin");
 
     elements.adminPanel = document.getElementById("adminPanel");
@@ -520,11 +528,161 @@ const OrgUI = (() => {
 
   const bindStaticListeners = () => {
 
+    if (elements.toggleProfile) {
+
+      elements.toggleProfile.addEventListener("click", toggleProfilePanel);
+
+    }
+
     if (elements.toggleAdmin) {
 
       elements.toggleAdmin.addEventListener("click", toggleAdminPanel);
 
     }
+
+    // Mobile hamburger menu
+    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+    const mobileMenuClose = document.getElementById('mobileMenuClose');
+
+    // Mobile view toggle (collapse main section)
+    const mobileViewToggle = document.getElementById('mobileViewToggle');
+    // Desktop view switch (tree/map) - also used on mobile
+    const desktopViewSwitch = document.getElementById('desktopViewSwitch');
+
+    if (mobileMenuToggle && mobileMenuOverlay) {
+      mobileMenuToggle.addEventListener('click', toggleMobileMenu);
+    }
+
+    if (mobileMenuClose && mobileMenuOverlay) {
+      mobileMenuClose.addEventListener('click', closeMobileMenu);
+    }
+
+    if (mobileViewToggle) {
+      mobileViewToggle.addEventListener('click', toggleMainContent);
+    }
+
+
+    if (desktopViewSwitch) {
+      desktopViewSwitch.addEventListener('click', () => {
+        const treeContainer = document.getElementById('orgchart');
+        const mapView = document.getElementById('mapView');
+        const isTreeActive = treeContainer && !treeContainer.classList.contains('hidden');
+        const nextView = isTreeActive ? 'map' : 'tree';
+        switchToView(nextView);
+        updateDesktopViewSwitchIcon(nextView);
+      });
+    }
+
+    if (mobileMenuOverlay) {
+      mobileMenuOverlay.addEventListener('click', (e) => {
+        if (e.target === mobileMenuOverlay) {
+          closeMobileMenu();
+        }
+      });
+    }
+
+    // Mobile admin button listeners
+    const mobileMyProfileBtn = document.getElementById('mobileMyProfileBtn');
+    const mobileProfileToggle = document.getElementById('mobileProfileToggle');
+    const mobileAdminToggle = document.getElementById('mobileAdminToggle');
+    const mobileUserManagementBtn = document.getElementById('mobileUserManagementBtn');
+    const mobileEditThemeBtn = document.getElementById('mobileEditThemeBtn');
+    const mobileEditNodesBtn = document.getElementById('mobileEditNodesBtn');
+    const mobileResourcesBtn = document.getElementById('mobileResourcesBtn');
+    const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+    
+    // Mobile view button listeners
+    const mobileTreeViewBtn = document.getElementById('mobileTreeViewBtn');
+    const mobileMapViewBtn = document.getElementById('mobileMapViewBtn');
+
+    if (mobileMyProfileBtn) {
+      mobileMyProfileBtn.addEventListener('click', () => {
+        // Open user management panel with profile view
+        const userManagementPanel = document.getElementById('userManagementPanel');
+        if (userManagementPanel) {
+          userManagementPanel.classList.remove('hidden');
+          // Switch to profile view
+          const profileView = document.getElementById('profileView');
+          const profileNavBtn = document.querySelector('[data-view="profile"]');
+          if (profileView && profileNavBtn) {
+            // Hide all views
+            document.querySelectorAll('.view-content').forEach(view => {
+              view.classList.remove('active');
+            });
+            // Show profile view
+            profileView.classList.add('active');
+            // Update nav button
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+              btn.classList.remove('active');
+            });
+            profileNavBtn.classList.add('active');
+          }
+          closeMobileMenu();
+        }
+      });
+    }
+
+    if (mobileProfileToggle) {
+      mobileProfileToggle.addEventListener('click', () => {
+        // Call the profile toggle function directly
+        toggleProfilePanel();
+        // Close mobile menu after opening profile
+        closeMobileMenu();
+      });
+    }
+
+    if (mobileAdminToggle) {
+      mobileAdminToggle.addEventListener('click', () => {
+        // Call the admin toggle function directly
+        toggleAdminPanel();
+        // Don't close mobile menu - let user see the admin buttons appear
+        // The menu will stay open so they can access admin functions immediately
+      });
+    }
+
+    if (mobileUserManagementBtn) {
+      mobileUserManagementBtn.addEventListener('click', () => {
+        closeMobileMenu();
+        // Call the function directly instead of simulating click
+        showConfigureUsersInDetailPanel();
+      });
+    }
+
+    if (mobileEditThemeBtn) {
+      mobileEditThemeBtn.addEventListener('click', () => {
+        closeMobileMenu();
+        // Call the function directly instead of simulating click
+        showEditThemeInDetailPanel();
+      });
+    }
+
+    if (mobileEditNodesBtn) {
+      mobileEditNodesBtn.addEventListener('click', () => {
+        closeMobileMenu();
+        // Call the function directly instead of simulating click
+        showEditNodesInDetailPanel();
+      });
+    }
+
+    if (mobileResourcesBtn) {
+      mobileResourcesBtn.addEventListener('click', () => {
+        closeMobileMenu();
+        // Call the function directly instead of simulating click
+        showAdminInfoInDetailPanel();
+      });
+    }
+
+    if (mobileLogoutBtn) {
+      mobileLogoutBtn.addEventListener('click', () => {
+        const desktopLogoutBtn = document.getElementById('logoutBtn');
+        if (desktopLogoutBtn) {
+          desktopLogoutBtn.click();
+          closeMobileMenu();
+        }
+      });
+    }
+
 
     if (elements.adminTabs && elements.adminTabs.length) {
 
@@ -691,6 +849,28 @@ const OrgUI = (() => {
       elements.clearDataButton.addEventListener("click", handleClearData);
     elements.testStorageButton.addEventListener("click", handleTestStorage);
 
+    }
+
+    // Add event listeners for header buttons
+    const userManagementBtn = document.getElementById('userManagementBtn');
+    const editThemeBtn = document.getElementById('editThemeBtn');
+    const editNodesBtn = document.getElementById('editNodesBtn');
+    const resourcesBtn = document.getElementById('resourcesBtn');
+    
+    if (userManagementBtn) {
+      userManagementBtn.addEventListener("click", showConfigureUsersInDetailPanel);
+    }
+    
+    if (editThemeBtn) {
+      editThemeBtn.addEventListener("click", showEditThemeInDetailPanel);
+    }
+    
+    if (editNodesBtn) {
+      editNodesBtn.addEventListener("click", showEditNodesInDetailPanel);
+    }
+    
+    if (resourcesBtn) {
+      resourcesBtn.addEventListener("click", showAdminInfoInDetailPanel);
     }
 
   };
@@ -996,6 +1176,11 @@ const OrgUI = (() => {
 
       return;
 
+    }
+
+    // Don't clear admin content when showing admin panels
+    if (showingAdminContent) {
+      return;
     }
 
     elements.detailPanel.innerHTML = "";
@@ -1337,6 +1522,24 @@ const OrgUI = (() => {
     if (action === "close-panel") {
 
       selectedNodeId = null;
+      showingAdminContent = false;
+      document.body.classList.remove('admin-mode-active');
+      document.body.classList.remove('profile-mode-active');
+
+      // Move admin panel back to its original location if it was moved
+      const adminPanel = document.getElementById('adminPanel');
+      const sideSection = document.querySelector('.side-section');
+      if (adminPanel && sideSection && !sideSection.contains(adminPanel)) {
+        sideSection.appendChild(adminPanel);
+        adminPanel.classList.remove('detail-admin-content');
+        adminPanel.classList.add('admin-panel');
+      }
+
+      // Theme panel is now cloned, no need to move it back
+      // The original editThemePanel remains in place
+
+      // User management panel is now cloned, no need to move it back
+      // The original userManagementPanel remains in place
 
       renderDetailPanel();
 
@@ -1345,6 +1548,7 @@ const OrgUI = (() => {
       return;
 
     }
+
 
     if (action === "toggle-detail") {
 
@@ -1504,6 +1708,114 @@ const OrgUI = (() => {
 
     });
 
+  };
+
+  // Functions to show/hide admin buttons
+  const showAdminButtons = () => {
+    const adminButtons = [
+      'userManagementBtn',
+      'editThemeBtn', 
+      'editNodesBtn',
+      'resourcesBtn'
+    ];
+    
+    adminButtons.forEach(btnId => {
+      const btn = document.getElementById(btnId);
+      if (btn) {
+        btn.classList.remove('hidden');
+        console.log(`Showing admin button: ${btnId}`);
+      }
+    });
+  };
+
+  const hideAdminButtons = () => {
+    const adminButtons = [
+      'userManagementBtn',
+      'editThemeBtn', 
+      'editNodesBtn',
+      'resourcesBtn'
+    ];
+    
+    adminButtons.forEach(btnId => {
+      const btn = document.getElementById(btnId);
+      if (btn) {
+        btn.classList.add('hidden');
+        console.log(`Hiding admin button: ${btnId}`);
+      }
+    });
+  };
+
+  const initializeAdminButtonListeners = () => {
+    const userManagementBtn = document.getElementById('userManagementBtn');
+    const editThemeBtn = document.getElementById('editThemeBtn');
+    const editNodesBtn = document.getElementById('editNodesBtn');
+    const resourcesBtn = document.getElementById('resourcesBtn');
+    
+    console.log('Initializing admin button listeners:', {
+      userManagementBtn: !!userManagementBtn,
+      editThemeBtn: !!editThemeBtn,
+      editNodesBtn: !!editNodesBtn,
+      resourcesBtn: !!resourcesBtn
+    });
+    
+    // Helper function to safely re-attach event listeners
+    const reattachListener = (button, handler, name) => {
+      if (button) {
+        // Clone button to remove all existing event listeners
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+        
+        // Add new event listener
+        newButton.addEventListener("click", handler);
+        console.log(`${name} button listener attached`);
+        return newButton;
+      }
+      return null;
+    };
+    
+    // Re-attach all admin button listeners
+    reattachListener(userManagementBtn, showConfigureUsersInDetailPanel, 'User management');
+    reattachListener(editThemeBtn, showEditThemeInDetailPanel, 'Edit theme');
+    reattachListener(editNodesBtn, showEditNodesInDetailPanel, 'Edit nodes');
+    reattachListener(resourcesBtn, showAdminInfoInDetailPanel, 'Resources');
+    
+    console.log('Admin button event listeners re-initialized');
+  };
+
+  // Move initializeAdminPanel to global scope to avoid reference errors
+  window.initializeAdminPanel = () => {
+    // Re-initialize admin panel functionality
+    refreshAdminPanel();
+    updateAdminTabsUI();
+    
+    // Re-cache admin elements since they may have moved
+    elements.adminTabs = Array.from(document.querySelectorAll('[data-admin-tab]')) || [];
+    elements.adminPanels = Array.from(document.querySelectorAll('[data-admin-panel]')) || [];
+    
+    // Re-bind admin panel event listeners
+    if (elements.adminTabs && elements.adminTabs.length) {
+      elements.adminTabs.forEach((button) => {
+        // Clone the button to remove all event listeners
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+        
+        // Add the event listener to the new button
+        newButton.addEventListener("click", () => {
+          const targetTab = newButton.dataset.adminTab;
+          if (targetTab) {
+            setActiveAdminTab(targetTab);
+          }
+        });
+      });
+      
+      // Update the elements array with the new buttons
+      elements.adminTabs = Array.from(document.querySelectorAll('[data-admin-tab]')) || [];
+    }
+    
+    // Re-initialize admin button listeners (for buttons like Edit Nodes, Edit Theme, etc.)
+    initializeAdminButtonListeners();
+    
+    console.log('Admin panel re-initialized');
   };
 
   const updateAdminButtonText = (isAdminOpen) => {
@@ -1911,29 +2223,259 @@ const OrgUI = (() => {
     if (tab === "metrics") {
       displayCurrentMetrics();
     }
+    
+    // Populate edit form when switching to Edit tab
+    if (tab === "edit") {
+      populateEditForm();
+    }
 
   };
 
-  const toggleAdminPanel = () => {
+  // Mobile menu functions
+  const toggleMobileMenu = () => {
+    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+    
+    if (!mobileMenuToggle || !mobileMenuOverlay) return;
+    
+    const isOpen = !mobileMenuOverlay.classList.contains('hidden');
+    
+    if (isOpen) {
+      closeMobileMenu();
+    } else {
+      openMobileMenu();
+    }
+  };
 
-    if (!elements.adminPanel || !elements.detailPanel) {
+  const openMobileMenu = () => {
+    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+    
+    if (!mobileMenuToggle || !mobileMenuOverlay) return;
+    
+    mobileMenuOverlay.classList.remove('hidden');
+    mobileMenuToggle.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // Sync admin button states
+    syncMobileAdminButtons();
+  };
 
-      return;
+  const closeMobileMenu = () => {
+    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+    
+    if (!mobileMenuToggle || !mobileMenuOverlay) return;
+    
+    mobileMenuOverlay.classList.add('hidden');
+    mobileMenuToggle.classList.remove('active');
+    document.body.style.overflow = '';
+  };
 
+
+  const toggleMainContent = () => {
+    const mobileViewToggle = document.getElementById('mobileViewToggle');
+    const body = document.body;
+    
+    if (!mobileViewToggle) return;
+    
+    const isCollapsed = body.classList.contains('main-content-collapsed');
+    
+    if (isCollapsed) {
+      // Show main content
+      body.classList.remove('main-content-collapsed');
+      mobileViewToggle.classList.remove('collapsed');
+    } else {
+      // Hide main content
+      body.classList.add('main-content-collapsed');
+      mobileViewToggle.classList.add('collapsed');
+    }
+  };
+
+  const syncMobileAdminButtons = () => {
+    const isAdminOpen = document.body.classList.contains('admin-mode-active');
+    
+    // Update mobile admin toggle button
+    const mobileAdminToggle = document.getElementById('mobileAdminToggle');
+    if (mobileAdminToggle) {
+      mobileAdminToggle.classList.toggle('active', isAdminOpen);
+      const textElement = mobileAdminToggle.querySelector('.mobile-admin-action-text');
+      if (textElement) {
+        textElement.textContent = isAdminOpen ? 'Exit Admin' : 'Admin Mode';
+      }
+    }
+    
+    // Show/hide admin action buttons
+    const adminButtons = [
+      'mobileUserManagementBtn',
+      'mobileEditThemeBtn', 
+      'mobileEditNodesBtn',
+      'mobileResourcesBtn'
+    ];
+    
+    adminButtons.forEach(buttonId => {
+      const button = document.getElementById(buttonId);
+      if (button) {
+        if (isAdminOpen) {
+          button.classList.remove('hidden');
+        } else {
+          button.classList.add('hidden');
+        }
+      }
+    });
+  };
+
+  // Function to switch between views
+  const switchToView = (viewType) => {
+    const treeContainer = document.getElementById('orgchart');
+    const mapView = document.getElementById('mapView');
+    
+    if (viewType === 'tree') {
+      if (treeContainer) treeContainer.classList.remove('hidden');
+      if (mapView) mapView.classList.add('hidden');
+    } else if (viewType === 'map') {
+      if (treeContainer) treeContainer.classList.add('hidden');
+      if (mapView) mapView.classList.remove('hidden');
+      
+      // When switching to map view, focus on the currently selected node
+      if (typeof OrgMap !== 'undefined' && OrgMap && typeof OrgMap.reveal === 'function') {
+        // Get the currently selected node ID from the tree
+        const selectedNodeId = getSelectedNodeId();
+        if (selectedNodeId) {
+          console.log('switchToView - focusing on selected node:', selectedNodeId);
+          // Use a small delay to ensure map is visible before focusing
+          setTimeout(() => {
+            OrgMap.reveal(selectedNodeId);
+          }, 100);
+        } else {
+          console.log('switchToView - no selected node, using resetView');
+          // If no node is selected, use resetView
+          setTimeout(() => {
+            if (typeof OrgMap !== 'undefined' && OrgMap && typeof OrgMap.resetView === 'function') {
+              OrgMap.resetView({ duration: 0 });
+            }
+          }, 100);
+        }
+      }
+    }
+    
+    // Update desktop view dropdown if it exists
+    const viewDropdownToggle = document.getElementById('viewDropdownToggle');
+    if (viewDropdownToggle) {
+      const currentSpan = viewDropdownToggle.querySelector('.view-current');
+      if (currentSpan) {
+        currentSpan.textContent = viewType === 'tree' ? 'Tree View' : 'Map View';
+      }
     }
 
-    const willOpen = !elements.adminPanel.classList.contains("open");
+    // Update desktop switch icon
+    updateDesktopViewSwitchIcon(viewType);
+  };
 
-    // Toggle admin panel visibility
-    elements.adminPanel.classList.toggle("open", willOpen);
 
-    // Hide/show detail panel based on admin mode
+  const updateDesktopViewSwitchIcon = (activeView) => {
+    const desktopViewSwitch = document.getElementById('desktopViewSwitch');
+    if (!desktopViewSwitch) return;
+    const iconEl = desktopViewSwitch.querySelector('.desktop-view-switch-icon');
+    if (!iconEl) return;
+    iconEl.textContent = activeView === 'tree' ? '🌳' : '🗺️';
+    desktopViewSwitch.setAttribute('aria-label', activeView === 'tree' ? 'Switch to map view' : 'Switch to tree view');
+  };
+
+  const getSelectedNodeId = () => {
+    // Try to get the selected node from the tree
+    const selectedNode = document.querySelector('.org-node.selected');
+    if (selectedNode) {
+      return selectedNode.dataset.nodeId || selectedNode.id;
+    }
+    
+    // Fallback: try to get from global selectedNodeId variable if it exists
+    if (typeof selectedNodeId !== 'undefined' && selectedNodeId) {
+      return selectedNodeId;
+    }
+    
+    // Another fallback: check if there's a node with active class
+    const activeNode = document.querySelector('.org-node.active');
+    if (activeNode) {
+      return activeNode.dataset.nodeId || activeNode.id;
+    }
+    
+    return null;
+  };
+
+  // Function to update mobile view buttons
+  const updateMobileViewButtons = (activeView) => {
+    const treeBtn = document.getElementById('mobileTreeViewBtn');
+    const mapBtn = document.getElementById('mobileMapViewBtn');
+    
+    if (treeBtn && mapBtn) {
+      treeBtn.classList.toggle('active', activeView === 'tree');
+      mapBtn.classList.toggle('active', activeView === 'map');
+    }
+  };
+
+  // Debounce admin toggle to prevent multiple rapid clicks
+  let adminToggleInProgress = false;
+  
+  const toggleAdminPanel = () => {
+    if (!elements.detailPanel) {
+      return;
+    }
+    
+    // Prevent multiple simultaneous toggle attempts
+    if (adminToggleInProgress) {
+      console.log('Admin toggle already in progress, ignoring click');
+      return;
+    }
+    
+    adminToggleInProgress = true;
+    
+    // Disable the admin toggle button temporarily
+    if (elements.toggleAdmin) {
+      elements.toggleAdmin.disabled = true;
+      elements.toggleAdmin.style.pointerEvents = 'none';
+    }
+    
+    try {
+      // Check if admin mode is currently active
+      const willOpen = !document.body.classList.contains("admin-mode-active");
+
+      // Toggle body class for admin mode
+      document.body.classList.toggle("admin-mode-active", willOpen);
+
+    // Show admin info in detail panel when admin mode is ON
     if (willOpen) {
-      // Admin mode ON: hide detail panel
-      elements.detailPanel.style.display = "none";
+      // Admin mode ON: show admin info in detail panel
+      document.body.classList.add('admin-mode-active');
+      showAdminInfoInDetailPanel();
+      
+      // Re-initialize event listeners for admin buttons to ensure they work
+      initializeAdminButtonListeners();
+      
+      // Show admin buttons
+      showAdminButtons();
     } else {
       // Admin mode OFF: show detail panel (restore original flex display)
-      elements.detailPanel.style.display = "flex";
+      document.body.classList.remove('admin-mode-active');
+      showingAdminContent = false;
+      
+      // Hide admin buttons
+      hideAdminButtons();
+      
+      // Move admin panel back to its original location if it was moved
+      const adminPanel = document.getElementById('adminPanel');
+      const sideSection = document.querySelector('.side-section');
+      if (adminPanel && sideSection && !sideSection.contains(adminPanel)) {
+        sideSection.appendChild(adminPanel);
+        adminPanel.classList.remove('detail-admin-content');
+        adminPanel.classList.add('admin-panel');
+      }
+
+      // Theme panel is now cloned, no need to move it back
+      // The original editThemePanel remains in place
+
+      // User management panel is now cloned, no need to move it back
+      // The original userManagementPanel remains in place
     }
 
     if (elements.toggleAdmin) {
@@ -1947,9 +2489,11 @@ const OrgUI = (() => {
 
     }
 
-    // Show/hide Users and Edit Theme buttons based on admin state
+    // Show/hide Users, Edit Theme, Edit Nodes, and Resources buttons based on admin state
     const userManagementBtn = document.getElementById('userManagementBtn');
     const editThemeBtn = document.getElementById('editThemeBtn');
+    const editNodesBtn = document.getElementById('editNodesBtn');
+    const resourcesBtn = document.getElementById('resourcesBtn');
     
     if (userManagementBtn) {
       if (willOpen) {
@@ -1966,6 +2510,25 @@ const OrgUI = (() => {
         editThemeBtn.classList.add('hidden');
       }
     }
+    
+    if (editNodesBtn) {
+      if (willOpen) {
+        editNodesBtn.classList.remove('hidden');
+      } else {
+        editNodesBtn.classList.add('hidden');
+      }
+    }
+    
+    if (resourcesBtn) {
+      if (willOpen) {
+        resourcesBtn.classList.remove('hidden');
+      } else {
+        resourcesBtn.classList.add('hidden');
+      }
+    }
+
+    // Sync mobile admin buttons
+    syncMobileAdminButtons();
 
     if (willOpen) {
 
@@ -1979,7 +2542,78 @@ const OrgUI = (() => {
       }
 
     }
+    
+    } catch (error) {
+      console.error('Admin toggle error:', error);
+    } finally {
+      // Re-enable the admin toggle button after a short delay
+      setTimeout(() => {
+        adminToggleInProgress = false;
+        if (elements.toggleAdmin) {
+          elements.toggleAdmin.disabled = false;
+          elements.toggleAdmin.style.pointerEvents = '';
+        }
+      }, 100); // Short delay to prevent rapid clicking
+    }
+  };
 
+  // Debounce profile toggle to prevent multiple rapid clicks
+  let profileToggleInProgress = false;
+  
+  const toggleProfilePanel = () => {
+    if (!elements.detailPanel) {
+      return;
+    }
+    
+    // Prevent multiple simultaneous toggle attempts
+    if (profileToggleInProgress) {
+      console.log('Profile toggle already in progress, ignoring click');
+      return;
+    }
+    
+    profileToggleInProgress = true;
+    
+    // Disable the profile toggle button temporarily
+    if (elements.toggleProfile) {
+      elements.toggleProfile.disabled = true;
+      elements.toggleProfile.style.pointerEvents = 'none';
+    }
+    
+    try {
+      // Check if profile mode is currently active
+      const willOpen = !document.body.classList.contains("profile-mode-active");
+
+      // Toggle body class for profile mode
+      document.body.classList.toggle("profile-mode-active", willOpen);
+
+      // Show profile info in detail panel when profile mode is ON
+      if (willOpen) {
+        showProfileInfoInDetailPanel();
+      } else {
+        // Hide detail panel when profile mode is OFF
+        elements.detailPanel.style.display = "none";
+        elements.detailPanel.classList.remove("active", "expanded");
+        document.body.classList.remove("detail-expanded");
+      }
+
+      // Update profile button state
+      if (elements.toggleProfile) {
+        elements.toggleProfile.classList.toggle("active", willOpen);
+        elements.toggleProfile.setAttribute("aria-pressed", String(willOpen));
+      }
+
+    } catch (error) {
+      console.error('Profile toggle error:', error);
+    } finally {
+      // Re-enable the profile toggle button after a short delay
+      setTimeout(() => {
+        profileToggleInProgress = false;
+        if (elements.toggleProfile) {
+          elements.toggleProfile.disabled = false;
+          elements.toggleProfile.style.pointerEvents = '';
+        }
+      }, 100); // Short delay to prevent rapid clicking
+    }
   };
 
   const refreshAdminPanel = () => {
@@ -2915,13 +3549,819 @@ const OrgUI = (() => {
 
   };
 
+  // New functions for showing content in detail panel
+  const showConfigureUsersInDetailPanel = () => {
+    console.log('showConfigureUsersInDetailPanel called');
+    
+    // Prevent multiple simultaneous calls
+    if (window._showConfigureUsersInProgress) {
+      console.log('showConfigureUsersInDetailPanel already in progress, skipping');
+      return;
+    }
+    
+    window._showConfigureUsersInProgress = true;
+    
+    // Safety timeout to reset flag if something goes wrong
+    setTimeout(() => {
+      if (window._showConfigureUsersInProgress) {
+        console.warn('showConfigureUsersInDetailPanel timeout - resetting flag');
+        window._showConfigureUsersInProgress = false;
+      }
+    }, 5000); // 5 second timeout
+    
+    // Check if DOM is ready
+    if (document.readyState !== 'complete') {
+      console.log('DOM not ready, waiting...');
+      const waitForDOM = () => {
+        if (document.readyState === 'complete') {
+          console.log('DOM is now ready, proceeding');
+          showConfigureUsersInDetailPanel();
+        } else {
+          setTimeout(waitForDOM, 100);
+        }
+      };
+      waitForDOM();
+      return;
+    }
+    
+    // Debug: Check if panels exist in HTML source
+    console.log('HTML source check:', {
+      hasUserPanel: document.documentElement.innerHTML.includes('userManagementPanel'),
+      hasThemePanel: document.documentElement.innerHTML.includes('editThemePanel'),
+      bodyHTML: document.body.innerHTML.substring(0, 200)
+    });
+    
+    if (!elements.detailPanel) {
+      console.log('Detail panel not found');
+      window._showConfigureUsersInProgress = false; // Reset flag
+      return;
+    }
+    
+    // Hide admin panel if it's open (but keep admin mode active)
+    if (elements.adminPanel && elements.adminPanel.classList.contains("open")) {
+      elements.adminPanel.classList.remove("open");
+    }
+    
+    // Show detail panel
+    elements.detailPanel.style.display = "flex";
+    elements.detailPanel.classList.add("active");
+    
+    // Mark that we're showing admin content
+    showingAdminContent = true;
+    
+    // Get the original user management panel content
+    let originalUserPanel = document.getElementById('userManagementPanel');
+    
+    console.log('Looking for userManagementPanel:', {
+      found: !!originalUserPanel,
+      documentReadyState: document.readyState,
+      bodyChildren: document.body.children.length,
+      allPanels: document.querySelectorAll('[id*="Panel"]').length
+    });
+    
+    // Panel should always be found since we're not moving it anymore
+    
+    if (!originalUserPanel) {
+      console.log('User management panel not found anywhere');
+      console.log('Available elements with "Panel" in ID:', 
+        Array.from(document.querySelectorAll('[id*="Panel"]')).map(el => el.id));
+      window._showConfigureUsersInProgress = false; // Reset flag
+      return;
+    }
+    
+    // Clone the user management panel content instead of moving it
+    const userContent = originalUserPanel.cloneNode(true);
+    userContent.classList.remove('hidden', 'user-panel');
+    userContent.classList.add('detail-user-content');
+    
+    // Remove the panel header and use detail panel header instead
+    const userHeader = userContent.querySelector('.user-panel-header');
+    if (userHeader) {
+      userHeader.remove();
+    }
+    
+    // Create detail panel header
+    const container = document.createElement("div");
+    container.classList.add("detail-content", "full-width");
+    
+    const header = document.createElement("div");
+    header.classList.add("detail-header");
+    
+    const title = document.createElement("h2");
+    title.textContent = "Configure Users";
+    header.appendChild(title);
+    
+    const closeButton = document.createElement("button");
+    closeButton.type = "button";
+    closeButton.classList.add("detail-close");
+    closeButton.setAttribute("aria-label", "Close panel");
+    closeButton.dataset.action = "close-panel";
+    closeButton.textContent = "";
+    header.appendChild(closeButton);
+    
+    container.appendChild(header);
+    
+    // Add the user content
+    container.appendChild(userContent);
+    
+    // Clear and populate detail panel
+    elements.detailPanel.innerHTML = "";
+    elements.detailPanel.appendChild(container);
+    elements.detailPanel.classList.add("expanded");
+    document.body.classList.add("detail-expanded");
+    
+    // Re-initialize user management functionality since we moved the content
+    setTimeout(() => {
+      if (typeof UserManagement !== 'undefined' && UserManagement.init) {
+        UserManagement.init();
+        console.log('User management re-initialized in detail panel');
+      }
+      
+      // Reset the progress flag
+      window._showConfigureUsersInProgress = false;
+    }, 100);
+  };
+
+  const showEditThemeInDetailPanel = () => {
+    console.log('showEditThemeInDetailPanel called');
+    
+    // Prevent multiple simultaneous calls
+    if (window._showEditThemeInProgress) {
+      console.log('showEditThemeInDetailPanel already in progress, skipping');
+      return;
+    }
+    
+    window._showEditThemeInProgress = true;
+    
+    // Safety timeout to reset flag if something goes wrong
+    setTimeout(() => {
+      if (window._showEditThemeInProgress) {
+        console.warn('showEditThemeInDetailPanel timeout - resetting flag');
+        window._showEditThemeInProgress = false;
+      }
+    }, 5000); // 5 second timeout
+    
+    // Check if DOM is ready
+    if (document.readyState !== 'complete') {
+      console.log('DOM not ready, waiting...');
+      const waitForDOM = () => {
+        if (document.readyState === 'complete') {
+          console.log('DOM is now ready, proceeding');
+          showEditThemeInDetailPanel();
+        } else {
+          setTimeout(waitForDOM, 100);
+        }
+      };
+      waitForDOM();
+      return;
+    }
+    
+    // Debug: Check if panels exist in HTML source
+    console.log('HTML source check:', {
+      hasUserPanel: document.documentElement.innerHTML.includes('userManagementPanel'),
+      hasThemePanel: document.documentElement.innerHTML.includes('editThemePanel'),
+      bodyHTML: document.body.innerHTML.substring(0, 200)
+    });
+    
+    if (!elements.detailPanel) {
+      console.log('Detail panel not found');
+      window._showEditThemeInProgress = false; // Reset flag
+      return;
+    }
+    
+    // Hide admin panel if it's open (but keep admin mode active)
+    if (elements.adminPanel && elements.adminPanel.classList.contains("open")) {
+      elements.adminPanel.classList.remove("open");
+    }
+    
+    // Show detail panel
+    elements.detailPanel.style.display = "flex";
+    elements.detailPanel.classList.add("active");
+    
+    // Mark that we're showing admin content
+    showingAdminContent = true;
+    
+    // Get the original theme panel content
+    let originalThemePanel = document.getElementById('editThemePanel');
+    
+    console.log('Looking for editThemePanel:', {
+      found: !!originalThemePanel,
+      documentReadyState: document.readyState,
+      bodyChildren: document.body.children.length,
+      allPanels: document.querySelectorAll('[id*="Panel"]').length,
+      allElements: document.querySelectorAll('*').length
+    });
+    
+    // Additional debugging - check if the element exists but with different attributes
+    if (!originalThemePanel) {
+      const allDivs = document.querySelectorAll('div');
+      const themeDivs = Array.from(allDivs).filter(div => 
+        div.id && div.id.includes('theme') || 
+        div.className && div.className.includes('theme')
+      );
+      console.log('Theme-related divs found:', themeDivs.map(div => ({
+        id: div.id,
+        className: div.className,
+        textContent: div.textContent?.substring(0, 50),
+        parentElement: div.parentElement?.tagName
+      })));
+    }
+    
+    // Panel should always be found since we're not moving it anymore
+    
+    if (!originalThemePanel) {
+      console.log('Edit theme panel not found anywhere');
+      console.log('Available elements with "Panel" in ID:', 
+        Array.from(document.querySelectorAll('[id*="Panel"]')).map(el => el.id));
+      window._showEditThemeInProgress = false; // Reset flag
+      return;
+    }
+    
+    // Clone the theme panel content instead of moving it
+    const themeContent = originalThemePanel.cloneNode(true);
+    themeContent.classList.remove('hidden', 'theme-panel');
+    themeContent.classList.add('detail-theme-content');
+    
+    // Remove the panel header and use detail panel header instead
+    const themeHeader = themeContent.querySelector('.theme-panel-header');
+    if (themeHeader) {
+      themeHeader.remove();
+    }
+    
+    // Create detail panel header
+    const container = document.createElement("div");
+    container.classList.add("detail-content", "full-width");
+    
+    const header = document.createElement("div");
+    header.classList.add("detail-header");
+    
+    const title = document.createElement("h2");
+    title.textContent = "Edit Theme";
+    header.appendChild(title);
+    
+    const closeButton = document.createElement("button");
+    closeButton.type = "button";
+    closeButton.classList.add("detail-close");
+    closeButton.setAttribute("aria-label", "Close panel");
+    closeButton.dataset.action = "close-panel";
+    closeButton.textContent = "";
+    header.appendChild(closeButton);
+    
+    container.appendChild(header);
+    
+    // Add the theme content
+    container.appendChild(themeContent);
+    
+    // Clear and populate detail panel
+    elements.detailPanel.innerHTML = "";
+    elements.detailPanel.appendChild(container);
+    elements.detailPanel.classList.add("expanded");
+    document.body.classList.add("detail-expanded");
+    
+    // Re-initialize theme editor functionality since we moved the content
+    setTimeout(() => {
+      if (typeof SupabaseThemeEditor !== 'undefined' && SupabaseThemeEditor.init) {
+        SupabaseThemeEditor.init();
+        console.log('Theme editor re-initialized in detail panel');
+      }
+      
+      // Reset the progress flag
+      window._showEditThemeInProgress = false;
+    }, 100);
+  };
+
+  const showEditNodesInDetailPanel = () => {
+    console.log('showEditNodesInDetailPanel called');
+    
+    // Prevent multiple simultaneous calls
+    if (window._showEditNodesInProgress) {
+      console.log('showEditNodesInDetailPanel already in progress, skipping');
+      return;
+    }
+    
+    window._showEditNodesInProgress = true;
+    
+    // Safety timeout to reset flag if something goes wrong
+    setTimeout(() => {
+      if (window._showEditNodesInProgress) {
+        console.warn('showEditNodesInDetailPanel timeout - resetting flag');
+        window._showEditNodesInProgress = false;
+      }
+    }, 5000); // 5 second timeout
+    
+    // Debug: Log current DOM state
+    console.log('DOM state check:', {
+      adminPanelById: !!document.getElementById('adminPanel'),
+      adminPanelByClass: !!document.querySelector('.admin-panel'),
+      adminPanelInElements: !!elements.adminPanel,
+      detailPanel: !!elements.detailPanel
+    });
+    
+    if (!elements.detailPanel) {
+      console.log('Detail panel not found');
+      window._showEditNodesInProgress = false; // Reset flag
+      return;
+    }
+    
+    // Hide admin panel if it's open (but keep admin mode active)
+    if (elements.adminPanel && elements.adminPanel.classList.contains("open")) {
+      elements.adminPanel.classList.remove("open");
+      console.log('Admin panel hidden');
+    }
+    
+    // Show detail panel
+    elements.detailPanel.style.display = "flex";
+    elements.detailPanel.classList.add("active");
+    
+    // Mark that we're showing admin content
+    showingAdminContent = true;
+    
+    // Check if admin content is already in detail panel
+    const existingAdminContent = elements.detailPanel.querySelector('.detail-admin-content');
+    if (existingAdminContent) {
+      console.log('Admin content already in detail panel');
+      window._showEditNodesInProgress = false; // Reset flag
+      return;
+    }
+    
+    // Get the original admin panel content - try multiple approaches
+    let originalAdminPanel = document.getElementById('adminPanel');
+    
+    // If not found by ID, try to find it in the DOM by class
+    if (!originalAdminPanel) {
+      originalAdminPanel = document.querySelector('.admin-panel');
+    }
+    
+    // If still not found, try to find it in elements
+    if (!originalAdminPanel && elements.adminPanel) {
+      originalAdminPanel = elements.adminPanel;
+    }
+    
+    if (!originalAdminPanel) {
+      console.warn('Admin panel not found - DOM may not be ready yet');
+      // Retry after a short delay with exponential backoff
+      let retryCount = 0;
+      const maxRetries = 5;
+      
+      const retryFunction = () => {
+        retryCount++;
+        let retryPanel = document.getElementById('adminPanel') || 
+                        document.querySelector('.admin-panel') || 
+                        elements.adminPanel;
+                        
+        if (retryPanel) {
+          showEditNodesInDetailPanel();
+        } else if (retryCount < maxRetries) {
+          setTimeout(retryFunction, 100 * retryCount); // Exponential backoff
+        } else {
+          console.error('Admin panel still not found after', maxRetries, 'retries');
+          // Fallback: create a simple admin interface
+          createFallbackAdminInterface();
+        }
+      };
+      
+      setTimeout(retryFunction, 100);
+      window._showEditNodesInProgress = false; // Reset flag
+      return;
+    }
+    
+    console.log('Moving admin panel content to detail panel');
+    
+    // Move the admin panel content instead of cloning it
+    const adminContent = originalAdminPanel;
+    adminContent.classList.remove('admin-panel');
+    adminContent.classList.add('detail-admin-content');
+    
+    // Create detail panel header
+    const container = document.createElement("div");
+    container.classList.add("detail-content", "full-width");
+    
+    const header = document.createElement("div");
+    header.classList.add("detail-header");
+    
+    const title = document.createElement("h2");
+    title.textContent = "Edit Nodes";
+    header.appendChild(title);
+    
+    const closeButton = document.createElement("button");
+    closeButton.type = "button";
+    closeButton.classList.add("detail-close");
+    closeButton.setAttribute("aria-label", "Close panel");
+    closeButton.dataset.action = "close-panel";
+    closeButton.textContent = "";
+    header.appendChild(closeButton);
+    
+    container.appendChild(header);
+    
+    // Add the admin content
+    container.appendChild(adminContent);
+    
+    // Clear and populate detail panel
+    elements.detailPanel.innerHTML = "";
+    elements.detailPanel.appendChild(container);
+    elements.detailPanel.classList.add("expanded");
+    document.body.classList.add("detail-expanded");
+    
+    console.log('Detail panel populated with admin content');
+    
+    // Re-initialize admin panel functionality since we moved the content
+    setTimeout(() => {
+      // Re-cache all admin elements since they've moved
+      cacheElements();
+      
+      // Initialize admin panel functionality
+      initializeAdminPanel();
+      
+      console.log('Admin panel re-initialized in detail panel');
+      
+      // Reset the progress flag
+      window._showEditNodesInProgress = false;
+    }, 100);
+  };
+
+  // Helper function to verify admin panel availability
+  const isAdminPanelAvailable = () => {
+    return !!(document.getElementById('adminPanel') || 
+              document.querySelector('.admin-panel') || 
+              elements.adminPanel);
+  };
+
+  // Verify that critical DOM elements are available
+  const verifyCriticalElements = () => {
+    const criticalElements = [
+      { name: 'detailPanel', element: elements.detailPanel },
+      { name: 'adminPanel', element: elements.adminPanel },
+      { name: 'toggleAdmin', element: elements.toggleAdmin }
+    ];
+    
+    const missingElements = criticalElements.filter(item => !item.element);
+    
+    if (missingElements.length > 0) {
+      console.warn('Critical UI elements not found:', missingElements.map(item => item.name));
+      
+      // Try to find admin panel by other means
+      if (!elements.adminPanel) {
+        const adminPanel = document.getElementById('adminPanel') || document.querySelector('.admin-panel');
+        if (adminPanel) {
+          elements.adminPanel = adminPanel;
+          console.log('Admin panel found and assigned to elements');
+        }
+      }
+    } else {
+      console.log('All critical UI elements found successfully');
+    }
+  };
+
+  // Fallback function to create a simple admin interface when main admin panel is not available
+  const createFallbackAdminInterface = () => {
+    console.log('Creating fallback admin interface');
+    
+    const container = document.createElement("div");
+    container.classList.add("detail-content", "full-width");
+    
+    const header = document.createElement("div");
+    header.classList.add("detail-header");
+    
+    const title = document.createElement("h2");
+    title.textContent = "Edit Nodes (Fallback Mode)";
+    header.appendChild(title);
+    
+    const closeButton = document.createElement("button");
+    closeButton.type = "button";
+    closeButton.classList.add("detail-close");
+    closeButton.setAttribute("aria-label", "Close panel");
+    closeButton.dataset.action = "close-panel";
+    closeButton.textContent = "";
+    header.appendChild(closeButton);
+    
+    container.appendChild(header);
+    
+    // Create a simple admin interface
+    const adminContent = document.createElement("div");
+    adminContent.classList.add("detail-admin-content", "fallback-admin");
+    
+    const message = document.createElement("div");
+    message.classList.add("admin-message");
+    message.innerHTML = `
+      <p><strong>Admin panel is temporarily unavailable.</strong></p>
+      <p>Please try refreshing the page or check if the admin panel is properly loaded.</p>
+      <p>If the issue persists, the admin functionality may need to be reinitialized.</p>
+    `;
+    
+    const refreshButton = document.createElement("button");
+    refreshButton.type = "button";
+    refreshButton.classList.add("btn", "btn-primary");
+    refreshButton.textContent = "Retry Loading Admin Panel";
+    refreshButton.addEventListener("click", () => {
+      // Try to reinitialize the admin panel
+      setTimeout(() => {
+        showEditNodesInDetailPanel();
+      }, 100);
+    });
+    
+    adminContent.appendChild(message);
+    adminContent.appendChild(refreshButton);
+    
+    container.appendChild(adminContent);
+    
+    // Clear and populate detail panel
+    elements.detailPanel.innerHTML = "";
+    elements.detailPanel.appendChild(container);
+    elements.detailPanel.classList.add("expanded");
+    document.body.classList.add("detail-expanded");
+    
+    console.log('Fallback admin interface created');
+  };
+
+  const showAdminInfoInDetailPanel = () => {
+    if (!elements.detailPanel) return;
+    
+    // Show detail panel
+    elements.detailPanel.style.display = "flex";
+    elements.detailPanel.classList.add("active");
+    
+    // Mark that we're showing admin content
+    showingAdminContent = true;
+    
+    // Create admin info content
+    const container = document.createElement("div");
+    container.classList.add("detail-content", "full-width");
+    
+    const header = document.createElement("div");
+    header.classList.add("detail-header");
+    
+    const title = document.createElement("h2");
+    title.textContent = "Admin Mode";
+    header.appendChild(title);
+    
+    const closeButton = document.createElement("button");
+    closeButton.type = "button";
+    closeButton.classList.add("detail-close");
+    closeButton.setAttribute("aria-label", "Close panel");
+    closeButton.dataset.action = "close-panel";
+    closeButton.textContent = "";
+    header.appendChild(closeButton);
+    
+    container.appendChild(header);
+    
+    // Add admin info content
+    const content = document.createElement("div");
+    content.innerHTML = `
+      <div class="admin-info-content">
+        <div class="admin-info-section">
+          <h3>🚀 Organization Chart Tool</h3>
+          <p>A modern, interactive web application for visualizing and managing organizational structures. Built with vanilla JavaScript, D3.js, and Supabase.</p>
+        </div>
+        
+        <div class="admin-info-section">
+          <h3>📋 Available Features</h3>
+          <ul class="feature-list">
+            <li><strong>Tree View:</strong> Navigate your organization hierarchy with an intuitive tree structure</li>
+            <li><strong>Map View:</strong> See the big picture with D3.js-powered force-directed graph</li>
+            <li><strong>User Management:</strong> Manage users and permissions (click Users button)</li>
+            <li><strong>Theme Editor:</strong> Customize colors, fonts, and branding (click Edit Theme button)</li>
+            <li><strong>Node Editor:</strong> Create, edit, and manage organization nodes (click Edit Nodes button)</li>
+            <li><strong>Metrics & Analytics:</strong> Track KPIs, budgets, and performance indicators</li>
+            <li><strong>Relationship Mapping:</strong> Define and visualize complex relationships</li>
+          </ul>
+        </div>
+        
+        <div class="admin-info-section">
+          <h3>🔧 Technical Implementation</h3>
+          <p>This application is built with modern web technologies and is designed to be easily customizable and extensible:</p>
+          <ul class="tech-list">
+            <li><strong>Frontend:</strong> Vanilla JavaScript, D3.js, CSS Grid & Flexbox</li>
+            <li><strong>Backend:</strong> Supabase (PostgreSQL, Authentication, Real-time)</li>
+            <li><strong>Storage:</strong> Local storage for demo mode, Supabase for production</li>
+            <li><strong>Responsive:</strong> Mobile-optimized with touch-friendly interface</li>
+          </ul>
+        </div>
+        
+        <div class="admin-info-section">
+          <h3>📚 Resources & Documentation</h3>
+          <div class="resource-links">
+            <a href="https://github.com/rian010194/OrgVis" target="_blank" rel="noopener noreferrer" class="resource-link">
+              <span class="link-icon">📁</span>
+              <span class="link-text">GitHub Repository</span>
+            </a>
+            <a href="https://github.com/rian010194/OrgVis/blob/main/docs/index.md" target="_blank" rel="noopener noreferrer" class="resource-link">
+              <span class="link-icon">📖</span>
+              <span class="link-text">Documentation</span>
+            </a>
+            <a href="https://github.com/rian010194/OrgVis/issues" target="_blank" rel="noopener noreferrer" class="resource-link">
+              <span class="link-icon">🐛</span>
+              <span class="link-text">Report Issues</span>
+            </a>
+            <a href="https://github.com/rian010194/OrgVis/discussions" target="_blank" rel="noopener noreferrer" class="resource-link">
+              <span class="link-icon">💬</span>
+              <span class="link-text">Discussions</span>
+            </a>
+          </div>
+        </div>
+        
+        <div class="admin-info-section">
+          <h3>🎯 Use Cases</h3>
+          <p>Perfect for companies, non-profits, educational institutions, and government organizations that need to:</p>
+          <ul class="use-case-list">
+            <li>Visualize corporate hierarchies and organizational structures</li>
+            <li>Track department performance and resource allocation</li>
+            <li>Manage organizational changes during growth or restructuring</li>
+            <li>Map academic departments and administrative structures</li>
+            <li>Organize government agencies and public service delivery</li>
+            <li>Manage volunteer networks and community impact</li>
+          </ul>
+        </div>
+        
+        <div class="admin-info-section">
+          <h3>⚡ Quick Actions</h3>
+          <p>Use the buttons in the header to access different features:</p>
+          <div class="quick-actions">
+            <div class="action-item">
+              <span class="action-icon">👥</span>
+              <span class="action-text"><strong>Users:</strong> Manage users and permissions</span>
+            </div>
+            <div class="action-item">
+              <span class="action-icon">🎨</span>
+              <span class="action-text"><strong>Edit Theme:</strong> Customize colors and branding</span>
+            </div>
+            <div class="action-item">
+              <span class="action-icon">✏️</span>
+              <span class="action-text"><strong>Edit Nodes:</strong> Create and edit organization nodes</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    container.appendChild(content);
+    
+    // Clear and populate detail panel
+    elements.detailPanel.innerHTML = "";
+    elements.detailPanel.appendChild(container);
+    elements.detailPanel.classList.add("expanded");
+    document.body.classList.add("detail-expanded");
+  };
+
+  const showProfileInfoInDetailPanel = () => {
+    if (!elements.detailPanel) return;
+    
+    // Show detail panel
+    elements.detailPanel.style.display = "flex";
+    elements.detailPanel.classList.add("active");
+    
+    // Create profile info content
+    const container = document.createElement("div");
+    container.classList.add("detail-content", "full-width");
+    
+    const header = document.createElement("div");
+    header.classList.add("detail-header");
+    
+    const title = document.createElement("h2");
+    title.textContent = "My Profile";
+    header.appendChild(title);
+  
+    const closeButton = document.createElement("button");
+    closeButton.type = "button";
+    closeButton.classList.add("detail-close");
+    closeButton.setAttribute("aria-label", "Close panel");
+    closeButton.dataset.action = "close-panel";
+    closeButton.textContent = "";
+    header.appendChild(closeButton);
+    
+    container.appendChild(header);
+    
+    // Add profile info content
+    const content = document.createElement("div");
+    content.innerHTML = `
+      <div class="profile-info-content">
+        <div class="profile-info-section">
+          <div class="profile-avatar">
+            <div class="profile-avatar-circle">JD</div>
+            <div class="profile-avatar-info">
+              <h4>John Doe</h4>
+              <p>Software Engineer</p>
+            </div>
+          </div>
+          <p>Welcome to your profile! Here you can view your personal information, activity, and manage your account settings.</p>
+        </div>
+        
+        <div class="profile-info-section">
+          <h3>📊 My Statistics</h3>
+          <div class="profile-stats">
+            <div class="profile-stat">
+              <span class="profile-stat-number">12</span>
+              <span class="profile-stat-label">Projects</span>
+            </div>
+            <div class="profile-stat">
+              <span class="profile-stat-number">8</span>
+              <span class="profile-stat-label">Team Members</span>
+            </div>
+            <div class="profile-stat">
+              <span class="profile-stat-number">24</span>
+              <span class="profile-stat-label">Tasks Completed</span>
+            </div>
+            <div class="profile-stat">
+              <span class="profile-stat-number">95%</span>
+              <span class="profile-stat-label">Performance</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="profile-info-section">
+          <h3>⚡ Quick Actions</h3>
+          <div class="profile-actions">
+            <button class="profile-action-btn" onclick="alert('Edit Profile clicked')">
+              <span class="profile-action-icon">✏️</span>
+              <span>Edit Profile</span>
+            </button>
+            <button class="profile-action-btn" onclick="alert('Change Password clicked')">
+              <span class="profile-action-icon">🔒</span>
+              <span>Change Password</span>
+            </button>
+            <button class="profile-action-btn" onclick="alert('Notification Settings clicked')">
+              <span class="profile-action-icon">🔔</span>
+              <span>Notification Settings</span>
+            </button>
+            <button class="profile-action-btn" onclick="alert('Privacy Settings clicked')">
+              <span class="profile-action-icon">🛡️</span>
+              <span>Privacy Settings</span>
+            </button>
+          </div>
+        </div>
+        
+        <div class="profile-info-section">
+          <h3>📈 Recent Activity</h3>
+          <ul class="profile-recent-activity">
+            <li class="profile-activity-item">
+              <span class="profile-activity-icon">✅</span>
+              <div class="profile-activity-content">
+                <p class="profile-activity-text">Completed project milestone</p>
+                <p class="profile-activity-time">2 hours ago</p>
+              </div>
+            </li>
+            <li class="profile-activity-item">
+              <span class="profile-activity-icon">👥</span>
+              <div class="profile-activity-content">
+                <p class="profile-activity-text">Joined team meeting</p>
+                <p class="profile-activity-time">1 day ago</p>
+              </div>
+            </li>
+            <li class="profile-activity-item">
+              <span class="profile-activity-icon">📝</span>
+              <div class="profile-activity-content">
+                <p class="profile-activity-text">Updated project documentation</p>
+                <p class="profile-activity-time">3 days ago</p>
+              </div>
+            </li>
+            <li class="profile-activity-item">
+              <span class="profile-activity-icon">🎯</span>
+              <div class="profile-activity-content">
+                <p class="profile-activity-text">Set new quarterly goals</p>
+                <p class="profile-activity-time">1 week ago</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="profile-info-section">
+          <h3>ℹ️ Account Information</h3>
+          <p><strong>Email:</strong> john.doe@company.com</p>
+          <p><strong>Department:</strong> Engineering</p>
+          <p><strong>Role:</strong> Senior Software Engineer</p>
+          <p><strong>Member since:</strong> January 2023</p>
+          <p><strong>Last login:</strong> Today at 9:30 AM</p>
+        </div>
+      </div>
+    `;
+    
+    container.appendChild(content);
+    
+    // Clear and populate detail panel
+    elements.detailPanel.innerHTML = "";
+    elements.detailPanel.appendChild(container);
+    elements.detailPanel.classList.add("expanded");
+    document.body.classList.add("detail-expanded");
+  };
+
+  // Mobile hamburger menu functionality (removed duplicate - using functions defined above)
+
+  // Test function removed - not needed in production
+
   return {
 
-    init,
+    init: () => {
+      init();
+    },
 
     openNode,
 
-    getSelectedNodeId: () => selectedNodeId
+    getSelectedNodeId: () => selectedNodeId,
+
+    isAdminPanelAvailable,
+
+    showAdminButtons,
+
+    hideAdminButtons
 
   };
 

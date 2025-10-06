@@ -260,19 +260,15 @@ const OrgStore = (() => {
           });
           console.log('Organization created in Supabase:', organizationId);
         } catch (createError) {
-          // Check for various duplicate key error formats
-          const isDuplicateError = createError.message && (
-            createError.message.includes('already exists') ||
-            createError.message.includes('duplicate key') ||
-            createError.message.includes('violates unique constraint') ||
-            createError.code === '23505' // PostgreSQL unique violation code
-          );
-          
-          if (isDuplicateError) {
+          if (createError.code === '23505' || createError.status === 409 || 
+              (createError.message && (createError.message.includes('already exists') || createError.message.includes('409')))) {
             console.log('Organization already exists in Supabase:', organizationId);
           } else {
             console.error('Error creating organization in Supabase:', createError);
-            // Don't throw here - let the load continue with local-only mode
+            // Don't throw the error for 409 conflicts, just log it
+            if (createError.status !== 409 && createError.code !== '23505') {
+              throw createError;
+            }
           }
         }
       } else {
@@ -288,19 +284,15 @@ const OrgStore = (() => {
           });
           console.log('Basic organization created in Supabase:', organizationId);
         } catch (createError) {
-          // Check for various duplicate key error formats
-          const isDuplicateError = createError.message && (
-            createError.message.includes('already exists') ||
-            createError.message.includes('duplicate key') ||
-            createError.message.includes('violates unique constraint') ||
-            createError.code === '23505' // PostgreSQL unique violation code
-          );
-          
-          if (isDuplicateError) {
-            console.log('Basic organization already exists in Supabase:', organizationId);
+          if (createError.code === '23505' || createError.status === 409 || 
+              (createError.message && (createError.message.includes('already exists') || createError.message.includes('409')))) {
+            console.log('Organization already exists in Supabase:', organizationId);
           } else {
             console.error('Error creating basic organization in Supabase:', createError);
-            // Don't throw here - let the load continue with local-only mode
+            // Don't throw the error for 409 conflicts, just log it
+            if (createError.status !== 409 && createError.code !== '23505') {
+              throw createError;
+            }
           }
         }
       }
@@ -332,6 +324,24 @@ const OrgStore = (() => {
     state.loadPromise = (async () => {
       try {
         console.log('Loading data for organization:', organizationId);
+        
+        // Test Supabase connection first
+        try {
+          const { data: testData, error: testError } = await window.orgDb.supabase
+            .from('organizations')
+            .select('id')
+            .limit(1);
+          
+          if (testError) {
+            console.error("Supabase connection test failed:", testError);
+            throw new Error(`Supabase connection failed: ${testError.message}`);
+          }
+          
+          console.log("Supabase connection test successful");
+        } catch (connectionError) {
+          console.error("Supabase connection error:", connectionError);
+          throw connectionError;
+        }
         
         // First, ensure the organization exists in the database
         await ensureOrganizationExists(organizationId);
@@ -384,13 +394,19 @@ const OrgStore = (() => {
       } catch (error) {
         state.lastError = error;
         console.error("OrgStore kunde inte ladda data från Supabase", error);
+        console.error("Error details:", {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
         
         // Fallback to mock data if Supabase fails
         console.log("Falling back to mock data...");
         try {
           const response = await fetch('mock/org.json');
           if (!response.ok) {
-            throw new Error(`Kunde inte ladda mock data: ${response.status}`);
+            throw new Error(`Kunde inte ladda mock data: ${response.status} ${response.statusText}`);
           }
           const payload = await response.json();
           
@@ -408,11 +424,16 @@ const OrgStore = (() => {
           state.isLoaded = true;
           state.currentOrganizationId = organizationId;
           state.lastError = null;
+          console.log("Successfully loaded mock data as fallback");
           notify();
           return getSnapshot();
         } catch (fallbackError) {
           console.error("Fallback to mock data failed", fallbackError);
-          throw error; // Throw original Supabase error
+          console.error("Both Supabase and mock data loading failed");
+          
+          // Create a more informative error message
+          const errorMessage = `Data loading failed: ${error.message}. Fallback to mock data also failed: ${fallbackError.message}`;
+          throw new Error(errorMessage);
         }
       } finally {
         state.loadPromise = null;
