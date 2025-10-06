@@ -2909,8 +2909,9 @@ button.danger {
 }
 
 .demo-notice-button {
-  background: rgba(76, 175, 80, 0.15);
-  border: 1px solid rgba(76, 175, 80, 0.3);
+  background: rgba(76, 175, 80, 0.2);
+  color: #4CAF50;
+  border: 1px solid rgba(76, 175, 80, 0.4);
   border-radius: 12px;
   padding: 0.75rem 1.5rem;
   cursor: pointer;
@@ -2920,22 +2921,15 @@ button.danger {
   justify-content: center;
   backdrop-filter: blur(10px);
   margin: 0 auto;
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .demo-notice-button:hover {
-  background: rgba(76, 175, 80, 0.25);
+  background: rgba(76, 175, 80, 0.3);
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(76, 175, 80, 0.2);
-}
-
-.demo-badge {
-  background: rgba(76, 175, 80, 0.2);
-  color: #4CAF50;
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-color: rgba(76, 175, 80, 0.6);
 }
 
 
