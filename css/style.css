@@ -4515,7 +4515,60 @@ button.danger {
 .feature-card p {
   color: var(--muted);
   line-height: 1.6;
-  margin: 0;
+  margin: 0 0 0.5rem 0;
+}
+
+.feature-card p:last-child {
+  margin-bottom: 0;
+}
+
+/* Links within feature cards */
+.feature-card a,
+.feature-link {
+  color: var(--brand-orange, #ff5a00);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.feature-card a:hover,
+.feature-link:hover {
+  color: var(--brand-red, #e53e3e);
+  text-decoration: underline;
+}
+
+/* Documentation links list */
+.documentation-links {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0 0;
+  text-align: left;
+}
+
+.documentation-links li {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.documentation-links li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--brand-orange, #ff5a00);
+  font-weight: bold;
+}
+
+.documentation-links a {
+  color: var(--text, #1a202c);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.documentation-links a:hover {
+  color: var(--brand-orange, #ff5a00);
+  text-decoration: underline;
 }
 
 /* Use Cases Section */
