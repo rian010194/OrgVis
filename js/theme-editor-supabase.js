@@ -57,17 +57,35 @@ class SupabaseThemeEditor {
       cancelThemeBtn.addEventListener('click', () => this.hideEditThemeModal());
     }
 
-    // Form submission
-    const editThemeForm = document.getElementById('editThemeForm');
-    if (editThemeForm) {
-      editThemeForm.addEventListener('submit', (e) => {
-        console.log('SupabaseThemeEditor: Form submit event triggered!');
-        this.handleThemeSubmit(e);
-      });
-      console.log('SupabaseThemeEditor: Form event listener attached to:', editThemeForm);
-    } else {
-      console.log('SupabaseThemeEditor: editThemeForm not found during init');
-    }
+    // Save button click handler (no form submission needed)
+    // Use event delegation on document to catch clicks anywhere
+    document.addEventListener('click', (e) => {
+      if (e.target && e.target.id === 'saveThemeBtn') {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('SupabaseThemeEditor: ========== SAVE THEME BUTTON CLICKED (via event delegation) ==========');
+        
+        const editThemeForm = document.getElementById('editThemeForm');
+        if (editThemeForm) {
+          this.handleThemeSubmit({ 
+            target: editThemeForm,
+            preventDefault: () => {},
+            stopPropagation: () => {}
+          });
+        } else {
+          console.error('SupabaseThemeEditor: editThemeForm container not found!');
+        }
+      }
+    });
+    console.log('SupabaseThemeEditor: Event delegation listener attached for saveThemeBtn');
+    
+    // Also attach direct listener as backup
+    this.attachSaveButtonListener();
+    
+    // And try after a delay
+    setTimeout(() => {
+      this.attachSaveButtonListener();
+    }, 500);
 
     // Color input synchronization
     this.setupColorInputSync();
@@ -191,43 +209,55 @@ class SupabaseThemeEditor {
   }
 
   setupColorInputSync() {
-    // Define all color input pairs
-    const colorInputs = [
-      { color: 'themePrimaryColor', text: 'themePrimaryColorText' },
-      { color: 'themeSecondaryColor', text: 'themeSecondaryColorText' },
-      { color: 'themeBackgroundColor', text: 'themeBackgroundColorText' },
-      { color: 'themeTextColor', text: 'themeTextColorText' },
-      { color: 'themeBorderColor', text: 'themeBorderColorText' },
-      { color: 'themeMutedColor', text: 'themeMutedColorText' },
-      { color: 'themeNodeBackgroundColor', text: 'themeNodeBackgroundColorText' },
-      { color: 'themeButtonBackgroundColor', text: 'themeButtonBackgroundColorText' },
-      { color: 'themeAccentBackgroundColor', text: 'themeAccentBackgroundColorText' },
-      { color: 'themeTreeItemBackgroundColor', text: 'themeTreeItemBackgroundColorText' },
-      { color: 'themeHoverColor', text: 'themeHoverColorText' },
-      { color: 'themeSelectedColor', text: 'themeSelectedColorText' },
-      { color: 'themeNodeStrokeColor', text: 'themeNodeStrokeColorText' }
-    ];
-
-    colorInputs.forEach(({ color, text }) => {
-      const colorInput = document.getElementById(color);
-      const textInput = document.getElementById(text);
-
-      if (colorInput && textInput) {
-        colorInput.addEventListener('input', (e) => {
-          textInput.value = e.target.value;
-          this.updateColorPreview(color, e.target.value);
-          this.previewThemeChanges();
-        });
-        
-        textInput.addEventListener('input', (e) => {
-          if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
-            colorInput.value = e.target.value;
-            this.updateColorPreview(color, e.target.value);
-            this.previewThemeChanges();
-          }
+    // Use event delegation to handle color inputs even when cloned
+    // This works for both original and cloned forms
+    document.addEventListener('input', (e) => {
+      const target = e.target;
+      
+      // Debug all input events in theme forms
+      if (target.id && target.id.startsWith('theme')) {
+        console.log('SupabaseThemeEditor: Input event detected:', {
+          id: target.id,
+          type: target.type,
+          value: target.value,
+          isColor: target.type === 'color'
         });
       }
+      
+      // Handle color picker inputs
+      if (target.id && target.id.startsWith('theme') && target.type === 'color') {
+        const textInputId = target.id + 'Text';
+        // Find the corresponding text input in the same form container
+        const formContainer = target.closest('#editThemeForm');
+        const textInput = formContainer ? formContainer.querySelector(`#${textInputId}`) : document.getElementById(textInputId);
+        
+        if (textInput) {
+          textInput.value = target.value;
+          console.log(`Color picker changed: ${target.id} = ${target.value}`);
+        }
+        this.updateColorPreview(target.id, target.value);
+        this.previewThemeChanges();
+      }
+      
+      // Handle text inputs for colors
+      if (target.id && target.id.endsWith('Text') && target.id.startsWith('theme')) {
+        if (/^#[0-9A-F]{6}$/i.test(target.value)) {
+          const colorInputId = target.id.replace('Text', '');
+          // Find the corresponding color input in the same form container
+          const formContainer = target.closest('#editThemeForm');
+          const colorInput = formContainer ? formContainer.querySelector(`#${colorInputId}`) : document.getElementById(colorInputId);
+          
+          if (colorInput) {
+            colorInput.value = target.value;
+            console.log(`Text input changed: ${target.id} = ${target.value}`);
+          }
+          this.updateColorPreview(colorInputId, target.value);
+          this.previewThemeChanges();
+        }
+      }
     });
+    
+    console.log('SupabaseThemeEditor: Color input sync set up with event delegation');
 
     // Setup theme presets
     this.setupThemePresets();
@@ -260,6 +290,11 @@ class SupabaseThemeEditor {
       this.loadCurrentTheme();
       // Ensure all color previews are initialized
       this.initializeColorPreviews();
+      
+      // Re-attach save button listener in case panel was cloned (force=true)
+      setTimeout(() => {
+        this.attachSaveButtonListener(true);
+      }, 100);
     }
   }
 
@@ -268,9 +303,32 @@ class SupabaseThemeEditor {
     if (panel) {
       panel.classList.add('hidden');
     }
+    
+    // Also check if theme editor is open in the detail panel
+    const detailPanel = document.getElementById('detailPanel');
+    if (detailPanel && detailPanel.querySelector('#editThemeForm')) {
+      // Theme editor is in detail panel, close it properly
+      console.log('SupabaseThemeEditor: Closing theme editor in detail panel');
+      
+      // Trigger the close-panel action
+      const closeBtn = detailPanel.querySelector('[data-action="close-panel"]');
+      if (closeBtn) {
+        closeBtn.click();
+      } else {
+        // Fallback: manually close the detail panel
+        detailPanel.classList.remove('active', 'expanded');
+        detailPanel.style.display = 'none';
+        document.body.classList.remove('detail-expanded');
+        
+        // Re-render the detail panel (if OrgUI is available)
+        if (window.OrgUI && typeof window.OrgUI.renderDetailPanel === 'function') {
+          window.OrgUI.renderDetailPanel();
+        }
+      }
+    }
   }
 
-  async loadCurrentTheme() {
+  async loadCurrentTheme(container = null) {
     const currentOrgId = localStorage.getItem('current_organization_id');
     if (!currentOrgId) {
       // Don't automatically load any organization - user should choose from landing page
@@ -284,12 +342,13 @@ class SupabaseThemeEditor {
       console.log('SupabaseThemeEditor: window.orgDb:', window.orgDb);
       console.log('SupabaseThemeEditor: typeof window.orgDb:', typeof window.orgDb);
       setTimeout(() => {
-        this.loadCurrentTheme();
+        this.loadCurrentTheme(container);
       }, 100);
       return;
     }
     
     console.log('SupabaseThemeEditor: orgDb is available, proceeding with loadCurrentTheme');
+    console.log('SupabaseThemeEditor: Container provided:', !!container);
 
     try {
       console.log('SupabaseThemeEditor: Attempting to load organization data from Supabase...');
@@ -299,9 +358,17 @@ class SupabaseThemeEditor {
       const brandingData = orgData.branding || {};
       console.log('SupabaseThemeEditor: Branding data:', brandingData);
 
+      // Helper to get element (from container if provided, or globally)
+      const getElement = (id) => {
+        if (container) {
+          return container.querySelector(`#${id}`);
+        }
+        return document.getElementById(id);
+      };
+
       // Update form fields
-      const orgNameInput = document.getElementById('themeOrgName');
-      const orgDescriptionInput = document.getElementById('themeOrgDescription');
+      const orgNameInput = getElement('themeOrgName');
+      const orgDescriptionInput = getElement('themeOrgDescription');
       
       if (orgNameInput) {
         orgNameInput.value = orgData.name || 'My Organization';
@@ -330,18 +397,23 @@ class SupabaseThemeEditor {
 
       colorMappings.forEach(({ key, input, text, default: defaultValue }) => {
         const colorValue = brandingData[key] || defaultValue;
-        const colorInput = document.getElementById(input);
-        const textInput = document.getElementById(text);
+        const colorInput = getElement(input);
+        const textInput = getElement(text);
         
-        if (colorInput) colorInput.value = colorValue;
-        if (textInput) textInput.value = colorValue;
+        if (colorInput) {
+          colorInput.value = colorValue;
+          console.log(`SupabaseThemeEditor: Set ${input} to ${colorValue}`);
+        }
+        if (textInput) {
+          textInput.value = colorValue;
+        }
         
         this.updateColorPreview(input, colorValue);
       });
 
       // Update font family and size
-      const fontFamilySelect = document.getElementById('themeFontFamily');
-      const fontSizeSelect = document.getElementById('themeFontSize');
+      const fontFamilySelect = getElement('themeFontFamily');
+      const fontSizeSelect = getElement('themeFontSize');
 
       if (fontFamilySelect) {
         fontFamilySelect.value = brandingData.fontFamily || 'system';
@@ -353,11 +425,13 @@ class SupabaseThemeEditor {
 
       // Update logo preview
       if (brandingData.logo) {
-        const logoPreview = document.getElementById('themeLogoPreview');
+        const logoPreview = getElement('themeLogoPreview');
         if (logoPreview) {
           logoPreview.innerHTML = `<img src="${brandingData.logo}" alt="Organization Logo" style="max-width: 100px; max-height: 60px;">`;
         }
       }
+      
+      console.log('SupabaseThemeEditor: Theme loaded into form successfully');
     } catch (error) {
       console.error('SupabaseThemeEditor: Error loading current theme:', error);
     }
@@ -420,8 +494,84 @@ class SupabaseThemeEditor {
     }
   }
 
+  attachSaveButtonListener(force = false) {
+    const saveThemeBtn = document.getElementById('saveThemeBtn');
+    
+    console.log('SupabaseThemeEditor: Looking for saveThemeBtn...', {
+      found: !!saveThemeBtn,
+      force: force,
+      hasDataset: saveThemeBtn ? !!saveThemeBtn.dataset.listenerAttached : false,
+      allButtons: document.querySelectorAll('button').length,
+      buttonIds: Array.from(document.querySelectorAll('button')).map(b => b.id).filter(id => id)
+    });
+    
+    if (saveThemeBtn) {
+      // Check if listener already attached (but allow force override)
+      if (!force && saveThemeBtn.dataset.listenerAttached) {
+        console.log('SupabaseThemeEditor: Save button listener already attached, skipping (use force=true to override)');
+        return;
+      }
+      
+      // Remove the old listener flag if forcing re-attachment
+      if (force && saveThemeBtn.dataset.listenerAttached) {
+        console.log('SupabaseThemeEditor: Forcing re-attachment, removing old marker');
+        delete saveThemeBtn.dataset.listenerAttached;
+      }
+      
+      console.log('SupabaseThemeEditor: Found saveThemeBtn, attaching click listener...');
+      
+      saveThemeBtn.addEventListener('click', (e) => {
+        e.preventDefault(); // Prevent any default behavior
+        e.stopPropagation(); // Stop event from bubbling
+        
+        console.log('SupabaseThemeEditor: ========== SAVE THEME BUTTON CLICKED ==========');
+        console.log('SupabaseThemeEditor: Button:', e.target);
+        
+        // Get the form container
+        const editThemeForm = document.getElementById('editThemeForm');
+        if (editThemeForm) {
+          // Trigger the theme submit handler
+          this.handleThemeSubmit({ 
+            target: editThemeForm,
+            preventDefault: () => {},
+            stopPropagation: () => {}
+          });
+        } else {
+          console.error('SupabaseThemeEditor: editThemeForm container not found!');
+        }
+      });
+      
+      // Mark as attached
+      saveThemeBtn.dataset.listenerAttached = 'true';
+      console.log('SupabaseThemeEditor: Save button click listener attached successfully');
+    } else {
+      console.warn('SupabaseThemeEditor: WARNING - saveThemeBtn not found! Available button IDs:', 
+        Array.from(document.querySelectorAll('button')).map(b => b.id).filter(id => id).join(', '));
+    }
+  }
+
   setupThemePresets() {
-    const themePresets = {
+    // Use event delegation for preset dropdowns (works with cloned forms)
+    document.addEventListener('change', (e) => {
+      const target = e.target;
+      
+      // Handle both themePreset and themePreset2 dropdowns
+      if (target.id === 'themePreset' || target.id === 'themePreset2') {
+        console.log('SupabaseThemeEditor: Theme preset changed to:', target.value);
+        const selectedTheme = this.getThemePresets()[target.value];
+        if (selectedTheme) {
+          // Find the form container to apply changes to the correct form
+          const formContainer = target.closest('#editThemeForm');
+          this.applyThemePreset(selectedTheme, formContainer);
+        }
+      }
+    });
+    
+    console.log('SupabaseThemeEditor: Theme preset event delegation set up');
+  }
+  
+  getThemePresets() {
+    return {
       orange: {
         primaryColor: '#ff5a00',
         secondaryColor: '#e53e3e',
@@ -513,35 +663,34 @@ class SupabaseThemeEditor {
         nodeStrokeColor: '#f59e0b'
       }
     };
-
-    // Handle both themePreset elements
-    const presetSelect = document.getElementById('themePreset');
-    const presetSelect2 = document.getElementById('themePreset2');
-    
-    const handlePresetChange = (e) => {
-      const selectedTheme = themePresets[e.target.value];
-      if (selectedTheme) {
-        this.applyThemePreset(selectedTheme);
-      }
-    };
-    
-    if (presetSelect) {
-      presetSelect.addEventListener('change', handlePresetChange);
-    }
-    
-    if (presetSelect2) {
-      presetSelect2.addEventListener('change', handlePresetChange);
-    }
   }
 
-  applyThemePreset(theme) {
-    // Apply colors to form inputs (both visible and hidden)
+  applyThemePreset(theme, container = null) {
+    console.log('SupabaseThemeEditor: Applying theme preset:', theme);
+    
+    // Helper to get element (from container if provided, or globally)
+    const getElement = (id) => {
+      if (container) {
+        return container.querySelector(`#${id}`);
+      }
+      return document.getElementById(id);
+    };
+    
+    // Apply colors to form inputs
     Object.keys(theme).forEach(key => {
-      const colorInput = document.getElementById(`theme${key.charAt(0).toUpperCase() + key.slice(1)}`);
-      const textInput = document.getElementById(`theme${key.charAt(0).toUpperCase() + key.slice(1)}Text`);
+      const inputId = `theme${key.charAt(0).toUpperCase() + key.slice(1)}`;
+      const textInputId = inputId + 'Text';
       
-      if (colorInput) colorInput.value = theme[key];
-      if (textInput) textInput.value = theme[key];
+      const colorInput = getElement(inputId);
+      const textInput = getElement(textInputId);
+      
+      if (colorInput) {
+        colorInput.value = theme[key];
+        console.log(`Set ${inputId} = ${theme[key]}`);
+      }
+      if (textInput) {
+        textInput.value = theme[key];
+      }
     });
 
     // Update preview boxes
@@ -695,7 +844,7 @@ class SupabaseThemeEditor {
   }
 
   async handleThemeSubmit(e) {
-    e.preventDefault();
+    // Note: e.preventDefault() is already called in the event listener
     
     console.log('SupabaseThemeEditor: Starting theme submit...');
     console.log('SupabaseThemeEditor: Form element:', e.target);
@@ -710,38 +859,112 @@ class SupabaseThemeEditor {
     
     console.log('SupabaseThemeEditor: Current org ID:', currentOrgId);
 
-    const formData = new FormData(e.target);
+    // Manually collect form values from the SPECIFIC form container (not by global ID)
+    // This avoids duplicate ID issues when form is cloned
+    const formContainer = e.target;
     
-    // Debug: Log all form data
-    console.log('SupabaseThemeEditor: Form data entries:');
-    for (let [key, value] of formData.entries()) {
-      console.log(`  ${key}: ${value}`);
-    }
+    const getValue = (id) => {
+      // Use querySelectorAll to get ALL elements with this ID
+      const allElements = document.querySelectorAll(`#${id}`);
+      let element = null;
+      
+      // Priority 1: Find element in detail panel (if theme editor is there)
+      const detailPanel = document.getElementById('detailPanel');
+      if (detailPanel) {
+        for (let el of allElements) {
+          if (detailPanel.contains(el)) {
+            element = el;
+            console.log(`Found ${id} in detail panel`);
+            break;
+          }
+        }
+      }
+      
+      // Priority 2: Find element in our form container
+      if (!element) {
+        for (let el of allElements) {
+          if (formContainer.contains(el)) {
+            element = el;
+            console.log(`Found ${id} in form container`);
+            break;
+          }
+        }
+      }
+      
+      // Priority 3: Just use the last one (most recently added/cloned)
+      if (!element && allElements.length > 0) {
+        element = allElements[allElements.length - 1];
+        console.log(`Using last ${id} (fallback)`);
+      }
+      
+      const value = element ? element.value : null;
+      console.log(`Getting value for ${id}: ${value}`);
+      return value;
+    };
+    
+    // Collect organization data
+    const orgName = getValue('themeOrgName');
+    const orgDescription = getValue('themeOrgDescription');
+    
+    // Collect all color values
+    const primaryColor = getValue('themePrimaryColor');
+    const secondaryColor = getValue('themeSecondaryColor');
+    const backgroundColor = getValue('themeBackgroundColor');
+    const textColor = getValue('themeTextColor');
+    const borderColor = getValue('themeBorderColor');
+    const mutedColor = getValue('themeMutedColor');
+    const nodeBackgroundColor = getValue('themeNodeBackgroundColor');
+    const buttonBackgroundColor = getValue('themeButtonBackgroundColor');
+    const accentBackgroundColor = getValue('themeAccentBackgroundColor');
+    const treeItemBackgroundColor = getValue('themeTreeItemBackgroundColor');
+    const hoverColor = getValue('themeHoverColor');
+    const selectedColor = getValue('themeSelectedColor');
+    const nodeStrokeColor = getValue('themeNodeStrokeColor');
+    const fontFamily = getValue('themeFontFamily');
+    const fontSize = getValue('themeFontSize');
+    
+    console.log('SupabaseThemeEditor: Collected form values:', {
+      orgName,
+      orgDescription,
+      primaryColor,
+      secondaryColor,
+      fontFamily,
+      fontSize
+    });
     
     try {
-      // Update organization data in Supabase - ensure values are valid
-      const orgUpdates = {
-        name: formData.get('orgName') || '',
-        description: formData.get('orgDescription') || ''
-      };
+      // Update organization data in Supabase - DON'T overwrite with empty values
+      const orgUpdates = {};
+      
+      // Only update name if it has a value
+      if (orgName && orgName.trim()) {
+        orgUpdates.name = orgName.trim();
+      }
+      
+      // Only update description if it has a value  
+      if (orgDescription && orgDescription.trim()) {
+        orgUpdates.description = orgDescription.trim();
+      }
+      
+      console.log('SupabaseThemeEditor: Organization updates (non-empty only):', orgUpdates);
 
       // Update branding data - ensure all values are valid
       const brandingData = {
-        primaryColor: formData.get('primaryColor') || '#ff5a00',
-        secondaryColor: formData.get('secondaryColor') || '#e53e3e',
-        backgroundColor: formData.get('backgroundColor') || '#f8fafc',
-        textColor: formData.get('textColor') || '#1a202c',
-        borderColor: formData.get('borderColor') || '#e2e8f0',
-        mutedColor: formData.get('mutedColor') || '#718096',
-        nodeBackgroundColor: formData.get('nodeBackgroundColor') || '#ffffff',
-        buttonBackgroundColor: formData.get('buttonBackgroundColor') || '#ffffff',
-        accentBackgroundColor: formData.get('accentBackgroundColor') || '#ffe6d5',
-        treeItemBackgroundColor: formData.get('treeItemBackgroundColor') || '#fff4ed',
-        hoverColor: formData.get('hoverColor') || '#ff5a00',
-        selectedColor: formData.get('selectedColor') || '#ff5a00',
-        nodeStrokeColor: formData.get('nodeStrokeColor') || '#ff5a00',
-        fontFamily: formData.get('fontFamily') || 'system',
-        fontSize: formData.get('fontSize') || '16',
+        primaryColor: primaryColor || '#ff5a00',
+        secondaryColor: secondaryColor || '#e53e3e',
+        backgroundColor: backgroundColor || '#f8fafc',
+        textColor: textColor || '#1a202c',
+        borderColor: borderColor || '#e2e8f0',
+        mutedColor: mutedColor || '#718096',
+        nodeBackgroundColor: nodeBackgroundColor || '#ffffff',
+        buttonBackgroundColor: buttonBackgroundColor || '#ffffff',
+        accentBackgroundColor: accentBackgroundColor || '#ffe6d5',
+        treeItemBackgroundColor: treeItemBackgroundColor || '#fff4ed',
+        hoverColor: hoverColor || '#ff5a00',
+        selectedColor: selectedColor || '#ff5a00',
+        nodeStrokeColor: nodeStrokeColor || '#ff5a00',
+        fontFamily: fontFamily || 'system',
+        fontSize: fontSize || '16',
         logo: null
       };
       
@@ -751,8 +974,9 @@ class SupabaseThemeEditor {
         currentOrgId
       });
 
-      // Handle logo upload
-      const logoFile = formData.get('orgLogo');
+      // Handle logo upload (query within form container to avoid duplicate ID issue)
+      const logoInput = formContainer.querySelector('#themeOrgLogo');
+      const logoFile = logoInput && logoInput.files ? logoInput.files[0] : null;
       if (logoFile && logoFile.size > 0) {
         const reader = new FileReader();
         reader.onload = async (e) => {
@@ -788,11 +1012,6 @@ class SupabaseThemeEditor {
     }
     
     console.log('SupabaseThemeEditor: Saving theme for org ID:', currentOrgId);
-    
-    // Show warning about potential organization switching
-    if (window.warningBanner) {
-      window.warningBanner.showThemeIssue();
-    }
     
     try {
       // Validate data before saving
@@ -848,6 +1067,12 @@ class SupabaseThemeEditor {
       
       // Ensure header is updated with the latest data
       await this.refreshHeader();
+      
+      // Force a refresh of the org chart to apply new colors
+      if (window.OrgChart && typeof window.OrgChart.refresh === 'function') {
+        console.log('SupabaseThemeEditor: Refreshing org chart to apply new theme');
+        window.OrgChart.refresh();
+      }
 
       // Don't force main app to be visible - let user choose from landing page
       // try {
@@ -932,9 +1157,17 @@ class SupabaseThemeEditor {
     document.documentElement.style.setProperty('--brand-gradient', 
       `linear-gradient(135deg, ${brandingData.primaryColor} 0%, ${brandingData.secondaryColor} 100%)`);
     
+    console.log('SupabaseThemeEditor: Applying colors:', {
+      primary: brandingData.primaryColor,
+      secondary: brandingData.secondaryColor,
+      hover: brandingData.hoverColor,
+      selected: brandingData.selectedColor
+    });
+    
     // Apply additional color properties
     if (brandingData.backgroundColor) {
       document.body.style.background = brandingData.backgroundColor;
+      document.documentElement.style.setProperty('--surface', brandingData.backgroundColor);
     }
     if (brandingData.textColor) {
       document.documentElement.style.setProperty('--text', brandingData.textColor);
@@ -957,11 +1190,14 @@ class SupabaseThemeEditor {
     if (brandingData.treeItemBackgroundColor) {
       document.documentElement.style.setProperty('--tree-item-background', brandingData.treeItemBackgroundColor);
     }
+    // CRITICAL: Set hover and selected colors (these control button/element interactions)
     if (brandingData.hoverColor) {
       document.documentElement.style.setProperty('--hover-color', brandingData.hoverColor);
+      console.log('SupabaseThemeEditor: Set --hover-color to', brandingData.hoverColor);
     }
     if (brandingData.selectedColor) {
       document.documentElement.style.setProperty('--selected-color', brandingData.selectedColor);
+      console.log('SupabaseThemeEditor: Set --selected-color to', brandingData.selectedColor);
     }
     // Update all opacity-based colors
     const hexToRgba = (hex, alpha) => {

@@ -3767,43 +3767,21 @@ const OrgUI = (() => {
     // Mark that we're showing admin content
     showingAdminContent = true;
     
-    // Get the original theme panel content
+    // Clone the theme panel into detail panel (with proper event handling)
     let originalThemePanel = document.getElementById('editThemePanel');
     
     console.log('Looking for editThemePanel:', {
       found: !!originalThemePanel,
-      documentReadyState: document.readyState,
-      bodyChildren: document.body.children.length,
-      allPanels: document.querySelectorAll('[id*="Panel"]').length,
-      allElements: document.querySelectorAll('*').length
+      documentReadyState: document.readyState
     });
     
-    // Additional debugging - check if the element exists but with different attributes
     if (!originalThemePanel) {
-      const allDivs = document.querySelectorAll('div');
-      const themeDivs = Array.from(allDivs).filter(div => 
-        div.id && div.id.includes('theme') || 
-        div.className && div.className.includes('theme')
-      );
-      console.log('Theme-related divs found:', themeDivs.map(div => ({
-        id: div.id,
-        className: div.className,
-        textContent: div.textContent?.substring(0, 50),
-        parentElement: div.parentElement?.tagName
-      })));
-    }
-    
-    // Panel should always be found since we're not moving it anymore
-    
-    if (!originalThemePanel) {
-      console.log('Edit theme panel not found anywhere');
-      console.log('Available elements with "Panel" in ID:', 
-        Array.from(document.querySelectorAll('[id*="Panel"]')).map(el => el.id));
-      window._showEditThemeInProgress = false; // Reset flag
+      console.log('Edit theme panel not found');
+      window._showEditThemeInProgress = false;
       return;
     }
     
-    // Clone the theme panel content instead of moving it
+    // Clone the theme panel content
     const themeContent = originalThemePanel.cloneNode(true);
     themeContent.classList.remove('hidden', 'theme-panel');
     themeContent.classList.add('detail-theme-content');
@@ -3834,8 +3812,6 @@ const OrgUI = (() => {
     header.appendChild(closeButton);
     
     container.appendChild(header);
-    
-    // Add the theme content
     container.appendChild(themeContent);
     
     // Clear and populate detail panel
@@ -3847,40 +3823,29 @@ const OrgUI = (() => {
     window._adminPanelTransition = true;
     document.body.classList.add("detail-expanded");
     
-    // Clear the flag after a short delay
     setTimeout(() => {
       window._adminPanelTransition = false;
     }, 500);
     
-    // Re-initialize theme editor functionality since we moved the content
+    // Load current theme and reattach listeners for the cloned form
     setTimeout(() => {
-      if (typeof SupabaseThemeEditor !== 'undefined' && SupabaseThemeEditor.init) {
-        SupabaseThemeEditor.init();
-        console.log('Theme editor re-initialized in detail panel');
-      }
-      
-      // Re-attach event listener to the moved form
-      const movedForm = document.querySelector('#editThemeForm');
-      if (movedForm && typeof SupabaseThemeEditor !== 'undefined') {
-        // Remove any existing event listeners
-        const newForm = movedForm.cloneNode(true);
-        movedForm.parentNode.replaceChild(newForm, movedForm);
+      if (window.ThemeEditor) {
+        // Re-attach save button listener (force=true to override marker)
+        if (typeof window.ThemeEditor.attachSaveButtonListener === 'function') {
+          console.log('Theme editor: Re-attaching save button listener after cloning');
+          window.ThemeEditor.attachSaveButtonListener(true);
+        }
         
-        // Re-attach the event listener
-        newForm.addEventListener('submit', (e) => SupabaseThemeEditor.handleThemeSubmit(e));
-        console.log('Theme form event listener re-attached');
-        
-        // Also add a click listener to the save button for debugging
-        const saveButton = newForm.querySelector('button[type="submit"]');
-        if (saveButton) {
-          saveButton.addEventListener('click', (e) => {
-            console.log('Save button clicked!', e);
-          });
-          console.log('Save button click listener added');
+        // Load current theme into the cloned form
+        if (typeof window.ThemeEditor.loadCurrentTheme === 'function') {
+          console.log('Theme editor: Loading current theme into detail panel');
+          const detailPanel = document.getElementById('detailPanel');
+          if (detailPanel) {
+            window.ThemeEditor.loadCurrentTheme(detailPanel);
+          }
         }
       }
       
-      // Reset the progress flag
       window._showEditThemeInProgress = false;
     }, 100);
   };

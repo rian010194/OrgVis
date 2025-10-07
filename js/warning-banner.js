@@ -62,13 +62,13 @@ class WarningBanner {
   
   showKnownIssues() {
     const issues = [
-      'Theme saving may cause organization switching. Working on a fix.',
+      // 'Theme saving may cause organization switching. Working on a fix.', // FIXED!
       'Some admin panel functions may be temporarily unavailable.',
       'Map focus may change unexpectedly when switching admin panels.'
     ];
     
-    // Show the first issue by default
-    this.show(issues[0]);
+    // Don't show any warnings by default now
+    // this.show(issues[0]);
   }
   
   updateMessage(message) {
@@ -79,7 +79,8 @@ class WarningBanner {
   
   // Method to show specific warnings
   showThemeIssue() {
-    this.show('Theme saving may cause organization switching. Working on a fix.');
+    // This issue has been fixed!
+    // this.show('Theme saving may cause organization switching. Working on a fix.');
   }
   
   showAdminPanelIssue() {

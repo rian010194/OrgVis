@@ -3,8 +3,16 @@ const LandingPage = (() => {
   let currentState = 'landing'; // 'landing', 'creating', 'app'
   
   const init = () => {
-    // Clear current organization ID to ensure we always show landing page
-    localStorage.removeItem('current_organization_id');
+    // Only clear current organization ID if we're actually on the landing page
+    // (Don't clear if main app is visible - this would log out the user)
+    const landingPage = document.getElementById('landingPage');
+    const mainApp = document.getElementById('mainApp');
+    
+    if (landingPage && !landingPage.classList.contains('hidden') && 
+        (!mainApp || mainApp.classList.contains('hidden'))) {
+      // We're showing the landing page, safe to clear
+      localStorage.removeItem('current_organization_id');
+    }
     
     // Initialize with JumpYard demo organization if none exists
     initializeJumpYardDemo();
@@ -22,7 +30,15 @@ const LandingPage = (() => {
     // }
     
     bindEvents();
+    updateLandingLogoutVisibility();
   };
+
+  function updateLandingLogoutVisibility() {
+    const btn = document.getElementById('landingLogoutBtn');
+    if (!btn) return;
+    const hasSession = !!localStorage.getItem('current_organization_id');
+    btn.style.display = hasSession ? 'inline-flex' : 'none';
+  }
   
   const initializeJumpYardDemo = async () => {
     const jumpyardOrgId = 'demo_org';
@@ -575,6 +591,7 @@ const LandingPage = (() => {
     
     // Initialize the main app
     currentState = 'app';
+    updateLandingLogoutVisibility();
     
     // Small delay to ensure DOM is ready, then trigger main app initialization
     setTimeout(async () => {
@@ -681,7 +698,7 @@ const LandingPage = (() => {
     }
   };
   
-  const saveCustomizationAndContinue = (customizationData) => {
+  const saveCustomizationAndContinue = async (customizationData) => {
     try {
       const currentOrgId = localStorage.getItem('current_organization_id');
       if (!currentOrgId) {
@@ -689,13 +706,27 @@ const LandingPage = (() => {
         return;
       }
       
-      // Save customization data for this specific organization
+      // Save customization data for this specific organization (localStorage)
       try {
         localStorage.setItem(`org_branding_${currentOrgId}`, JSON.stringify(customizationData));
       } catch (error) {
-        console.error('Error saving customization data:', error);
+        console.error('Error saving customization data to localStorage:', error);
         showErrorMessage('Error saving customization data. Please try again.');
         return;
+      }
+      
+      // ALSO save to Supabase database
+      if (window.orgDb && typeof window.orgDb.updateOrganization === 'function') {
+        try {
+          console.log('Saving branding to Supabase:', customizationData);
+          await window.orgDb.updateOrganization(currentOrgId, {
+            branding: customizationData
+          });
+          console.log('Branding saved to Supabase successfully');
+        } catch (error) {
+          console.error('Error saving branding to Supabase:', error);
+          // Don't block the flow - localStorage save is enough for now
+        }
       }
       
       // Apply branding to the page
@@ -774,15 +805,35 @@ const LandingPage = (() => {
       return; // Don't apply branding if main app is not visible
     }
     
-    // Apply colors to CSS custom properties
+    // Apply ALL colors to CSS custom properties (comprehensive theme application)
     if (brandingData.primaryColor) {
       document.documentElement.style.setProperty('--brand-orange', brandingData.primaryColor);
+      document.documentElement.style.setProperty('--primary-color', brandingData.primaryColor);
+      document.documentElement.style.setProperty('--hover-color', brandingData.primaryColor);
+      document.documentElement.style.setProperty('--selected-color', brandingData.primaryColor);
       // Also update the gradient
       const gradient = `linear-gradient(135deg, ${brandingData.primaryColor} 0%, ${brandingData.secondaryColor || '#e53e3e'} 100%)`;
       document.documentElement.style.setProperty('--brand-gradient', gradient);
+      
+      // Update opacity-based colors
+      const hexToRgba = (hex, alpha) => {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      };
+      document.documentElement.style.setProperty('--accent-light', hexToRgba(brandingData.primaryColor, 0.08));
+      document.documentElement.style.setProperty('--accent-medium', hexToRgba(brandingData.primaryColor, 0.1));
+      document.documentElement.style.setProperty('--accent-dark', hexToRgba(brandingData.primaryColor, 0.15));
+      document.documentElement.style.setProperty('--accent-darker', hexToRgba(brandingData.primaryColor, 0.25));
+      document.documentElement.style.setProperty('--accent-darkest', hexToRgba(brandingData.primaryColor, 0.3));
+      document.documentElement.style.setProperty('--brand-light-opacity', hexToRgba(brandingData.primaryColor, 0.06));
+      document.documentElement.style.setProperty('--brand-medium-opacity', hexToRgba(brandingData.primaryColor, 0.55));
+      document.documentElement.style.setProperty('--brand-strong-opacity', hexToRgba(brandingData.primaryColor, 0.7));
     }
     if (brandingData.secondaryColor) {
       document.documentElement.style.setProperty('--brand-red', brandingData.secondaryColor);
+      document.documentElement.style.setProperty('--secondary-color', brandingData.secondaryColor);
       // Update gradient if primary color is also set
       if (brandingData.primaryColor) {
         const gradient = `linear-gradient(135deg, ${brandingData.primaryColor} 0%, ${brandingData.secondaryColor} 100%)`;
@@ -1051,6 +1102,7 @@ const LandingPage = (() => {
       
       // Reset state
       currentState = 'landing';
+      updateLandingLogoutVisibility();
       
       // Show success message
       showSuccessMessage('Logged out successfully!');

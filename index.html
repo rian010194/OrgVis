@@ -19,7 +19,7 @@
       <div class="warning-icon">⚠️</div>
       <div class="warning-text">
         <strong>Known Issues:</strong>
-        <span id="warningMessage">Theme saving may cause organization switching. Working on a fix.</span>
+        <span id="warningMessage">No current warnings.</span>
       </div>
       <button id="warningClose" class="warning-close" aria-label="Close warning">×</button>
     </div>
@@ -41,13 +41,11 @@
             <span class="link-icon">🎯</span>
             <span class="link-text">Try Demo</span>
           </a>
-          <span class="link-separator">•</span>
           <a href="https://github.com/rian010194/OrgVis/blob/main/docs/index.md" target="_blank" rel="noopener noreferrer" class="header-link github-link">
             <span class="link-icon">📁</span>
             <span class="link-text">View on GitHub</span>
           </a>
-          <span class="link-separator">•</span>
-          <button id="landingLogoutBtn" type="button" class="header-link logout-link" style="background: none; border: none; color: inherit; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s ease;">
+          <button id="landingLogoutBtn" type="button" class="header-link logout-link" style="display: none; background: none; border: none; color: inherit; cursor: pointer; text-decoration: none; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s ease;">
             <span class="link-icon">🚪</span>
             <span class="link-text">Logout</span>
           </button>
@@ -79,6 +77,14 @@
             <div class="feature-item">
               <span class="feature-icon">🔗</span>
               <span class="feature-text">Relationship Mapping</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">🧩</span>
+              <span class="feature-text">Open Source</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">📚</span>
+              <span class="feature-text">Docs & Integration</span>
             </div>
           </div>
           <button id="createOrgBtn" class="create-org-button">
@@ -143,10 +149,43 @@
               <p>Your data is protected with password authentication and secure storage. Choose between local storage or cloud-based Supabase backend.</p>
             </div>
             
-            <div class="feature-card hidden">
+            <div class="feature-card">
               <div class="feature-icon-large">🔓</div>
               <h3>Open Source & Extensible</h3>
               <p>Built with modern web technologies and comprehensive documentation. Your IT team can easily customize, extend, and integrate with existing systems.</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon-large">📚</div>
+              <h3>Documentation & Integration</h3>
+              <p>Clear guides for deployment, authentication, and data pipelines. Connect to current systems via CSV import, REST APIs, or Supabase/Postgres—no vendor lock‑in.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Open Source & Integration Section -->
+      <div class="features-section">
+        <div class="features-container">
+          <h2 class="features-title">Open Source, Dokumentation och Integration</h2>
+          <p class="features-subtitle">Byggt för att IT-avdelningen enkelt ska kunna koppla mot befintliga system</p>
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="feature-icon-large">🛠️</div>
+              <h3>Öppen källkod</h3>
+              <p>MIT-licens, läsbar kod utan ramverksberoenden (vanilla JS + D3). Fri att forka, utöka och självhosta.</p>
+              <p><a href="https://github.com/rian010194/OrgVis" target="_blank" rel="noopener noreferrer">Visa källkod på GitHub</a></p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon-large">🔌</div>
+              <h3>Dokumentation & kopplingar</h3>
+              <p>Steg‑för‑steg‑guider för drift och integration: Supabase/Postgres, CSV‑import, tematisering och deployment.</p>
+              <ul>
+                <li><a href="https://github.com/rian010194/OrgVis/blob/main/docs/supabase-setup.md" target="_blank" rel="noopener noreferrer">Supabase‑setup</a></li>
+                <li><a href="https://github.com/rian010194/OrgVis/blob/main/docs/deployment-strategy.md" target="_blank" rel="noopener noreferrer">Deploy‑strategi</a></li>
+                <li><a href="https://github.com/rian010194/OrgVis/blob/main/docs/user-management-guide.md" target="_blank" rel="noopener noreferrer">Användarhantering</a></li>
+                <li><a href="https://github.com/rian010194/OrgVis/blob/main/docs/todo-workflow.md" target="_blank" rel="noopener noreferrer">Arbetsflöde & checklistor</a></li>
+              </ul>
             </div>
           </div>
         </div>
@@ -632,7 +671,7 @@
     </div>
     
     <div class="theme-panel-content">
-      <form id="editThemeForm" class="theme-form">
+      <div id="editThemeForm" class="theme-form">
         <div class="customization-section">
           <h3>Organization Info</h3>
           <div class="form-group">
@@ -932,9 +971,9 @@
 
         <div class="form-actions">
           <button type="button" id="cancelThemeBtn" class="btn btn-secondary">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Theme</button>
+          <button type="button" id="saveThemeBtn" class="btn btn-primary">Save Theme</button>
         </div>
-      </form>
+      </div>
     </div>
   </div>
 
@@ -1259,18 +1298,18 @@
     <script type="module" src="js/data-supabase-multi-org.js?v=20241221a"></script>
     <script src="js/warning-banner.js?v=20241221"></script>
     <script src="js/charts.js?v=20241221b"></script>
-      <script src="js/ui.js?v=20241221b"></script>
+      <script src="js/ui.js?v=20241222d"></script>
     <script src="js/map.js?v=20241221b"></script>
     <!-- User Management System -->
     <!-- <script type="module" src="js/user-management.js?v=20241221"></script> -->
     <!-- <script type="module" src="js/user-interface.js?v=20241221"></script> -->
     <!-- Demo version for testing without Supabase -->
     <script src="js/user-interface-demo.js?v=20241221c"></script>
-    <script src="js/theme-editor-supabase.js?v=20241221f"></script>
+    <script src="js/theme-editor-supabase.js?v=20241222f"></script>
     <script src="js/app.js?v=20241221b"></script>
   </div>
 
   <!-- Landing Page JavaScript -->
-  <script src="js/landing.js?v=20241221c"></script>
+    <script src="js/landing.js?v=20241221q"></script>
 </body>
 </html>
