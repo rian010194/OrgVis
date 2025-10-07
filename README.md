@@ -6,24 +6,34 @@ A modern, interactive web application for visualizing and managing organizationa
 
 ### 📊 **Interactive Visualizations**
 - **Tree View**: Hierarchical navigation with expandable/collapsible nodes
-- **Map View**: D3.js-powered force-directed graph visualization
+- **Map View**: D3.js-powered force-directed graph visualization with zoom and pan
 - **Detail Panel**: Comprehensive node information with metrics and relationships
+- **Profile Panel**: User profile management with statistics and activity tracking
 
 ### 🎨 **Customization & Branding**
-- **Theme Editor**: Customize colors, fonts, and branding
-- **Responsive Design**: Optimized for desktop and mobile devices
-- **Multi-Organization Support**: Manage multiple organizations with separate branding
+- **Theme Editor**: Customize colors, fonts, logos, and organization branding
+- **Multi-Organization Support**: Manage multiple organizations with separate themes
+- **Real-time Theme Updates**: Changes apply immediately across the application
+- **Responsive Design**: Optimized for desktop, tablet, and mobile devices
 
 ### 🔧 **Administrative Tools**
 - **Node Management**: Create, edit, and delete organizational nodes
 - **Relationship Mapping**: Define and visualize connections between nodes
-- **Metrics & Analytics**: Track KPIs and performance indicators
-- **User Management**: Role-based access control
+- **Metrics & Analytics**: Track KPIs and performance indicators with interactive charts
+- **User Management**: Role-based access control and user administration
+- **Resources Management**: Organize and manage organizational resources
 
 ### 📱 **Mobile-First Design**
 - **Touch-Optimized**: Large touch targets and intuitive gestures
 - **Responsive Layout**: Adapts seamlessly to different screen sizes
-- **Compact Navigation**: Efficient use of screen real estate
+- **Mobile View Toggle**: Collapsible tree/map view for better mobile experience
+- **Compact Navigation**: Efficient use of screen real estate with hamburger menu
+- **Fullscreen Mode**: Immersive detail panel view on mobile devices
+
+### 🚨 **User Experience**
+- **Warning Banner**: Real-time notifications about known issues
+- **Known Issues Page**: Comprehensive documentation of current limitations
+- **Error Handling**: Graceful fallbacks and user-friendly error messages
 
 ## 🚀 Quick Start
 
@@ -55,6 +65,7 @@ npm run dev
 ```
 Organisation/
 ├── index.html              # Main application entry point
+├── known-issues.html       # Known issues documentation page
 ├── css/
 │   ├── style.css          # Main stylesheet with responsive design
 │   └── user-management.css # User management specific styles
@@ -62,19 +73,26 @@ Organisation/
 │   ├── app.js             # Application initialization and view management
 │   ├── ui.js              # UI logic and event handling
 │   ├── data.js            # Data management and localStorage
-│   ├── map.js             # D3.js map visualization
+│   ├── map.js             # D3.js map visualization with zoom/pan
 │   ├── supabase-multi-org.js        # Supabase integration with multi-org support
-│   └── theme-editor.js    # Theme customization functionality
+│   ├── theme-editor-supabase.js     # Theme customization with Supabase
+│   ├── warning-banner.js  # Warning banner system for known issues
+│   └── landing.js         # Landing page functionality
 ├── supabase/
 │   ├── database_schema.sql    # Main database schema
 │   ├── demo_data.sql          # Sample organizational data
 │   ├── user_management_schema.sql # User management tables
-│   └── migrations/            # Database migrations
+│   ├── migrations/            # Database migrations
+│   └── config.toml           # Supabase configuration
 ├── docs/                   # Documentation
+│   ├── index.md           # Documentation index
+│   ├── quick-start.md     # Quick start guide
+│   ├── setup-guide.md     # Detailed setup instructions
 │   ├── supabase-setup.md  # Supabase configuration guide
 │   ├── deployment-strategy.md # Deployment options
 │   └── user-management-guide.md # User management setup
-└── templates/              # Import/export templates
+├── templates/              # Import/export templates
+└── netlify.toml           # Netlify deployment configuration
 ```
 
 ## 🛠️ Technology Stack
@@ -156,13 +174,30 @@ For support and questions:
 
 ## 🗺️ Roadmap
 
+### ✅ Completed Features
+- [x] Interactive tree and map visualizations
+- [x] Mobile-responsive design with touch optimization
+- [x] Theme customization and branding system
+- [x] Multi-organization support
+- [x] Admin panel with node management
+- [x] Warning banner and known issues system
+- [x] Profile panel for user management
+- [x] Supabase integration with real-time updates
+
+### 🚧 In Progress
 - [ ] Advanced analytics dashboard
+- [ ] Enhanced user permissions system
 - [ ] Real-time collaboration features
+
+### 📋 Planned Features
 - [ ] API integration capabilities
-- [ ] Advanced user permissions
 - [ ] Mobile app development
 - [ ] Integration with HR systems
+- [ ] Advanced reporting and export features
+- [ ] Workflow automation tools
 
 ---
 
 **Built with ❤️ for modern organizational management**
+
+**Last updated**: October 2025

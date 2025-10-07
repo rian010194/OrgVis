@@ -7,6 +7,7 @@ Welcome to the Organization Visualization Tool documentation. This guide will he
 - [Quick Start Guide](quick-start.md) - Get up and running in minutes
 - [Setup Guide](setup-guide.md) - Detailed installation instructions
 - [Supabase Setup](supabase-setup.md) - Database configuration
+- [Mobile Features Guide](mobile-features.md) - Mobile-specific features and optimization
 
 ## 🛠️ Configuration & Deployment
 

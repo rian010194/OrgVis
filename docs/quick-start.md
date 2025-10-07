@@ -2,6 +2,8 @@
 
 ## 🚀 Snabbstart utan CLI
 
+> **Last updated**: October 2025
+
 ### Steg 1: Skapa Supabase-projekt
 1. Gå till [supabase.com](https://supabase.com)
 2. Klicka "Start your project" 

@@ -2,6 +2,8 @@
 
 Denna guide hjälper dig att komma igång med Organization Chart med Supabase backend.
 
+> **Last updated**: October 2025
+
 ## 🚀 Snabbstart
 
 ### 1. Förutsättningar
