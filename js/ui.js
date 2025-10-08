@@ -773,48 +773,154 @@ const OrgUI = (() => {
       
       // Handle chart type changes to show/hide values container
       const chartTypeSelect = elements.addMetricForm.querySelector('select[name="metricChartType"]');
-      const valuesContainer = document.getElementById('valuesContainer');
-      const valuesList = document.getElementById('valuesList');
-      const addValueBtn = document.getElementById('addValueBtn');
+      const valuesContainer = document.getElementById('metricValuesContainer');
+      const addValueBtn = document.getElementById('addMetricValueBtn');
       
-      if (chartTypeSelect && valuesContainer && valuesList && addValueBtn) {
+      console.log('Metric form elements:', {
+        chartTypeSelect: !!chartTypeSelect,
+        valuesContainer: !!valuesContainer,
+        addValueBtn: !!addValueBtn
+      });
+      
+      if (valuesContainer && addValueBtn) {
         // Function to add a new value input
         const addValueInput = () => {
-          const currentInputs = valuesList.querySelectorAll('.value-input-row');
+          const currentInputs = valuesContainer.querySelectorAll('.value-input-row');
           const index = currentInputs.length;
           const valueRow = window.createValueInput(index);
-          valuesList.appendChild(valueRow);
+          valuesContainer.appendChild(valueRow);
         };
         
-        // Handle chart type changes
-        chartTypeSelect.addEventListener('change', (e) => {
-          const chartType = e.target.value;
-          // Show values container for chart types that need numerical values
-          if (['pie', 'doughnut', 'bar', 'line'].includes(chartType)) {
-            valuesContainer.style.display = 'block';
-            // Initialize with one value input if none exist
-            if (valuesList.children.length === 0) {
-              addValueInput();
-            }
-          } else if (chartType === 'table') {
-            valuesContainer.style.display = 'none';
-          } else {
-            valuesContainer.style.display = 'block';
-            if (valuesList.children.length === 0) {
-              addValueInput();
-            }
-          }
-        });
-        
-        // Handle add value button
+        // Add event listener to the add value button
         addValueBtn.addEventListener('click', addValueInput);
         
-        // Initialize with one value input for pie charts (most common)
-        if (chartTypeSelect.value === 'pie') {
+        // Initialize with two value inputs by default for new metrics
+        if (!window.editingMetric) {
+          addValueInput();
           addValueInput();
         }
+        
+        console.log('Metric value inputs initialized');
+      } else {
+        console.warn('Metric form elements not found:', {
+          valuesContainer: !!valuesContainer,
+          addValueBtn: !!addValueBtn
+        });
       }
 
+    }
+
+    // Manage Metrics section - populate node select and handle metric list display
+    const metricsNodeSelect = document.getElementById('metricsNodeSelect');
+    const metricsListContainer = document.getElementById('metricsListContainer');
+    
+    if (metricsNodeSelect && metricsListContainer) {
+      // Populate node select when admin panel opens
+      const populateMetricsNodeSelect = () => {
+        const nodes = OrgStore.getAll();
+        metricsNodeSelect.innerHTML = '<option value="">Select a node...</option>';
+        nodes.forEach(node => {
+          const option = document.createElement('option');
+          option.value = node.id;
+          option.textContent = node.name;
+          metricsNodeSelect.appendChild(option);
+        });
+      };
+      
+      // Display metrics for selected node
+      const displayNodeMetrics = (nodeId) => {
+        if (!nodeId) {
+          metricsListContainer.innerHTML = '<p style="color: var(--muted, #718096); text-align: center; padding: 2rem;">Select a node to view and manage its metrics</p>';
+          return;
+        }
+        
+        const node = OrgStore.getNode(nodeId);
+        if (!node) {
+          metricsListContainer.innerHTML = '<p style="color: var(--muted, #718096); text-align: center; padding: 2rem;">Node not found</p>';
+          return;
+        }
+        
+        const metrics = node.metrics || [];
+        
+        if (metrics.length === 0) {
+          metricsListContainer.innerHTML = `
+            <p style="color: var(--muted, #718096); text-align: center; padding: 2rem;">
+              No metrics found for <strong>${node.name}</strong>. Use the form above to add metrics.
+            </p>
+          `;
+          return;
+        }
+        
+        // Build metrics list with edit and delete buttons
+        let html = `
+          <div style="background: var(--surface, #fff); border: 1px solid var(--border, #e2e8f0); border-radius: 8px; padding: 1rem;">
+            <h4 style="margin: 0 0 1rem 0; color: var(--text, #1a202c);">Metrics for ${node.name}</h4>
+        `;
+        
+        metrics.forEach((metric, index) => {
+          const dataPointsCount = metric.values ? metric.values.length : 0;
+          html += `
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background: var(--background-color, #f8fafc); border-radius: 6px; margin-bottom: 0.5rem;">
+              <div style="flex: 1;">
+                <div style="font-weight: 600; color: var(--text, #1a202c);">${metric.name || 'Unnamed Metric'}</div>
+                <div style="font-size: 0.875rem; color: var(--muted, #718096); margin-top: 0.25rem;">
+                  Type: ${metric.chartType || 'pie'} | 
+                  Unit: ${metric.unit || 'N/A'} | 
+                  Data points: ${dataPointsCount}
+                </div>
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <button type="button" class="edit-metric-btn secondary" data-node-id="${nodeId}" data-metric-index="${index}" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                  Edit
+                </button>
+                <button type="button" class="remove-metric-btn danger" data-node-id="${nodeId}" data-metric-index="${index}" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                  Remove
+                </button>
+              </div>
+            </div>
+          `;
+        });
+        
+        html += `</div>`;
+        metricsListContainer.innerHTML = html;
+        
+        // Attach event listeners to edit and remove buttons
+        const editButtons = metricsListContainer.querySelectorAll('.edit-metric-btn');
+        const removeButtons = metricsListContainer.querySelectorAll('.remove-metric-btn');
+        
+        editButtons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const nodeId = btn.dataset.nodeId;
+            const metricIndex = parseInt(btn.dataset.metricIndex);
+            handleEditMetric(nodeId, metricIndex);
+          });
+        });
+        
+        removeButtons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const nodeId = btn.dataset.nodeId;
+            const metricIndex = parseInt(btn.dataset.metricIndex);
+            handleRemoveMetricByIndex(nodeId, metricIndex);
+          });
+        });
+      };
+      
+      // Listen for node selection changes
+      metricsNodeSelect.addEventListener('change', (e) => {
+        displayNodeMetrics(e.target.value);
+      });
+      
+      // Populate on init
+      populateMetricsNodeSelect();
+      
+      // Repopulate when data changes
+      window.addEventListener('orgDataChanged', () => {
+        populateMetricsNodeSelect();
+        // Refresh the current display if a node is selected
+        if (metricsNodeSelect.value) {
+          displayNodeMetrics(metricsNodeSelect.value);
+        }
+      });
     }
 
     if (elements.removeMetricForm) {
@@ -3107,6 +3213,91 @@ const OrgUI = (() => {
 
   };
 
+  // Helper function to edit a metric
+  const handleEditMetric = (nodeId, metricIndex) => {
+    const node = OrgStore.getNode(nodeId);
+    if (!node || !node.metrics || !node.metrics[metricIndex]) {
+      displayAdminMessage("Metric not found.", "error");
+      return;
+    }
+    
+    const metric = node.metrics[metricIndex];
+    const form = elements.addMetricForm;
+    
+    // Populate the form with metric data
+    form.querySelector('select[name="nodeId"]').value = nodeId;
+    form.querySelector('input[name="metricName"]').value = metric.name || '';
+    form.querySelector('input[name="metricUnit"]').value = metric.unit || '';
+    form.querySelector('select[name="metricChartType"]').value = metric.chartType || 'pie';
+    form.querySelector('select[name="metricColorPalette"]').value = metric.colorPalette || 'orange';
+    form.querySelector('input[name="metricDescription"]').value = metric.description || '';
+    
+    // Clear existing value inputs
+    const valuesContainer = document.getElementById('metricValuesContainer');
+    if (valuesContainer) {
+      valuesContainer.innerHTML = '';
+      
+      // Add value inputs for existing data
+      if (metric.values && metric.values.length > 0) {
+        metric.values.forEach((dataPoint, i) => {
+          const valueRow = window.createValueInput(i, dataPoint.label, dataPoint.value);
+          valuesContainer.appendChild(valueRow);
+        });
+      }
+    }
+    
+    // Store editing state
+    window.editingMetric = {
+      nodeId: nodeId,
+      originalIndex: metricIndex
+    };
+    
+    // Change submit button text
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.textContent = "Update Metric";
+    }
+    
+    // Scroll to form
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    
+    displayAdminMessage(`Editing metric: ${metric.name}`, "info");
+  };
+  
+  // Helper function to remove a metric by index
+  const handleRemoveMetricByIndex = (nodeId, metricIndex) => {
+    const node = OrgStore.getNode(nodeId);
+    if (!node || !node.metrics || !node.metrics[metricIndex]) {
+      displayAdminMessage("Metric not found.", "error");
+      return;
+    }
+    
+    const metric = node.metrics[metricIndex];
+    const metricName = metric.name || 'Unnamed Metric';
+    
+    if (confirm(`Are you sure you want to remove the metric "${metricName}" from ${node.name}?`)) {
+      const updatedMetrics = node.metrics.filter((_, index) => index !== metricIndex);
+      OrgStore.updateNode(nodeId, { metrics: updatedMetrics });
+      
+      displayAdminMessage(`Metric "${metricName}" removed successfully.`, "success");
+      
+      // Refresh the metrics list
+      const metricsNodeSelect = document.getElementById('metricsNodeSelect');
+      if (metricsNodeSelect && metricsNodeSelect.value === nodeId) {
+        const displayNodeMetrics = () => {
+          // Trigger a re-render by changing and changing back
+          const currentValue = metricsNodeSelect.value;
+          metricsNodeSelect.value = '';
+          metricsNodeSelect.value = currentValue;
+          metricsNodeSelect.dispatchEvent(new Event('change'));
+        };
+        setTimeout(displayNodeMetrics, 100);
+      }
+      
+      refresh();
+    }
+  };
+
   const handleAddMetric = (event) => {
     event.preventDefault();
     
@@ -3190,10 +3381,27 @@ const OrgUI = (() => {
         submitBtn.style.backgroundColor = "";
       }
       
+      // Clear the editing state
+      window.editingMetric = null;
+      
       form.reset();
       
+      // Clear data point inputs
+      const valuesContainer = document.getElementById('metricValuesContainer');
+      if (valuesContainer) {
+        valuesContainer.innerHTML = '';
+      }
+      
+      // Refresh the metrics list if it's showing the node we just updated
+      const metricsNodeSelect = document.getElementById('metricsNodeSelect');
+      if (metricsNodeSelect && metricsNodeSelect.value === nodeId) {
+        metricsNodeSelect.dispatchEvent(new Event('change'));
+      }
+      
       // Update current metrics display
-      displayCurrentMetrics();
+      if (typeof displayCurrentMetrics === 'function') {
+        displayCurrentMetrics();
+      }
       
     } catch (error) {
       displayAdminMessage("Failed to add metric: " + error.message, "error");

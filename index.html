@@ -1247,41 +1247,66 @@
 
           <div class="admin-tab-panel" id="adminPanel-metrics" data-admin-panel="metrics" role="tabpanel" aria-labelledby="adminTab-metrics" hidden>
             <form id="adminAddMetricForm" class="admin-form">
-              <h3>Add metric</h3>
+              <h3>Add Metric</h3>
               <label>
                 Node
                 <select name="nodeId"></select>
               </label>
               <label>
-                Name
-                <input name="metricName" type="text" placeholder="e.g. Customer Satisfaction" />
+                Metric Name
+                <input name="metricName" type="text" placeholder="e.g. Time spent on, Budget Allocation" required />
               </label>
               <label>
                 Unit
-                <input name="metricUnit" type="text" placeholder="e.g. % or SEK" />
+                <input name="metricUnit" type="text" placeholder="e.g. %, SEK, hours" value="%" />
               </label>
               <label>
-                Visualization
-                <select name="metricViz">
-                  <option value="pie">Pie</option>
-                  <option value="bar">Bar</option>
-                  <option value="line">Line</option>
+                Chart Type
+                <select name="metricChartType">
+                  <option value="pie">Pie Chart</option>
+                  <option value="doughnut">Doughnut Chart</option>
+                  <option value="bar">Bar Chart</option>
+                  <option value="line">Line Chart</option>
                 </select>
               </label>
-              <button type="submit" class="primary">Add metric</button>
-            </form>
-            <form id="adminRemoveMetricForm" class="admin-form">
-              <h3>Remove metric</h3>
               <label>
-                Node
-                <select name="nodeId"></select>
+                Color Palette
+                <select name="metricColorPalette">
+                  <option value="orange">Orange</option>
+                  <option value="blue">Blue</option>
+                  <option value="green">Green</option>
+                  <option value="purple">Purple</option>
+                  <option value="red">Red</option>
+                  <option value="teal">Teal</option>
+                </select>
               </label>
               <label>
-                Metric
-                <select name="metricIndex"></select>
+                Description (Optional)
+                <input name="metricDescription" type="text" placeholder="Brief description of this metric" />
               </label>
-              <button type="submit" class="danger">Remove metric</button>
+              
+              <div class="metric-values-section">
+                <h4>Data Points</h4>
+                <div id="metricValuesContainer"></div>
+                <button type="button" id="addMetricValueBtn" class="secondary" style="margin-top: 0.5rem;">+ Add Data Point</button>
+              </div>
+              
+              <button type="submit" class="primary">Add Metric</button>
             </form>
+            
+            <!-- Manage Metrics Section -->
+            <div class="admin-form">
+              <h3>Manage Metrics</h3>
+              <label>
+                Select Node to View Metrics
+                <select id="metricsNodeSelect" name="metricsNodeId">
+                  <option value="">Select a node...</option>
+                </select>
+              </label>
+              <div id="metricsListContainer" style="margin-top: 1rem;">
+                <p style="color: var(--muted, #718096); text-align: center; padding: 2rem;">Select a node to view and manage its metrics</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1298,7 +1323,7 @@
     <script type="module" src="js/data-supabase-multi-org.js?v=20241221a"></script>
     <script src="js/warning-banner.js?v=20241221"></script>
     <script src="js/charts.js?v=20241221b"></script>
-      <script src="js/ui.js?v=20241222d"></script>
+      <script src="js/ui.js?v=20241222j"></script>
     <script src="js/map.js?v=20241221b"></script>
     <!-- User Management System -->
     <!-- <script type="module" src="js/user-management.js?v=20241221"></script> -->
