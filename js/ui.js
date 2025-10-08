@@ -810,27 +810,14 @@ const OrgUI = (() => {
 
     }
 
-    // Manage Metrics section - populate node select and handle metric list display
-    const metricsNodeSelect = document.getElementById('metricsNodeSelect');
+    // Manage Metrics section - display metrics for currently selected node
     const metricsListContainer = document.getElementById('metricsListContainer');
     
-    if (metricsNodeSelect && metricsListContainer) {
-      // Populate node select when admin panel opens
-      const populateMetricsNodeSelect = () => {
-        const nodes = OrgStore.getAll();
-        metricsNodeSelect.innerHTML = '<option value="">Select a node...</option>';
-        nodes.forEach(node => {
-          const option = document.createElement('option');
-          option.value = node.id;
-          option.textContent = node.name;
-          metricsNodeSelect.appendChild(option);
-        });
-      };
-      
+    if (metricsListContainer) {
       // Display metrics for selected node
-      const displayNodeMetrics = (nodeId) => {
+      window.displayManageMetrics = (nodeId) => {
         if (!nodeId) {
-          metricsListContainer.innerHTML = '<p style="color: var(--muted, #718096); text-align: center; padding: 2rem;">Select a node to view and manage its metrics</p>';
+          metricsListContainer.innerHTML = '<p style="color: var(--muted, #718096); text-align: center; padding: 2rem;">Select a node from the chart to view and manage its metrics</p>';
           return;
         }
         
@@ -904,23 +891,6 @@ const OrgUI = (() => {
           });
         });
       };
-      
-      // Listen for node selection changes
-      metricsNodeSelect.addEventListener('change', (e) => {
-        displayNodeMetrics(e.target.value);
-      });
-      
-      // Populate on init
-      populateMetricsNodeSelect();
-      
-      // Repopulate when data changes
-      window.addEventListener('orgDataChanged', () => {
-        populateMetricsNodeSelect();
-        // Refresh the current display if a node is selected
-        if (metricsNodeSelect.value) {
-          displayNodeMetrics(metricsNodeSelect.value);
-        }
-      });
     }
 
     if (elements.removeMetricForm) {
@@ -1239,6 +1209,11 @@ const OrgUI = (() => {
     // Update Relations and Metrics dropdowns if admin panel is open
     if (elements.adminPanel && elements.adminPanel.classList.contains("open")) {
       updateFormDropdownsWithSelectedNode();
+      
+      // Update Manage Metrics if on metrics tab
+      if (typeof window.displayManageMetrics === 'function') {
+        window.displayManageMetrics(nodeId);
+      }
     }
 
     setActiveAdminTab("edit");
@@ -2333,7 +2308,9 @@ const OrgUI = (() => {
     
     // Show current metrics when switching to Metrics tab
     if (tab === "metrics") {
-      displayCurrentMetrics();
+      if (typeof window.displayManageMetrics === 'function') {
+        window.displayManageMetrics(selectedNodeId);
+      }
     }
     
     // Populate edit form when switching to Edit tab
@@ -3288,16 +3265,8 @@ const OrgUI = (() => {
       displayAdminMessage(`Metric "${metricName}" removed successfully.`, "success");
       
       // Refresh the metrics list
-      const metricsNodeSelect = document.getElementById('metricsNodeSelect');
-      if (metricsNodeSelect && metricsNodeSelect.value === nodeId) {
-        const displayNodeMetrics = () => {
-          // Trigger a re-render by changing and changing back
-          const currentValue = metricsNodeSelect.value;
-          metricsNodeSelect.value = '';
-          metricsNodeSelect.value = currentValue;
-          metricsNodeSelect.dispatchEvent(new Event('change'));
-        };
-        setTimeout(displayNodeMetrics, 100);
+      if (typeof window.displayManageMetrics === 'function') {
+        setTimeout(() => window.displayManageMetrics(nodeId), 100);
       }
       
       refresh();
@@ -3398,10 +3367,9 @@ const OrgUI = (() => {
         valuesContainer.innerHTML = '';
       }
       
-      // Refresh the metrics list if it's showing the node we just updated
-      const metricsNodeSelect = document.getElementById('metricsNodeSelect');
-      if (metricsNodeSelect && metricsNodeSelect.value === nodeId) {
-        metricsNodeSelect.dispatchEvent(new Event('change'));
+      // Refresh the metrics list if we're on the metrics tab
+      if (typeof window.displayManageMetrics === 'function') {
+        window.displayManageMetrics(nodeId);
       }
       
       // Update current metrics display
