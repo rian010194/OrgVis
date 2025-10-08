@@ -2031,6 +2031,11 @@ const OrgUI = (() => {
   };
 
   const displayCurrentMetrics = () => {
+    // DISABLED: Now using the "Manage Metrics" section in the Metrics tab instead
+    // This old function was showing metrics in the detail panel which created duplicate UI
+    return;
+    
+    /* OLD CODE DISABLED
     if (!selectedNodeId) {
       return;
     }
@@ -2262,6 +2267,7 @@ const OrgUI = (() => {
       
       metricsDisplay.appendChild(metricsList);
     }
+    */ // END OF DISABLED CODE
   };
 
   const updateAdminTabsUI = () => {
