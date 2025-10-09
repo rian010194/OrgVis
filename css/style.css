@@ -4432,6 +4432,18 @@ button.danger {
   transform: translateY(-2px);
 }
 
+.header-link.roadmap-link {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.header-link.roadmap-link:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
 .link-separator {
   color: rgba(255, 255, 255, 0.6);
   font-weight: 400;

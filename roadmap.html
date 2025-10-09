@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Feature Roadmap - Organization Chart</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNCIgZmlsbD0iI2ZmNWEwMCIvPgo8dGV4dCB4PSIxNiIgeT0iMjAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5PPC90ZXh0Pgo8L3N2Zz4K">
+  <link rel="stylesheet" href="css/style.css?v=20241222a">
+  <!-- Google Fonts for custom typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@300;400;500;600;700&family=Lato:wght@300;400;700&family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .roadmap-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .roadmap-header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+      padding: 2rem 1rem;
+    }
+
+    .roadmap-header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 1.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: #764ba2;
+      transform: translateX(-4px);
+    }
+
+    .roadmap-title {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #1a202c;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .roadmap-subtitle {
+      font-size: 1.5rem;
+      color: #4a5568;
+      margin: 0 0 1rem 0;
+      font-weight: 400;
+    }
+
+    .roadmap-description {
+      font-size: 1.125rem;
+      color: #718096;
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .roadmap-main {
+      flex: 1;
+      padding: 3rem 1rem;
+    }
+
+    .roadmap-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .strategy-section {
+      background: white;
+      border-radius: 16px;
+      padding: 2.5rem;
+      margin-bottom: 3rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .strategy-section h2 {
+      font-size: 2rem;
+      color: #1a202c;
+      margin: 0 0 1rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .strategy-section h3 {
+      font-size: 1.5rem;
+      color: #2d3748;
+      margin: 2rem 0 1rem 0;
+    }
+
+    .strategy-section p {
+      color: #4a5568;
+      line-height: 1.7;
+      margin: 0.5rem 0;
+    }
+
+    .strategy-section ul {
+      color: #4a5568;
+      line-height: 1.8;
+      margin: 1rem 0;
+      padding-left: 1.5rem;
+    }
+
+    .phase-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .phase-card {
+      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+      border-radius: 12px;
+      padding: 1.5rem;
+      border-left: 4px solid #667eea;
+    }
+
+    .phase-card h4 {
+      font-size: 1.25rem;
+      color: #2d3748;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .phase-card p {
+      font-size: 0.95rem;
+      color: #4a5568;
+      margin: 0.5rem 0;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .feature-category {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+
+    .feature-category:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+      border-color: #667eea;
+    }
+
+    .feature-category.expanded {
+      border-color: #667eea;
+    }
+
+    .feature-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .feature-icon {
+      font-size: 2.5rem;
+      flex-shrink: 0;
+    }
+
+    .feature-title-section {
+      flex: 1;
+    }
+
+    .feature-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #1a202c;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .priority-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .priority-high {
+      background: #fed7d7;
+      color: #c53030;
+    }
+
+    .priority-medium {
+      background: #feebc8;
+      color: #c05621;
+    }
+
+    .priority-low {
+      background: #e6fffa;
+      color: #234e52;
+    }
+
+    .feature-summary {
+      color: #4a5568;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .feature-details {
+      display: none;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .feature-category.expanded .feature-details {
+      display: block;
+    }
+
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 1rem 0;
+    }
+
+    .feature-list li {
+      padding: 0.5rem 0;
+      padding-left: 1.5rem;
+      position: relative;
+      color: #2d3748;
+      line-height: 1.6;
+    }
+
+    .feature-list li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #667eea;
+      font-weight: bold;
+    }
+
+    .tech-considerations {
+      background: #f7fafc;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    .tech-considerations h4 {
+      font-size: 1rem;
+      color: #2d3748;
+      margin: 0 0 0.75rem 0;
+      font-weight: 600;
+    }
+
+    .tech-considerations ul {
+      margin: 0;
+      padding-left: 1.5rem;
+      color: #4a5568;
+      font-size: 0.9rem;
+    }
+
+    .expand-indicator {
+      font-size: 1.25rem;
+      color: #a0aec0;
+      transition: transform 0.3s ease;
+    }
+
+    .feature-category.expanded .expand-indicator {
+      transform: rotate(180deg);
+    }
+
+    .quick-wins-section {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 16px;
+      padding: 2.5rem;
+      margin-bottom: 3rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .quick-wins-section h2 {
+      color: white;
+      margin: 0 0 1.5rem 0;
+      font-size: 2rem;
+    }
+
+    .quick-wins-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .quick-win-card {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .quick-win-card h3 {
+      font-size: 1.25rem;
+      color: white;
+      margin: 0 0 0.75rem 0;
+    }
+
+    .quick-win-card p {
+      color: rgba(255, 255, 255, 0.9);
+      margin: 0.5rem 0;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .quick-win-stats {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-badge {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.375rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .footer {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 2rem 1rem;
+      text-align: center;
+      margin-top: 4rem;
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      color: #718096;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    .footer-link {
+      color: #667eea;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .footer-link:hover {
+      color: #764ba2;
+    }
+
+    @media (max-width: 768px) {
+      .roadmap-title {
+        font-size: 2rem;
+      }
+
+      .roadmap-subtitle {
+        font-size: 1.25rem;
+      }
+
+      .strategy-section,
+      .quick-wins-section {
+        padding: 1.5rem;
+      }
+
+      .feature-category {
+        padding: 1.5rem;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+
+      .quick-wins-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="roadmap-page">
+    <header class="roadmap-header">
+      <div class="roadmap-header-content">
+        <a href="index.html" class="back-link">
+          <span>←</span>
+          <span>Back to Home</span>
+        </a>
+        <h1 class="roadmap-title">Feature Roadmap</h1>
+        <p class="roadmap-subtitle">Expansion Opportunities & Future Development</p>
+        <p class="roadmap-description">
+          Explore the exciting features and capabilities we're planning for the Organization Visualization Tool. 
+          This roadmap outlines potential expansions, implementation strategies, and priorities for future development.
+        </p>
+      </div>
+    </header>
+
+    <main class="roadmap-main">
+      <div class="roadmap-container">
+        
+        <!-- Implementation Strategy -->
+        <section class="strategy-section">
+          <h2>📋 Implementation Strategy</h2>
+          <p>We recommend a <strong>phased approach</strong> to feature development, focusing on high-impact, lower-effort features first:</p>
+          
+          <div class="phase-grid">
+            <div class="phase-card">
+              <h4>Phase 1: Quick Wins (1-2 weeks each)</h4>
+              <p>Features that add immediate value with minimal infrastructure changes</p>
+              <ul>
+                <li>Import/Export capabilities</li>
+                <li>Advanced search & filtering</li>
+                <li>Comments & annotations</li>
+                <li>Activity & audit logs</li>
+              </ul>
+            </div>
+            
+            <div class="phase-card">
+              <h4>Phase 2: Foundation Building (2-4 weeks each)</h4>
+              <p>Infrastructure that enables future features</p>
+              <ul>
+                <li>Notifications system</li>
+                <li>Approval workflows</li>
+                <li>Enhanced permissions</li>
+                <li>Real-time collaboration</li>
+              </ul>
+            </div>
+            
+            <div class="phase-card">
+              <h4>Phase 3: Advanced Features (4-8 weeks each)</h4>
+              <p>Sophisticated capabilities</p>
+              <ul>
+                <li>Custom dashboards</li>
+                <li>Scenario planning</li>
+                <li>Advanced analytics</li>
+                <li>External integrations</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick Wins -->
+        <section class="quick-wins-section">
+          <h2>🎖️ Recommended Quick Wins</h2>
+          <p>If you're looking to add value quickly, start with these high-impact, lower-effort features:</p>
+          
+          <div class="quick-wins-grid">
+            <div class="quick-win-card">
+              <h3>1. CSV Import/Export</h3>
+              <p>Makes it easy to populate and share organizational data in bulk</p>
+              <div class="quick-win-stats">
+                <span class="stat-badge">⏱️ 1-2 weeks</span>
+                <span class="stat-badge">📈 High Impact</span>
+                <span class="stat-badge">🛠️ Low Effort</span>
+              </div>
+            </div>
+            
+            <div class="quick-win-card">
+              <h3>2. Advanced Search</h3>
+              <p>Essential for finding nodes and people in large organizations</p>
+              <div class="quick-win-stats">
+                <span class="stat-badge">⏱️ 1-2 weeks</span>
+                <span class="stat-badge">📈 High Impact</span>
+                <span class="stat-badge">🛠️ Medium Effort</span>
+              </div>
+            </div>
+            
+            <div class="quick-win-card">
+              <h3>3. Comments on Nodes</h3>
+              <p>Enables team discussions and collaborative decision-making</p>
+              <div class="quick-win-stats">
+                <span class="stat-badge">⏱️ 2 weeks</span>
+                <span class="stat-badge">📈 High Impact</span>
+                <span class="stat-badge">🛠️ Medium Effort</span>
+              </div>
+            </div>
+            
+            <div class="quick-win-card">
+              <h3>4. Audit Trail</h3>
+              <p>Track who changed what for accountability and compliance</p>
+              <div class="quick-win-stats">
+                <span class="stat-badge">⏱️ 1-2 weeks</span>
+                <span class="stat-badge">📈 Medium Impact</span>
+                <span class="stat-badge">🛠️ Low Effort</span>
+              </div>
+            </div>
+            
+            <div class="quick-win-card">
+              <h3>5. Saved Views/Filters</h3>
+              <p>Quick access to commonly used organizational views</p>
+              <div class="quick-win-stats">
+                <span class="stat-badge">⏱️ 1 week</span>
+                <span class="stat-badge">📈 Medium Impact</span>
+                <span class="stat-badge">🛠️ Low Effort</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Feature Categories -->
+        <section class="strategy-section">
+          <h2>🚀 Feature Categories</h2>
+          <p>Click on any category to explore detailed features, technical considerations, and implementation priorities:</p>
+          
+          <div class="features-grid">
+            
+            <!-- Category 1 -->
+            <div class="feature-category" onclick="this.classList.toggle('expanded')">
+              <div class="feature-header">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title-section">
+                  <h3 class="feature-title">Enhanced Data Management</h3>
+                  <span class="priority-badge priority-high">HIGH PRIORITY</span>
+                </div>
+                <span class="expand-indicator">▼</span>
+              </div>
+              <p class="feature-summary">Essential tools for importing, exporting, and integrating organizational data with external systems.</p>
+              
+              <div class="feature-details">
+                <ul class="feature-list">
+                  <li><strong>CSV/Excel/JSON Import/Export</strong> - Bulk data operations</li>
+                  <li><strong>API & Webhooks</strong> - RESTful API for integrations</li>
+                  <li><strong>External System Integration</strong> - HR systems, Slack, Teams</li>
+                  <li><strong>Audit Trail</strong> - Track all changes with rollback</li>
+                  <li><strong>Version History</strong> - Snapshots and comparison views</li>
+                </ul>
+                <div class="tech-considerations">
+                  <h4>Technical Considerations</h4>
+                  <ul>
+                    <li>Database tables: audit_logs, snapshots, api_keys, webhooks</li>
+                    <li>CSV parsing with PapaParse library</li>
+                    <li>REST API via Supabase Edge Functions</li>
+                    <li>Webhook queue system for event notifications</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Category 2 -->
+            <div class="feature-category" onclick="this.classList.toggle('expanded')">
+              <div class="feature-header">
+                <div class="feature-icon">💬</div>
+                <div class="feature-title-section">
+                  <h3 class="feature-title">Collaboration & Communication</h3>
+                  <span class="priority-badge priority-medium">MEDIUM PRIORITY</span>
+                </div>
+                <span class="expand-indicator">▼</span>
+              </div>
+              <p class="feature-summary">Enable team collaboration with real-time editing, comments, and approval workflows.</p>
+              
+              <div class="feature-details">
+                <ul class="feature-list">
+                  <li><strong>Real-time Collaboration</strong> - See who's viewing/editing</li>
+                  <li><strong>Comments & Annotations</strong> - Discussion threads with @mentions</li>
+                  <li><strong>Notifications System</strong> - Email and in-app alerts</li>
+                  <li><strong>Approval Workflows</strong> - Review and approve changes</li>
+                </ul>
+                <div class="tech-considerations">
+                  <h4>Technical Considerations</h4>
+                  <ul>
+                    <li>Supabase Realtime for presence and live updates</li>
+                    <li>Database tables: comments, notifications, approval_requests</li>
+                    <li>Email integration with SendGrid or AWS SES</li>
+                    <li>WebSocket connection management</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Category 3 -->
+            <div class="feature-category" onclick="this.classList.toggle('expanded')">
+              <div class="feature-header">
+                <div class="feature-icon">📈</div>
+                <div class="feature-title-section">
+                  <h3 class="feature-title">Advanced Analytics & Reporting</h3>
+                  <span class="priority-badge priority-high">HIGH PRIORITY</span>
+                </div>
+                <span class="expand-indicator">▼</span>
+              </div>
+              <p class="feature-summary">Custom dashboards, reports, and predictive analytics for data-driven decision making.</p>
+              
+              <div class="feature-details">
+                <ul class="feature-list">
+                  <li><strong>Custom Dashboards</strong> - Drag-and-drop widgets</li>
+                  <li><strong>Report Builder</strong> - PDF/PowerPoint generation</li>
+                  <li><strong>Comparative Analysis</strong> - Compare over time</li>
+                  <li><strong>Predictive Analytics</strong> - Forecast headcount and budgets</li>
+                  <li><strong>Cost Analysis</strong> - Track salaries and operational costs</li>
+                </ul>
+                <div class="tech-considerations">
+                  <h4>Technical Considerations</h4>
+                  <ul>
+                    <li>Database tables: dashboards, widgets, reports, cost_data</li>
+                    <li>PDF generation with jsPDF library</li>
+                    <li>Dashboard UI with GridStack.js</li>
+                    <li>Analytics engine for forecasting</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Category 4 -->
+            <div class="feature-category" onclick="this.classList.toggle('expanded')">
+              <div class="feature-header">
+                <div class="feature-icon">👥</div>
+                <div class="feature-title-section">
+                  <h3 class="feature-title">People-Focused Features</h3>
+                  <span class="priority-badge priority-medium">MEDIUM PRIORITY</span>
+                </div>
+                <span class="expand-indicator">▼</span>
+              </div>
+              <p class="feature-summary">Employee profiles, succession planning, skills tracking, and performance integration.</p>
+              
+              <div class="feature-details">
+                <ul class="feature-list">
+                  <li><strong>Employee Directory</strong> - Profiles with skills and certifications</li>
+                  <li><strong>Succession Planning</strong> - Identify successors and readiness</li>
+                  <li><strong>Skills Matrix</strong> - Track competencies and gaps</li>
+                  <li><strong>Performance Integration</strong> - Link reviews and goals</li>
+                  <li><strong>Onboarding Workflows</strong> - Automated checklists</li>
+                </ul>
+                <div class="tech-considerations">
+                  <h4>Technical Considerations</h4>
+                  <ul>
+                    <li>Database tables: employees, skills, succession_plans</li>
+                    <li>Employee profile component with photo upload</li>
+                    <li>Skills taxonomy and management system</li>
+                    <li>Workflow engine for onboarding</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Category 5 -->
+            <div class="feature-category" onclick="this.classList.toggle('expanded')">
+              <div class="feature-header">
+                <div class="feature-icon">📁</div>
+                <div class="feature-title-section">
+                  <h3 class="feature-title">Document Management</h3>
+                  <span class="priority-badge priority-medium">MEDIUM PRIORITY</span>
+                </div>
+                <span class="expand-indicator">▼</span>
+              </div>
+              <p class="feature-summary">File attachments, resource library, and knowledge base integration.</p>
+              
+              <div class="feature-details">
+                <ul class="feature-list">
+                  <li><strong>File Attachments</strong> - Attach documents to nodes</li>
+                  <li><strong>Resource Library</strong> - Centralized document storage</li>
+                  <li><strong>Template Library</strong> - Job descriptions and policies</li>
+                  <li><strong>Knowledge Base</strong> - Wiki-style documentation</li>
+                </ul>
+                <div class="tech-considerations">
+                  <h4>Technical Considerations</h4>
+                  <ul>
+                    <li>Supabase Storage for file management</li>
+                    <li>Database tables: attachments, resources, templates</li>
+                    <li>File upload with drag-and-drop interface</li>
+                    <li>Document search indexing</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Category 6 -->
+            <div class="feature-category" onclick="this.classList.toggle('expanded')">
+              <div class="feature-header">
+                <div class="feature-icon">🎯</div>
+                <div class="feature-title-section">
+                  <h3 class="feature-title">Planning & Scenario Modeling</h3>
+                  <span class="priority-badge priority-high">HIGH PRIORITY</span>
+                </div>
+                <span class="expand-indicator">▼</span>
+              </div>
+              <p class="feature-summary">Create what-if scenarios, budget planning, and reorganization tools.</p>
+              
+              <div class="feature-details">
+                <ul class="feature-list">
+                  <li><strong>Scenario Planning</strong> - Create what-if structures</li>
+                  <li><strong>Budgeting Tools</strong> - Allocation and forecasting</li>
+                  <li><strong>Headcount Planning</strong> - Model growth scenarios</li>
+                  <li><strong>Reorganization Tools</strong> - Drag-and-drop restructuring</li>
+                </ul>
+                <div class="tech-considerations">
+                  <h4>Technical Considerations</h4>
+                  <ul>
+                    <li>Database tables: scenarios, scenario_nodes, budgets</li>
+                    <li>Scenario clone functionality</li>
+                    <li>Budget calculation engine</li>
+                    <li>Impact analysis algorithms</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Category 7 -->
+            <div class="feature-category" onclick="this.classList.toggle('expanded')">
+              <div class="feature-header">
+                <div class="feature-icon">🔍</div>
+                <div class="feature-title-section">
+                  <h3 class="feature-title">Search & Discovery</h3>
+                  <span class="priority-badge priority-high">HIGH PRIORITY</span>
+                </div>
+                <span class="expand-indicator">▼</span>
+              </div>
+              <p class="feature-summary">Advanced search, smart filters, and saved views for efficient navigation.</p>
+              
+              <div class="feature-details">
+                <ul class="feature-list">
+                  <li><strong>Advanced Search</strong> - Full-text search across all data</li>
+                  <li><strong>Smart Filters</strong> - Filter by multiple criteria</li>
+                  <li><strong>Saved Views</strong> - Create and share custom views</li>
+                  <li><strong>Quick Navigation</strong> - Keyboard shortcuts</li>
+                </ul>
+                <div class="tech-considerations">
+                  <h4>Technical Considerations</h4>
+                  <ul>
+                    <li>PostgreSQL full-text search or Algolia integration</li>
+                    <li>Database tables: saved_searches, user_views</li>
+                    <li>Search ranking algorithms</li>
+                    <li>Filter UI with criteria builder</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Category 8 -->
+            <div class="feature-category" onclick="this.classList.toggle('expanded')">
+              <div class="feature-header">
+                <div class="feature-icon">📱</div>
+                <div class="feature-title-section">
+                  <h3 class="feature-title">Mobile & Accessibility</h3>
+                  <span class="priority-badge priority-medium">MEDIUM PRIORITY</span>
+                </div>
+                <span class="expand-indicator">▼</span>
+              </div>
+              <p class="feature-summary">Native mobile apps, offline mode, and WCAG compliance.</p>
+              
+              <div class="feature-details">
+                <ul class="feature-list">
+                  <li><strong>Native Mobile Apps</strong> - iOS and Android apps</li>
+                  <li><strong>Offline Mode</strong> - Work without internet</li>
+                  <li><strong>Accessibility</strong> - WCAG 2.1 AA compliance</li>
+                  <li><strong>PWA</strong> - Installable progressive web app</li>
+                </ul>
+                <div class="tech-considerations">
+                  <h4>Technical Considerations</h4>
+                  <ul>
+                    <li>PWA manifest and service worker</li>
+                    <li>React Native or Flutter for native apps</li>
+                    <li>Local storage caching strategy</li>
+                    <li>ARIA labels and semantic HTML</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Category 9 -->
+            <div class="feature-category" onclick="this.classList.toggle('expanded')">
+              <div class="feature-header">
+                <div class="feature-icon">🔒</div>
+                <div class="feature-title-section">
+                  <h3 class="feature-title">Security & Compliance</h3>
+                  <span class="priority-badge priority-high">HIGH PRIORITY</span>
+                </div>
+                <span class="expand-indicator">▼</span>
+              </div>
+              <p class="feature-summary">Granular permissions, SSO, encryption, and compliance tools.</p>
+              
+              <div class="feature-details">
+                <ul class="feature-list">
+                  <li><strong>Granular Permissions</strong> - Field-level access control</li>
+                  <li><strong>Compliance Tools</strong> - GDPR/SOC2 features</li>
+                  <li><strong>SSO Integration</strong> - SAML, OAuth, Active Directory</li>
+                  <li><strong>Data Encryption</strong> - End-to-end encryption</li>
+                </ul>
+                <div class="tech-considerations">
+                  <h4>Technical Considerations</h4>
+                  <ul>
+                    <li>Row-level security (RLS) in Supabase</li>
+                    <li>Database tables: permissions, roles, security_events</li>
+                    <li>SSO provider integration (Auth0, Okta, Azure AD)</li>
+                    <li>Field-level encryption implementation</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Category 10 -->
+            <div class="feature-category" onclick="this.classList.toggle('expanded')">
+              <div class="feature-header">
+                <div class="feature-icon">⚙️</div>
+                <div class="feature-title-section">
+                  <h3 class="feature-title">Workflow Automation</h3>
+                  <span class="priority-badge priority-medium">MEDIUM PRIORITY</span>
+                </div>
+                <span class="expand-indicator">▼</span>
+              </div>
+              <p class="feature-summary">Task management, automated alerts, and custom workflow rules.</p>
+              
+              <div class="feature-details">
+                <ul class="feature-list">
+                  <li><strong>Task Management</strong> - Assign and track tasks</li>
+                  <li><strong>Automated Alerts</strong> - Threshold-based notifications</li>
+                  <li><strong>Calendar Integration</strong> - Sync events and milestones</li>
+                  <li><strong>Email Integration</strong> - Send updates from app</li>
+                  <li><strong>Custom Workflows</strong> - Build if-this-then-that rules</li>
+                </ul>
+                <div class="tech-considerations">
+                  <h4>Technical Considerations</h4>
+                  <ul>
+                    <li>Database tables: tasks, workflow_rules, calendar_events</li>
+                    <li>Workflow engine with rule evaluation</li>
+                    <li>Calendar API integration (Google, Outlook)</li>
+                    <li>Task UI with Kanban or list view</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- Getting Started -->
+        <section class="strategy-section">
+          <h2>🚦 Getting Started</h2>
+          
+          <h3>For Developers</h3>
+          <ul>
+            <li>Review the current codebase structure</li>
+            <li>Choose a feature from Phase 1 (Quick Wins)</li>
+            <li>Read the technical considerations for that feature</li>
+            <li>Create a feature branch: <code>git checkout -b feature/[feature-name]</code></li>
+            <li>Implement with tests and documentation</li>
+          </ul>
+
+          <h3>For Product Managers</h3>
+          <ul>
+            <li>Gather user feedback on feature priorities</li>
+            <li>Review the prioritization matrix in the documentation</li>
+            <li>Create user stories for chosen features</li>
+            <li>Work with developers on implementation timeline</li>
+            <li>Plan beta testing and rollout strategy</li>
+          </ul>
+
+          <h3>For Users</h3>
+          <ul>
+            <li>Review this roadmap to understand upcoming features</li>
+            <li>Provide feedback on what matters most to you</li>
+            <li>Participate in beta testing when available</li>
+            <li>Check the main README for current feature status</li>
+          </ul>
+        </section>
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <p>For more detailed documentation, visit our <a href="docs/feature-roadmap.md" class="footer-link">technical roadmap</a></p>
+        <div class="footer-links">
+          <a href="index.html" class="footer-link">Home</a>
+          <a href="docs/index.md" class="footer-link">Documentation</a>
+          <a href="https://github.com/rian010194/OrgVis" target="_blank" class="footer-link">GitHub</a>
+        </div>
+        <p style="margin-top: 1rem; font-size: 0.9rem;">Last updated: October 2025</p>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
+

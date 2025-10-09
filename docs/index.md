@@ -9,6 +9,10 @@ Welcome to the Organization Visualization Tool documentation. This guide will he
 - [Supabase Setup](supabase-setup.md) - Database configuration
 - [Mobile Features Guide](mobile-features.md) - Mobile-specific features and optimization
 
+## 🗺️ Roadmap & Future Features
+
+- [Feature Roadmap](feature-roadmap.md) - Explore expansion opportunities and future development plans
+
 ## 🛠️ Configuration & Deployment
 
 - [Supabase Instructions](supabase-instructions.md) - Step-by-step Supabase setup
