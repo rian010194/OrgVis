@@ -403,12 +403,18 @@ export class OrgDatabase {
   }
 
   // Delete all metrics for a specific node
-  async deleteMetricsForNode(nodeId) {
-    const { error } = await this.supabase
+  async deleteMetricsForNode(nodeId, organizationId = null) {
+    let query = this.supabase
       .from('metrics')
       .delete()
       .eq('node_id', nodeId);
     
+    // Add organization filter if provided
+    if (organizationId) {
+      query = query.eq('organization_id', organizationId);
+    }
+    
+    const { error } = await query;
     if (error) throw error;
   }
 }

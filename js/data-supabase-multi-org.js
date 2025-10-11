@@ -577,6 +577,7 @@ const OrgStore = (() => {
 
   const updateNode = async (id, updates) => {
     try {
+      console.log('OrgStore.updateNode called:', { id, updates });
       const node = state.nodesById.get(id);
       if (!node) {
         throw new Error(`Nod med id ${id} saknas`);
@@ -596,7 +597,7 @@ const OrgStore = (() => {
         node.metrics = normaliseMetrics(updates.metrics) || [];
         
         // Save metrics to Supabase
-        await this.saveMetricsToSupabase(nodeId, node.metrics);
+        await saveMetricsToSupabase(id, node.metrics);
       }
       if (updates.responsibilities !== undefined) {
         node.responsibilities = normaliseStringList(updates.responsibilities);
@@ -622,8 +623,9 @@ const OrgStore = (() => {
     } catch (error) {
       console.error("Kunde inte uppdatera nod i Supabase", error);
       // In memory-only mode, still update the node locally
+      const localNode = state.nodesById.get(id);
       notify();
-      return clone(node);
+      return localNode ? clone(localNode) : null;
     }
   };
 
@@ -790,18 +792,23 @@ const OrgStore = (() => {
   // Save metrics to Supabase
   const saveMetricsToSupabase = async (nodeId, metrics) => {
     try {
+      console.log('Saving metrics to Supabase:', { nodeId, organizationId: state.currentOrganizationId, metricsCount: metrics.length });
+      
       // First, delete existing metrics for this node
-      await window.orgDb.deleteMetricsForNode(nodeId);
+      await window.orgDb.deleteMetricsForNode(nodeId, state.currentOrganizationId);
       
       // Then insert new metrics
       for (const metric of metrics) {
         if (metric && (Object.keys(metric.data || {}).length > 0 || (metric.values && metric.values.length > 0))) {
           const supabaseMetric = window.convertFrontendMetricToSupabase(metric, state.currentOrganizationId, nodeId);
           if (supabaseMetric && Object.keys(supabaseMetric.data || {}).length > 0) {
+            console.log('Creating metric:', supabaseMetric);
             await window.orgDb.createMetric(supabaseMetric);
           }
         }
       }
+      
+      console.log('Metrics saved successfully to Supabase');
     } catch (error) {
       console.error('Error saving metrics to Supabase:', error);
     }

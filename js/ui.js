@@ -3269,7 +3269,10 @@ const OrgUI = (() => {
         setTimeout(() => window.displayManageMetrics(nodeId), 100);
       }
       
-      refresh();
+      // Refresh the org chart visualization
+      if (typeof OrgChart !== 'undefined' && typeof OrgChart.refresh === 'function') {
+        OrgChart.refresh();
+      }
     }
   };
 
@@ -3332,6 +3335,7 @@ const OrgUI = (() => {
       
       // Check if we're editing an existing metric
       let updatedMetrics;
+      
       if (window.editingMetric && window.editingMetric.nodeId === nodeId) {
         // Replace the existing metric
         updatedMetrics = [...(node.metrics || [])];

@@ -1,0 +1,267 @@
+OBSERVABLE NOTEBOOK - QUICK REFERENCE
+=====================================
+
+Kopiera cellerna nedan en i taget till din Observable notebook.
+Tryck Shift+Enter efter varje cell för att köra den.
+
+----- CELL 1: Supabase Setup -----
+supabase = {
+  const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+  return createClient(
+    'https://cihgptcfhaeujxhpvame.supabase.co',
+    secrets.SUPABASE_KEY
+  );
+}
+
+----- CELL 2: Hämta organisations -----
+organizations = {
+  const { data, error } = await supabase
+    .from('organizations')
+    .select('*');
+  
+  if (error) {
+    console.error('Connection error:', error);
+    throw error;
+  }
+  
+  return data;
+}
+
+----- CELL 3: Visa organisations -----
+Inputs.table(organizations, {
+  columns: ["id", "name", "type", "description"],
+  header: {
+    id: "ID",
+    name: "Name",
+    type: "Type", 
+    description: "Description"
+  }
+})
+
+----- CELL 4: Välj organisation -----
+viewof selectedOrgId = Inputs.select(
+  organizations.map(org => org.id),
+  {
+    label: "Select Organization",
+    format: id => organizations.find(o => o.id === id)?.name || id,
+    value: organizations[0]?.id
+  }
+)
+
+----- CELL 5: Hämta noder -----
+nodes = {
+  const { data, error } = await supabase
+    .from('nodes')
+    .select('*')
+    .eq('organization_id', selectedOrgId)
+    .order('name');
+  
+  if (error) throw error;
+  
+  return data;
+}
+
+----- CELL 6: Visa noder -----
+Inputs.table(nodes, {
+  columns: ["id", "name", "type", "role", "parent_id"],
+  header: {
+    id: "ID",
+    name: "Name",
+    type: "Type",
+    role: "Role",
+    parent_id: "Parent"
+  },
+  rows: 20
+})
+
+----- CELL 7: Välj nod -----
+viewof selectedNodeId = Inputs.select(
+  nodes,
+  {
+    label: "Select node to edit",
+    format: node => `${node.name} (${node.type})`,
+    value: nodes[0]
+  }
+)
+
+----- CELL 8: Visa nod info -----
+md`### Selected Node: ${selectedNodeId?.name || 'None'}
+- **ID:** ${selectedNodeId?.id}
+- **Type:** ${selectedNodeId?.type}
+- **Role:** ${selectedNodeId?.role || 'N/A'}
+- **Parent:** ${selectedNodeId?.parent_id || 'Root'}
+`
+
+----- CELL 9: Redigeringsformulär -----
+viewof editedNode = Inputs.form([
+  Inputs.text({
+    label: "Name",
+    value: selectedNodeId?.name || ""
+  }),
+  Inputs.select(
+    ["Unit", "Department", "Team", "SupportOffice"],
+    {
+      label: "Type",
+      value: selectedNodeId?.type || "Unit"
+    }
+  ),
+  Inputs.textarea({
+    label: "Role",
+    value: selectedNodeId?.role || "",
+    rows: 3
+  })
+])
+
+----- CELL 10: Spara nod -----
+viewof saveNode = Inputs.button("💾 Save Changes", {
+  reduce: async () => {
+    if (!selectedNodeId?.id) {
+      alert('Please select a node first');
+      return;
+    }
+    
+    const [name, type, role] = editedNode;
+    
+    const { data, error } = await supabase
+      .from('nodes')
+      .update({
+        name: name,
+        type: type,
+        role: role,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', selectedNodeId.id)
+      .eq('organization_id', selectedOrgId)
+      .select();
+    
+    if (error) {
+      alert('❌ Error: ' + error.message);
+      console.error(error);
+    } else {
+      alert('✅ Node updated successfully!');
+    }
+    
+    return data;
+  }
+})
+
+----- CELL 11: Hämta metrics -----
+nodeMetrics = {
+  if (!selectedNodeId?.id) return [];
+  
+  const { data, error } = await supabase
+    .from('metrics')
+    .select('*')
+    .eq('node_id', selectedNodeId.id)
+    .eq('organization_id', selectedOrgId);
+  
+  if (error) throw error;
+  
+  return data;
+}
+
+----- CELL 12: Visa metrics diagram -----
+Plot.plot({
+  marks: [
+    Plot.barY(
+      nodeMetrics[0]?.data ? Object.entries(nodeMetrics[0].data) : [],
+      {
+        x: ([key]) => key,
+        y: ([_, value]) => value,
+        fill: "steelblue",
+        tip: true
+      }
+    )
+  ],
+  x: {
+    label: "Activity",
+    tickRotate: -45
+  },
+  y: {
+    label: nodeMetrics[0]?.unit || "Value"
+  },
+  marginBottom: 80,
+  title: nodeMetrics[0]?.name || "No metrics available"
+})
+
+----- CELL 13: Ny metric formulär -----
+viewof newMetric = Inputs.form([
+  Inputs.text({
+    label: "Metric Name",
+    placeholder: "e.g., Time spent on:",
+    value: "Time spent on:"
+  }),
+  Inputs.select(
+    ["pie", "bar", "line", "table"],
+    {
+      label: "Chart Type",
+      value: "pie"
+    }
+  ),
+  Inputs.text({
+    label: "Unit",
+    value: "%",
+    placeholder: "e.g., %, hours, kr"
+  }),
+  Inputs.textarea({
+    label: "Data (key:value pairs, one per line)",
+    placeholder: "teaching:20\nresearch:15\nadmin:5",
+    rows: 5
+  })
+])
+
+----- CELL 14: Spara metric -----
+viewof saveMetric = Inputs.button("📊 Add Metric", {
+  reduce: async () => {
+    if (!selectedNodeId?.id) {
+      alert('Please select a node first');
+      return;
+    }
+    
+    const [name, type, unit, dataText] = newMetric;
+    
+    const data = {};
+    dataText.split('\n').forEach(line => {
+      const [key, value] = line.split(':').map(s => s.trim());
+      if (key && value) {
+        data[key] = parseFloat(value) || 0;
+      }
+    });
+    
+    if (Object.keys(data).length === 0) {
+      alert('Please add at least one data point');
+      return;
+    }
+    
+    const { error } = await supabase
+      .from('metrics')
+      .insert({
+        organization_id: selectedOrgId,
+        node_id: selectedNodeId.id,
+        name: name || "Time spent on:",
+        type: type,
+        unit: unit || "%",
+        data: data
+      });
+    
+    if (error) {
+      alert('❌ Error: ' + error.message);
+      console.error(error);
+    } else {
+      alert('✅ Metric added successfully!');
+    }
+    
+    return data;
+  }
+})
+
+=====================================
+KLART! Nu har du 14 cells i din Observable notebook.
+
+Testa:
+1. Välj organisation
+2. Välj nod
+3. Ändra namn
+4. Klicka "💾 Save Changes"
+5. Öppna din app → se ändringen live!
+
