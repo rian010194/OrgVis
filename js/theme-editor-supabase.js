@@ -329,7 +329,7 @@ class SupabaseThemeEditor {
   }
 
   async loadCurrentTheme(container = null) {
-    const currentOrgId = localStorage.getItem('current_organization_id');
+    const currentOrgId = localStorage.getItem('current_organization_id') || 'local_org';
     if (!currentOrgId) {
       // Don't automatically load any organization - user should choose from landing page
       console.log('SupabaseThemeEditor: No current organization ID, not loading theme');
@@ -434,6 +434,35 @@ class SupabaseThemeEditor {
       console.log('SupabaseThemeEditor: Theme loaded into form successfully');
     } catch (error) {
       console.error('SupabaseThemeEditor: Error loading current theme:', error);
+      // Fallback to local branding if available
+      const localBranding = this.loadBrandingLocal(currentOrgId);
+      if (localBranding) {
+        console.log('SupabaseThemeEditor: Applying locally saved branding');
+        this.applyTheme(localBranding, {});
+        // Try to populate form fields too
+        const getElement = (id) => (container ? container.querySelector(`#${id}`) : document.getElementById(id));
+        const mapping = {
+          primaryColor: 'themePrimaryColor',
+          secondaryColor: 'themeSecondaryColor',
+          backgroundColor: 'themeBackgroundColor',
+          textColor: 'themeTextColor',
+          borderColor: 'themeBorderColor',
+          mutedColor: 'themeMutedColor',
+          nodeBackgroundColor: 'themeNodeBackgroundColor',
+          buttonBackgroundColor: 'themeButtonBackgroundColor',
+          accentBackgroundColor: 'themeAccentBackgroundColor',
+          treeItemBackgroundColor: 'themeTreeItemBackgroundColor',
+          hoverColor: 'themeHoverColor',
+          selectedColor: 'themeSelectedColor',
+          nodeStrokeColor: 'themeNodeStrokeColor'
+        };
+        Object.keys(mapping).forEach(k => {
+          const el = getElement(mapping[k]);
+          const txt = getElement(mapping[k] + 'Text');
+          if (el && localBranding[k]) el.value = localBranding[k];
+          if (txt && localBranding[k]) txt.value = localBranding[k];
+        });
+      }
     }
   }
 
@@ -563,6 +592,16 @@ class SupabaseThemeEditor {
           // Find the form container to apply changes to the correct form
           const formContainer = target.closest('#editThemeForm');
           this.applyThemePreset(selectedTheme, formContainer);
+
+          // Also update chart palette to match preset (if ChartRenderer is available)
+          if (window.ChartRenderer && typeof window.ChartRenderer.setDefaultPalette === 'function') {
+            try {
+              window.ChartRenderer.setDefaultPalette(target.value);
+              console.log('SupabaseThemeEditor: Chart palette set to', target.value);
+            } catch (err) {
+              console.warn('SupabaseThemeEditor: Failed to set chart palette', err);
+            }
+          }
         }
       }
     });
@@ -740,16 +779,33 @@ class SupabaseThemeEditor {
     if (selectedPreview) selectedPreview.style.background = theme.selectedColor;
   }
 
+  getActiveThemeForm() {
+    // Prefer an editThemeForm inside a visible theme panel
+    const panelForm = document.querySelector('#editThemePanel:not(.hidden) #editThemeForm');
+    if (panelForm) return panelForm;
+    // Fallback: form cloned into detail panel
+    const detailForm = document.querySelector('#detailPanel #editThemeForm');
+    if (detailForm) return detailForm;
+    // Last resort: any form with this id
+    return document.getElementById('editThemeForm');
+  }
+
   previewThemeChanges() {
-    // Get current form values
-    const orgName = document.getElementById('themeOrgName')?.value || '';
-    const orgDescription = document.getElementById('themeOrgDescription')?.value || '';
-    const primaryColor = document.getElementById('themePrimaryColor')?.value || '#ff5a00';
-    const secondaryColor = document.getElementById('themeSecondaryColor')?.value || '#e53e3e';
-    const backgroundColor = document.getElementById('themeBackgroundColor')?.value || '#f8fafc';
-    const textColor = document.getElementById('themeTextColor')?.value || '#1a202c';
-    const borderColor = document.getElementById('themeBorderColor')?.value || '#e2e8f0';
-    const mutedColor = document.getElementById('themeMutedColor')?.value || '#718096';
+    const form = this.getActiveThemeForm();
+    const qv = (id, defVal) => {
+      if (!form) return defVal;
+      const el = form.querySelector('#' + id);
+      return (el && el.value) ? el.value : defVal;
+    };
+    // Get current form values from the active form container (avoid duplicate ID confusion)
+    const orgName = qv('themeOrgName', '');
+    const orgDescription = qv('themeOrgDescription', '');
+    const primaryColor = qv('themePrimaryColor', '#ff5a00');
+    const secondaryColor = qv('themeSecondaryColor', '#e53e3e');
+    const backgroundColor = qv('themeBackgroundColor', '#f8fafc');
+    const textColor = qv('themeTextColor', '#1a202c');
+    const borderColor = qv('themeBorderColor', '#e2e8f0');
+    const mutedColor = qv('themeMutedColor', '#718096');
 
     // Update header immediately with real-time preview
     const orgNameElement = document.getElementById('orgName');
@@ -1061,6 +1117,9 @@ class SupabaseThemeEditor {
       });
       
       console.log('SupabaseThemeEditor: Successfully updated organization');
+
+      // Also persist a local copy so the theme survives offline
+      this.saveBrandingLocal(currentOrgId, brandingData);
       
       // Apply theme immediately
       this.applyTheme(brandingData, orgUpdates);
@@ -1102,7 +1161,17 @@ class SupabaseThemeEditor {
         // Clear invalid organization ID
         localStorage.removeItem('current_organization_id');
       } else {
-        this.showErrorMessage('Error saving theme: ' + error.message);
+        // Fallback: Save locally so the theme persists without Supabase
+        try {
+          const currentOrgId = localStorage.getItem('current_organization_id') || 'local_org';
+          this.saveBrandingLocal(currentOrgId, brandingData);
+          // Apply immediately
+          this.applyTheme(brandingData, orgUpdates);
+          this.showSuccessMessage('Theme saved locally (offline). It will apply on load.');
+        } catch (e2) {
+          console.error('SupabaseThemeEditor: Local save failed:', e2);
+          this.showErrorMessage('Could not save theme. Check connection and try again.');
+        }
       }
     }
   }
@@ -1225,6 +1294,23 @@ class SupabaseThemeEditor {
       document.documentElement.style.setProperty('--node-stroke-selected', hexToRgba(brandingData.nodeStrokeColor, 0.12));
     }
 
+    // Try to set chart palette to match primary color if it matches a preset
+    try {
+      const primary = (brandingData.primaryColor || '').toLowerCase();
+      const presetByPrimary = {
+        '#ff5a00': 'orange',
+        '#2563eb': 'blue',
+        '#059669': 'green',
+        '#7c3aed': 'purple',
+        '#dc2626': 'red',
+      };
+      const paletteKey = presetByPrimary[primary];
+      if (paletteKey && window.ChartRenderer && typeof window.ChartRenderer.setDefaultPalette === 'function') {
+        window.ChartRenderer.setDefaultPalette(paletteKey);
+        console.log('SupabaseThemeEditor: Chart palette synced to', paletteKey);
+      }
+    } catch (_) {}
+
     // Apply font family
     const fontFamily = this.getFontFamily(brandingData.fontFamily);
     document.documentElement.style.setProperty('--font-family', fontFamily);
@@ -1251,6 +1337,28 @@ class SupabaseThemeEditor {
       if (orgLogo) {
         orgLogo.style.display = 'none';
       }
+    }
+  }
+
+  // Local fallback persistence
+  saveBrandingLocal(orgId, branding) {
+    try {
+      const key = `branding_local_${orgId}`;
+      localStorage.setItem(key, JSON.stringify(branding));
+      console.log('Saved branding locally under', key);
+    } catch (e) {
+      console.warn('Failed to save branding locally:', e);
+    }
+  }
+
+  loadBrandingLocal(orgId) {
+    try {
+      const key = `branding_local_${orgId}`;
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      console.warn('Failed to load branding locally:', e);
+      return null;
     }
   }
 

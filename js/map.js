@@ -29,7 +29,6 @@ const OrgMap = (() => {
 
   let container = null;
   let svg = null;
-  let canvasGroup = null;
   let linkGroup = null;
   let nodeGroup = null;
   let supportToggleGroup = null;
@@ -40,6 +39,12 @@ const OrgMap = (() => {
   let lastUserZoomTime = 0;
   let lastLayout = null;
   let isInitialised = false;
+  // Drag-to-scroll state
+  let isDragScrolling = false;
+  let dragStartX = 0;
+  let dragStartY = 0;
+  let dragStartScrollLeft = 0;
+  let dragStartScrollTop = 0;
 
   // Original D3 linkVertical generator for curved lines
   const linkGenerator = d3
@@ -48,16 +53,18 @@ const OrgMap = (() => {
     .y((point) => point.y);
 
   const handleZoom = (event) => {
+    // Re-enabled zoom/pan: apply transform to groups
     currentTransform = event.transform;
-    if (canvasGroup) {
-      canvasGroup.attr("transform", currentTransform);
-    }
+    applyCurrentTransform();
     lastUserZoomTime = Date.now();
   };
 
   const applyCurrentTransform = () => {
-    if (canvasGroup) {
-      canvasGroup.attr("transform", currentTransform);
+    if (svg) {
+      linkGroup.attr("transform", currentTransform);
+      nodeGroup.attr("transform", currentTransform);
+      supportToggleGroup.attr("transform", currentTransform);
+      supportBoxGroup.attr("transform", currentTransform);
     }
   };
 
@@ -86,10 +93,93 @@ const OrgMap = (() => {
   };
 
   const ensureTransformConsistency = () => {
-    // Ensure the current transform is properly applied to all canvas elements
-    if (canvasGroup && currentTransform) {
-      canvasGroup.attr("transform", currentTransform);
+    // Ensure the current transform is properly applied to all SVG groups
+    if (svg && currentTransform) {
+      applyCurrentTransform();
     }
+  };
+
+  // Find the nearest scrollable container; fallback to document.scrollingElement
+  const getScrollableContainer = (el) => {
+    let node = el;
+    while (node && node !== document.body && node !== document.documentElement) {
+      const style = window.getComputedStyle(node);
+      const overflowY = style.overflowY;
+      const overflowX = style.overflowX;
+      const canScrollY = (overflowY === 'auto' || overflowY === 'scroll') && node.scrollHeight > node.clientHeight;
+      const canScrollX = (overflowX === 'auto' || overflowX === 'scroll') && node.scrollWidth > node.clientWidth;
+      if (canScrollY || canScrollX) return node;
+      node = node.parentElement;
+    }
+    return document.scrollingElement || document.documentElement;
+  };
+
+  // Smoothly scroll a container to center the given SVG coordinates
+  const safeScrollToNode = (svgX, svgY, opts = {}) => {
+    if (!container || !svg) return;
+    const padding = typeof opts.padding === 'number' ? opts.padding : 60;
+    const duration = typeof opts.duration === 'number' ? opts.duration : 400;
+
+    const scrollContainer = getScrollableContainer(container);
+
+    // Convert SVG coords to container client coords by accounting for container position
+    const containerRect = scrollContainer.getBoundingClientRect();
+    const svgRect = svg.node().getBoundingClientRect();
+
+    // Node position relative to the page: svg top-left + node coords
+    const pageX = svgRect.left + svgX;
+    const pageY = svgRect.top + svgY;
+
+    // Desired scroll positions to center the node in the scroll container
+    const targetScrollLeft = (scrollContainer.scrollLeft + pageX) - (containerRect.left + scrollContainer.clientWidth / 2) + padding;
+    const targetScrollTop = (scrollContainer.scrollTop + pageY) - (containerRect.top + scrollContainer.clientHeight / 2) + padding;
+
+    // Clamp to bounds
+    const maxLeft = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+    const maxTop = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+    const finalLeft = Math.max(0, Math.min(maxLeft, targetScrollLeft));
+    const finalTop = Math.max(0, Math.min(maxTop, targetScrollTop));
+
+    try {
+      scrollContainer.scrollTo({ left: finalLeft, top: finalTop, behavior: duration === 0 ? 'auto' : 'smooth' });
+    } catch (_e) {
+      // Fallback for older browsers
+      scrollContainer.scrollLeft = finalLeft;
+      scrollContainer.scrollTop = finalTop;
+    }
+  };
+
+  // Briefly pulse-highlight the target node group for visual focus
+  const pulseHighlightNode = (nodeId) => {
+    if (!nodeGroup) return;
+    const nodeSel = nodeGroup.selectAll('g.map-node').filter(d => d && d.id === nodeId);
+    if (nodeSel.empty()) return;
+
+    // Add a temporary outline rect on top
+    nodeSel.each(function(d){
+      const g = d3.select(this);
+      // Remove existing pulse if any
+      g.selectAll('.focus-pulse').remove();
+      g.append('rect')
+        .attr('class', 'focus-pulse')
+        .attr('x', -NODE_WIDTH / 2 - 6)
+        .attr('y', -NODE_HEIGHT / 2 - 6)
+        .attr('width', NODE_WIDTH + 12)
+        .attr('height', NODE_HEIGHT + 12)
+        .attr('rx', 18)
+        .attr('ry', 18)
+        .attr('fill', 'none')
+        .attr('stroke', 'var(--selected, #ff5a00)')
+        .attr('stroke-width', 2)
+        .attr('opacity', 0)
+        .transition()
+        .duration(150)
+        .attr('opacity', 1)
+        .transition()
+        .duration(600)
+        .attr('opacity', 0)
+        .on('end', function() { d3.select(this).remove(); });
+    });
   };
 
   const focusNode = (nodeId, options = {}) => {
@@ -97,19 +187,7 @@ const OrgMap = (() => {
       return;
     }
     
-    // Skip focus if admin panel transition is in progress
-    if (window._adminPanelTransition) {
-      console.log('focusNode - skipping focus due to admin panel transition');
-      return;
-    }
-    
-    // Ensure dimensions are stable after UI changes (e.g., detail panel opens)
-    if (options && options.ensureStable !== false) {
-      waitForStableDimensions().then(() => {
-        focusNode(nodeId, Object.assign({}, options, { ensureStable: false }));
-      });
-      return;
-    }
+    // Simplified: no async waits or admin transition gating
     
     // First try to find the node in regular nodes
     let target = lastLayout.nodeData.find((node) => node.id === nodeId);
@@ -132,138 +210,46 @@ const OrgMap = (() => {
       }
     }
     
-    if (!target) {
-      console.warn('OrgMap: Node not found for focus:', nodeId);
-      return;
-    }
+    if (!target) { return; }
 
-    // Prefer actual SVG dimensions for accurate centering, fallback to container
-    let width = 0;
-    let height = 0;
-    if (svg && typeof svg.node === 'function') {
-      const svgEl = svg.node();
-      width = svgEl && (svgEl.clientWidth || svgEl.getBoundingClientRect().width || 0);
-      height = svgEl && (svgEl.clientHeight || svgEl.getBoundingClientRect().height || 0);
-      if ((!width || !height) && svgEl) {
-        // Fallback to attributes if present
-        const attrW = parseFloat(svgEl.getAttribute('width'));
-        const attrH = parseFloat(svgEl.getAttribute('height'));
-        if (!isNaN(attrW)) width = width || attrW;
-        if (!isNaN(attrH)) height = height || attrH;
-      }
-    }
-    if (!width || !height) {
-      const bounds = container ? container.getBoundingClientRect() : null;
-      width = bounds && bounds.width ? bounds.width : (container ? container.clientWidth : 0);
-      height = bounds && bounds.height ? bounds.height : (container ? container.clientHeight : 0);
-    }
-    // last resort fallbacks to avoid zeros
-    if (!width || width < 10) width = window.innerWidth || 1024;
-    if (!height || height < 10) height = Math.min(window.innerHeight || 768, 700);
-    if (!width) width = (lastLayout ? lastLayout.outerWidth : 0) || minInnerWidth + margins.left + margins.right;
-    if (!height) height = (lastLayout ? lastLayout.outerHeight : 0) || minInnerHeight + margins.top + margins.bottom;
-    
-    // In fullscreen mode, use viewport dimensions for better centering
-    if (document.body.classList.contains('detail-expanded')) {
-      width = Math.max(width, window.innerWidth * 0.8); // Use 80% of viewport width
-      height = Math.max(height, window.innerHeight * 0.8); // Use 80% of viewport height
-      console.log('focusNode - fullscreen mode detected, using viewport dimensions:', { width, height, viewportWidth: window.innerWidth, viewportHeight: window.innerHeight });
-    }
+    // Get current view size (simplified)
+    const { width, height } = getViewSize();
 
-    // Respect current zoom if no scale is specified; otherwise use provided scale.
-    // If the user interacted very recently, keep their scale unless caller overrides.
-    const currentScale = currentTransform && typeof currentTransform.k === 'number' ? currentTransform.k : 1;
-    const userInteractedRecently = Date.now() - lastUserZoomTime < 1500; // 1.5s window
-    const desiredScale = options.scale !== undefined
-      ? options.scale
-      : (userInteractedRecently ? currentScale : currentScale);
-    const scale = Math.max(zoomSettings.min, Math.min(zoomSettings.max, desiredScale));
-    // Center horizontally in the actual rendered area
+    // Compute transform to center the node with current/desired scale
     const centerX = width / 2;
-    // Center at 50% of height for better centering
     const centerY = height / 2;
-    
-    // Node coordinates are already in screen space (include margins), so we need to account for that
-    // Simple and correct transform: translate so node appears at center
-    const tx = centerX - target.x * scale;
+    const scale = Math.max(zoomSettings.min, Math.min(zoomSettings.max, (options.scale ?? zoomSettings.focusScale)));
+    const tx = centerX - (target.x) * scale;
     const ty = centerY - (focusY || target.y) * scale;
     const transform = d3.zoomIdentity.translate(tx, ty).scale(scale);
     
-    console.log('=== FOCUS DEBUG ===');
-    console.log('Node:', nodeId, 'at position:', target.x, target.y);
-    console.log('Container/SVG size used for centering:', width, 'x', height);
-    console.log('Center point:', centerX, centerY);
-    console.log('Scale:', scale);
-    console.log('Transform calculation:');
-    console.log('  tx = centerX - target.x * scale =', centerX, '-', target.x, '*', scale, '=', tx);
-    console.log('  ty = centerY - target.y * scale =', centerY, '-', (focusY || target.y), '*', scale, '=', ty);
-    console.log('Final transform:', transform.toString());
-    console.log('==================');
-    
-    // Add visual debug indicator (only when DEBUG_MAP enabled)
-    const DEBUG_MAP = (typeof window !== 'undefined' && (window.DEBUG_MAP || localStorage.getItem('debugMap') === '1'));
-    if (svg && DEBUG_MAP) {
-      // Remove any existing debug indicators
-      svg.selectAll('.debug-center').remove();
-      
-      // Add center point indicator
-      svg.append('circle')
-        .attr('class', 'debug-center')
-        .attr('cx', centerX)
-        .attr('cy', centerY)
-        .attr('r', 10)
-        .attr('fill', 'red')
-        .attr('opacity', 0.7)
-        .attr('stroke', 'white')
-        .attr('stroke-width', 2);
-      
-      // Add node position indicator
-      svg.append('circle')
-        .attr('class', 'debug-center')
-        .attr('cx', target.x)
-        .attr('cy', focusY || target.y)
-        .attr('r', 8)
-        .attr('fill', 'blue')
-        .attr('opacity', 0.7)
-        .attr('stroke', 'white')
-        .attr('stroke-width', 2);
-    }
+    // No debug indicators
 
+    // Apply zoom/pan transform and add a brief highlight
     currentTransform = transform;
     if (svg && zoomBehavior) {
       const duration = options.duration !== undefined ? options.duration : 450;
       svg.transition().duration(duration).call(zoomBehavior.transform, transform);
-    } else if (canvasGroup) {
-      canvasGroup.attr("transform", transform);
+    } else {
+      applyCurrentTransform();
     }
+    pulseHighlightNode(nodeId);
   };
 
   const resetView = (options = {}) => {
     if (!lastLayout || !svg || !zoomBehavior) {
       currentTransform = d3.zoomIdentity;
-      if (canvasGroup) {
-        canvasGroup.attr("transform", currentTransform);
-      }
-      return;
-    }
-    
-    // Skip reset if admin panel transition is in progress
-    if (window._adminPanelTransition) {
-      console.log('resetView - skipping reset due to admin panel transition');
+      applyCurrentTransform();
       return;
     }
 
-    // Calculate bounds of all nodes to center the view
-    const nodes = lastLayout.nodeData;
-    if (!nodes || nodes.length === 0) {
+    const nodes = lastLayout.nodeData || [];
+    if (!nodes.length) {
       currentTransform = d3.zoomIdentity;
-      if (canvasGroup) {
-        canvasGroup.attr("transform", currentTransform);
-      }
+      applyCurrentTransform();
       return;
     }
 
-    // Find bounds of all nodes
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     nodes.forEach(node => {
       minX = Math.min(minX, node.x - NODE_WIDTH / 2);
@@ -271,56 +257,34 @@ const OrgMap = (() => {
       minY = Math.min(minY, node.y - NODE_HEIGHT / 2);
       maxY = Math.max(maxY, node.y + NODE_HEIGHT / 2);
     });
+    if (!isFinite(minX) || !isFinite(minY)) {
+      currentTransform = d3.zoomIdentity;
+      applyCurrentTransform();
+      return;
+    }
 
-    // Add some padding
     const padding = 100;
-    minX -= padding;
-    maxX += padding;
-    minY -= padding;
-    maxY += padding;
-
-    // Calculate center and scale
+    minX -= padding; maxX += padding; minY -= padding; maxY += padding;
     const contentWidth = maxX - minX;
     const contentHeight = maxY - minY;
     const centerX = (minX + maxX) / 2;
     const centerY = (minY + maxY) / 2;
 
-    // Get SVG dimensions - use container dimensions for better mobile support
     const containerRect = container.getBoundingClientRect();
-    let svgWidth = containerRect.width;
-    let svgHeight = containerRect.height;
-    
-    // Fallback to client dimensions if getBoundingClientRect returns 0 or invalid values
-    if (!svgWidth || svgWidth <= 0) {
-      svgWidth = container.clientWidth || 800;
-    }
-    if (!svgHeight || svgHeight <= 0) {
-      svgHeight = container.clientHeight || 600;
-    }
-    
-    // Additional fallback for mobile
+    let svgWidth = containerRect.width || container.clientWidth || 800;
+    let svgHeight = containerRect.height || container.clientHeight || 600;
     if (svgWidth < 300) svgWidth = 800;
     if (svgHeight < 300) svgHeight = 600;
-    
-    // In fullscreen mode, use viewport dimensions for better centering
-    if (document.body.classList.contains('detail-expanded')) {
-      svgWidth = Math.max(svgWidth, window.innerWidth * 0.8); // Use 80% of viewport width
-      svgHeight = Math.max(svgHeight, window.innerHeight * 0.8); // Use 80% of viewport height
-    }
 
-    // Calculate scale to fit content with some margin
     const scaleX = svgWidth / contentWidth;
     const scaleY = svgHeight / contentHeight;
-    const scale = Math.min(scaleX, scaleY, zoomSettings.max) * 0.8; // 80% to add margin
+    const scale = Math.min(scaleX, scaleY, zoomSettings.max) * 0.8;
 
-    // Calculate translation to center the content
-    // Compose transform: center content point, then scale
     const transform = d3.zoomIdentity
       .translate(svgWidth / 2, svgHeight / 2)
       .scale(scale)
       .translate(-centerX, -centerY);
     currentTransform = transform;
-
     const duration = options.duration !== undefined ? options.duration : 300;
     svg.transition().duration(duration).call(zoomBehavior.transform, transform);
   };
@@ -345,12 +309,9 @@ const OrgMap = (() => {
     const contentCenterX = (minX + maxX) / 2;
     const contentCenterY = (minY + maxY) / 2;
 
-    let viewW = 0, viewH = 0;
-    if (svg && typeof svg.node === 'function') {
-      const el = svg.node();
-      viewW = el && (el.clientWidth || el.getBoundingClientRect().width || parseFloat(el.getAttribute('width')) || 0);
-      viewH = el && (el.clientHeight || el.getBoundingClientRect().height || parseFloat(el.getAttribute('height')) || 0);
-    }
+    const el = svg.node();
+    let viewW = el && (el.clientWidth || el.getBoundingClientRect().width || parseFloat(el.getAttribute('width')) || 0);
+    let viewH = el && (el.clientHeight || el.getBoundingClientRect().height || parseFloat(el.getAttribute('height')) || 0);
     if (!viewW || !viewH) {
       const rect = container.getBoundingClientRect();
       viewW = rect.width || container.clientWidth || 800;
@@ -384,17 +345,19 @@ const OrgMap = (() => {
     }
 
     svg = d3.select(container).append("svg").attr("class", "map-svg");
-    canvasGroup = svg.append("g").attr("class", "map-canvas");
-    linkGroup = canvasGroup.append("g").attr("class", "map-links");
-    nodeGroup = canvasGroup.append("g").attr("class", "map-nodes");
-    supportToggleGroup = canvasGroup.append("g").attr("class", "map-support-toggles");
-    supportBoxGroup = canvasGroup.append("g").attr("class", "map-support-boxes");
+    linkGroup = svg.append("g").attr("class", "map-links");
+    nodeGroup = svg.append("g").attr("class", "map-nodes");
+    supportToggleGroup = svg.append("g").attr("class", "map-support-toggles");
+    supportBoxGroup = svg.append("g").attr("class", "map-support-boxes");
 
+    // Enable D3 zoom/pan
     zoomBehavior = d3.zoom().scaleExtent([zoomSettings.min, zoomSettings.max]).on("zoom", handleZoom);
     svg.call(zoomBehavior);
     svg.call(zoomBehavior.transform, currentTransform);
-    // Ensure initial transform is applied
     applyCurrentTransform();
+
+    // Enable drag-to-scroll on the container (not zoom)
+    setupDragScroll();
 
     // Prevent multiple subscriptions
     if (unsubscribe) {
@@ -408,6 +371,45 @@ const OrgMap = (() => {
     window.addEventListener("resize", handleResize);
     refresh();
     isInitialised = true;
+  };
+
+  const setupDragScroll = () => {
+    if (!container) return;
+    const el = container;
+    const scrollEl = getScrollableContainer(el);
+    if (!scrollEl) return;
+
+    const onDown = (e) => {
+      // Left mouse or touch only (ignore right/middle)
+      if (e.button !== undefined && e.button !== 0) return;
+      isDragScrolling = true;
+      const point = (e.touches && e.touches[0]) || e;
+      dragStartX = point.clientX;
+      dragStartY = point.clientY;
+      dragStartScrollLeft = scrollEl.scrollLeft;
+      dragStartScrollTop = scrollEl.scrollTop;
+      el.style.cursor = 'grabbing';
+    };
+    const onMove = (e) => {
+      if (!isDragScrolling) return;
+      const point = (e.touches && e.touches[0]) || e;
+      const dx = point.clientX - dragStartX;
+      const dy = point.clientY - dragStartY;
+      scrollEl.scrollLeft = dragStartScrollLeft - dx;
+      scrollEl.scrollTop = dragStartScrollTop - dy;
+    };
+    const onUp = () => {
+      if (!isDragScrolling) return;
+      isDragScrolling = false;
+      el.style.cursor = '';
+    };
+
+    el.addEventListener('mousedown', onDown);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    el.addEventListener('touchstart', onDown, { passive: true });
+    window.addEventListener('touchmove', onMove, { passive: true });
+    window.addEventListener('touchend', onUp, { passive: true });
   };
 
   const buildHierarchy = (nodes) => {
@@ -608,7 +610,8 @@ const OrgMap = (() => {
       .append("path")
       .attr("class", "map-link")
       .merge(selection)
-      .attr("d", (link) => linkGenerator({ source: link.source, target: link.target }));
+      .attr("d", (link) => linkGenerator({ source: link.source, target: link.target }))
+      .classed('dimmed', (link) => shouldDimLink(link));
   };
 
   const renderNodes = (nodes) => {
@@ -625,6 +628,8 @@ const OrgMap = (() => {
         }
         // Do not change pan/zoom when selecting a node
       })
+      .on("mouseover", function(){ d3.select(this).classed('is-hovered', true); })
+      .on("mouseout", function(){ d3.select(this).classed('is-hovered', false); })
       .on("dblclick", (event, node) => {
         event.stopPropagation();
         toggleNode(node);
@@ -682,6 +687,9 @@ const OrgMap = (() => {
       .attr("y", NODE_HEIGHT / 2 - 14)
       .text((node) => node.type || "")
       .attr("opacity", (node) => (node.type ? 1 : 0));
+
+    // Dim nodes not on the selected path
+    merged.classed('dimmed', (node) => shouldDimNode(node));
 
     const toggles = merged.selectAll("g.map-node-toggle").data(
       (node) => (node.hasChildren ? [node] : []),
@@ -768,25 +776,7 @@ const OrgMap = (() => {
       supportVisibility.add(parentId);
       console.log('Cleared all and added new to supportVisibility');
       
-      // Zoom out a bit to accommodate support boxes
-      if (svg && zoomBehavior) {
-        const currentScale = currentTransform.k;
-        const newScale = Math.max(zoomSettings.min, currentScale * 0.7); // Zoom out to 70% of current scale
-        const newTransform = d3.zoomIdentity.translate(currentTransform.x, currentTransform.y).scale(newScale);
-        
-        svg.transition()
-          .duration(300)
-          .ease(d3.easeCubicInOut)
-          .call(zoomBehavior.transform, newTransform)
-          .on('end', () => {
-            // After zoom animation, focus on the selected node if any
-            if (state.selectedId) {
-              setTimeout(() => {
-                focusNode(state.selectedId, { duration: 200, scale: 0.6 });
-              }, 50);
-            }
-          });
-      }
+      // Zoom disabled – no transform changes when opening support boxes
     }
     console.log('Current supportVisibility:', Array.from(supportVisibility));
     console.log('lastLayout exists:', !!lastLayout);
@@ -795,6 +785,37 @@ const OrgMap = (() => {
       renderSupportToggles(lastLayout);
       renderSupportBoxes(lastLayout);
     }
+  };
+
+  // Determine if a node should be dimmed based on selected path
+  const shouldDimNode = (node) => {
+    if (!state.selectedId || !lastLayout) return false;
+    const pathIds = computePathIdsToSelected();
+    return !pathIds.has(node.id);
+  };
+
+  // Determine if a link should be dimmed based on selected path
+  const shouldDimLink = (link) => {
+    if (!state.selectedId || !lastLayout) return false;
+    const pathIds = computePathIdsToSelected();
+    const parts = (link && link.id ? String(link.id).split('->') : []);
+    const parentId = parts[0];
+    const childId = parts[1];
+    if (!parentId || !childId) return true;
+    return !(pathIds.has(parentId) && pathIds.has(childId));
+  };
+
+  const computePathIdsToSelected = () => {
+    const ids = new Set();
+    if (!state.selectedId || !lastLayout) return ids;
+    const lookup = lastLayout.nodeLookup || new Map();
+    let current = lookup.get(state.selectedId);
+    while (current) {
+      ids.add(current.id);
+      if (!current.parentId) break;
+      current = lookup.get(current.parentId);
+    }
+    return ids;
   };
 
   const renderSupportToggles = (layout) => {
@@ -964,25 +985,7 @@ const OrgMap = (() => {
       // Open the new support office
       supportVisibility.add(parentId);
       
-      // Zoom out a bit when opening support offices
-      if (svg && zoomBehavior) {
-        const currentScale = currentTransform.k;
-        const newScale = Math.max(zoomSettings.min, currentScale * 0.7); // Zoom out to 70% of current scale
-        const newTransform = d3.zoomIdentity.translate(currentTransform.x, currentTransform.y).scale(newScale);
-        
-        svg.transition()
-          .duration(300)
-          .ease(d3.easeCubicInOut)
-          .call(zoomBehavior.transform, newTransform)
-          .on('end', () => {
-            // After zoom animation, focus on the selected node if any
-            if (state.selectedId) {
-              setTimeout(() => {
-                focusNode(state.selectedId, { duration: 200, scale: 0.6 });
-              }, 50);
-            }
-          });
-      }
+      // Zoom disabled – no transform changes when opening support offices
     } else {
       supportVisibility.delete(parentId);
       
@@ -1276,7 +1279,6 @@ const OrgMap = (() => {
     if (svg) {
       svg.remove();
       svg = null;
-      canvasGroup = null;
       linkGroup = null;
       nodeGroup = null;
       supportToggleGroup = null;

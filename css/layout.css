@@ -1,0 +1,148 @@
+main.app-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 50% / 50% on desktop */
+  gap: 2rem;
+  padding: 1.5rem;
+  align-items: stretch;
+  min-height: auto;
+  transition: grid-template-columns 0.3s ease;
+}
+
+/* Admin panel open - show admin panel in right column */
+body.admin-panel-open .app-layout {
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+body.admin-panel-open .detail-panel {
+  display: none;
+}
+
+/* Ensure detail panel is visible when admin panel is closed */
+body:not(.admin-panel-open) .detail-panel {
+  display: flex;
+}
+
+/* Ensure detail panel content uses full width */
+.detail-panel .detail-content {
+  width: 100%;
+  max-width: none;
+}
+
+.detail-panel .detail-section {
+  width: 100%;
+  max-width: none;
+}
+
+body.admin-panel-open .admin-panel {
+  width: 100%;
+  max-width: none;
+  display: flex;
+}
+
+/* When admin panel is open and a node is selected, give more space to admin panel */
+body.admin-panel-open.detail-expanded .app-layout {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* Mobile responsive: stack vertically when screen is too small */
+@media (max-width: 1024px) {
+  main.app-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    min-height: auto;
+  }
+  
+  .org-section {
+    order: 1;
+    min-height: auto;
+    margin-bottom: 0;
+  }
+  
+  .side-section {
+    order: 2;
+    min-height: auto;
+    margin-top: 0;
+  }
+  
+  /* Admin panel open on mobile - stack vertically */
+  body.admin-panel-open .app-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    gap: 1.5rem;
+  }
+  
+  body.admin-panel-open .detail-panel {
+    display: none;
+  }
+}
+
+body.detail-expanded .app-layout {
+  grid-template-columns: 1fr 1fr;
+  align-items: stretch;
+}
+
+body.detail-expanded .org-section {
+  height: 100%;
+}
+
+body.detail-expanded .tree-container,
+body.detail-expanded .map-view {
+  height: 100%;
+  min-height: 100%;
+}
+
+.tree-container,
+.map-view {
+  background: var(--node-background, #fff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 12px;
+  /* Ensure stable height even when details re-render */
+  height: auto;
+  min-height: 80vh;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+/* Keep the left column tall so inner cards don't collapse on re-render */
+.org-section {
+  min-height: 80vh;
+}
+
+body.admin-panel-open.detail-expanded .detail-panel {
+  display: none;
+}
+
+/* Override detail-expanded for mobile - still stack vertically */
+@media (max-width: 1024px) {
+  body.detail-expanded .app-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+  }
+  
+  body.detail-expanded .org-section {
+    height: auto !important;
+    min-height: auto !important;
+  }
+  
+  body.detail-expanded .tree-container,
+  body.detail-expanded .map-view {
+    height: 200px !important;
+    min-height: 200px !important;
+    max-height: 200px !important;
+  }
+  
+  /* Admin panel open on mobile overrides detail-expanded */
+  body.admin-panel-open.detail-expanded .app-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+  }
+  
+  body.admin-panel-open.detail-expanded .detail-panel {
+    display: none !important;
+  }
+}
+

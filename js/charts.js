@@ -10,16 +10,23 @@ const ChartRenderer = (() => {
     teal: ['#0d9488', '#14b8a6', '#5eead4', '#99f6e4', '#ccfbf1', '#a7f3d0']
   };
 
-  // Default palette (orange)
-  const colorPalette = colorPalettes.orange;
+  // Default palette key (can be updated at runtime)
+  let defaultPaletteKey = 'orange';
 
-  const getMetricColor = (key, index, palette = 'orange') => {
-    const currentPalette = colorPalettes[palette] || colorPalettes.orange;
+  const setDefaultPalette = (paletteKey) => {
+    if (paletteKey && colorPalettes[paletteKey]) {
+      defaultPaletteKey = paletteKey;
+    }
+  };
+
+  const getMetricColor = (key, index, palette) => {
+    const effectiveKey = palette || defaultPaletteKey;
+    const currentPalette = colorPalettes[effectiveKey] || colorPalettes.orange;
     return currentPalette[index % currentPalette.length];
   };
 
   // Pie Chart (existing functionality enhanced)
-  const renderPieChart = (container, entries, total, title = "Time spent on:", unit = "%", palette = "orange") => {
+  const renderPieChart = (container, entries, total, title = "Time spent on:", unit = "%", palette) => {
     console.log('renderPieChart called with:', { container, entries, total, title, unit });
     
     if (!container || !d3 || !d3.pie) {
@@ -85,7 +92,7 @@ const ChartRenderer = (() => {
   };
 
   // Bar Chart
-  const renderBarChart = (container, entries, total, title = "Time spent on:", unit = "%", palette = "orange") => {
+  const renderBarChart = (container, entries, total, title = "Time spent on:", unit = "%", palette) => {
     if (!container || !d3 || !d3.scaleBand) {
       container.textContent = "Enable D3.js to show the diagram.";
       return;
@@ -166,7 +173,7 @@ const ChartRenderer = (() => {
   };
 
   // Line Chart
-  const renderLineChart = (container, entries, total, title = "Time spent on:", unit = "%", palette = "orange") => {
+  const renderLineChart = (container, entries, total, title = "Time spent on:", unit = "%", palette) => {
     if (!container || !d3 || !d3.scaleLinear) {
       container.textContent = "Enable D3.js to show the diagram.";
       return;
@@ -212,7 +219,7 @@ const ChartRenderer = (() => {
       .append("path")
       .datum(entries)
       .attr("fill", "none")
-      .attr("stroke", colorPalette[0])
+      .attr("stroke", (colorPalettes[palette || defaultPaletteKey] || colorPalettes.orange)[0])
       .attr("stroke-width", 3)
       .attr("d", line);
 
@@ -226,7 +233,7 @@ const ChartRenderer = (() => {
       .attr("cx", d => xScale(d.key) + xScale.bandwidth() / 2)
       .attr("cy", d => yScale(d.value))
       .attr("r", 5)
-      .attr("fill", colorPalette[0])
+      .attr("fill", (colorPalettes[palette || defaultPaletteKey] || colorPalettes.orange)[0])
       .attr("stroke", "#fff")
       .attr("stroke-width", 2);
 
@@ -248,7 +255,7 @@ const ChartRenderer = (() => {
   };
 
   // Table View
-  const renderTableView = (container, entries, total, title = "Time spent on:", unit = "%", palette = "orange") => {
+  const renderTableView = (container, entries, total, title = "Time spent on:", unit = "%", palette) => {
     if (!container) {
       return;
     }
@@ -304,7 +311,7 @@ const ChartRenderer = (() => {
   };
 
   // Main render function that switches between chart types
-  const renderChart = (container, entries, total, chartType = "pie", title = "Time spent on:", unit = "%", palette = "orange") => {
+  const renderChart = (container, entries, total, chartType = "pie", title = "Time spent on:", unit = "%", palette) => {
     if (!entries || entries.length === 0) {
       container.innerHTML = '<p class="chart-empty">No data available</p>';
       return;
@@ -333,7 +340,8 @@ const ChartRenderer = (() => {
     renderPieChart,
     renderBarChart,
     renderLineChart,
-    renderTableView
+    renderTableView,
+    setDefaultPalette
   };
 })();
 

@@ -1189,6 +1189,8 @@ const OrgUI = (() => {
   const openNode = (nodeId) => {
 
     selectedNodeId = nodeId;
+    // Ensure detail mode is restored when navigating to another node
+    showingAdminContent = false;
 
     // Keep detail panel expanded by default
     // if (elements.detailPanel) {
@@ -1482,21 +1484,18 @@ const OrgUI = (() => {
     
     container.appendChild(inputsOutputsContainer);
 
+    // Add small users button at the bottom of details content
+    const usersBtn = document.createElement("button");
+    usersBtn.type = "button";
+    usersBtn.className = "btn btn-sm secondary";
+    usersBtn.dataset.action = "open-users";
+    usersBtn.dataset.nodeId = node.id;
+    usersBtn.dataset.nodeName = node.name || "";
+    usersBtn.style.cssText = "margin-top: 0.75rem; align-self: flex-start;";
+    usersBtn.textContent = "Profiles connected to this node";
+    container.appendChild(usersBtn);
+
     elements.detailPanel.appendChild(container);
-
-    const toggleButton = document.createElement("button");
-
-    toggleButton.type = "button";
-
-    toggleButton.classList.add("detail-toggle");
-
-    toggleButton.dataset.action = "toggle-detail";
-
-    const isExpanded = elements.detailPanel.classList.contains("expanded");
-
-    toggleButton.textContent = isExpanded ? "Show less" : "Show more";
-
-    elements.detailPanel.appendChild(toggleButton);
 
     elements.detailPanel.classList.add("active");
 
@@ -1590,12 +1589,18 @@ const OrgUI = (() => {
 
   const handleDetailPanelClick = (event) => {
 
-    const target = event.target;
+    const origin = event.target;
 
-    if (!(target instanceof HTMLElement)) {
+    if (!(origin instanceof HTMLElement)) {
 
       return;
 
+    }
+
+    // Support clicks on child elements: walk up to element with data-action
+    const target = origin.closest('[data-action]');
+    if (!target) {
+      return;
     }
 
     const action = target.dataset.action;
@@ -1631,34 +1636,7 @@ const OrgUI = (() => {
     }
 
 
-    if (action === "toggle-detail") {
-
-      const isExpanded = elements.detailPanel.classList.toggle("expanded");
-
-      document.body.classList.toggle("detail-expanded", isExpanded);
-
-      target.textContent = isExpanded ? "Show less" : "Show more";
-
-      // Sync panel heights when detail panel expands/collapses
-      syncPanelHeights();
-
-      if (typeof OrgMap !== "undefined" && OrgMap && typeof OrgMap.refresh === "function") {
-        // Preserve focus on selected node when detail panel expands/collapses
-        const currentSelectedNode = selectedNodeId;
-        requestAnimationFrame(() => {
-          OrgMap.refresh();
-          // Restore focus to the selected node after refresh
-          if (currentSelectedNode && typeof OrgMap.reveal === "function") {
-            setTimeout(() => {
-              OrgMap.reveal(currentSelectedNode);
-            }, 100);
-          }
-        });
-      }
-
-      return;
-
-    }
+    // removed toggle-detail button/action
 
     if (action === "jump") {
 
@@ -1677,6 +1655,43 @@ const OrgUI = (() => {
 
       }
 
+    if (action === "back-to-details") {
+      // Return to node details view
+      showingAdminContent = false;
+      renderDetailPanel();
+      return;
+    }
+
+    }
+
+    if (action === "open-users") {
+      const nodeId = target.dataset.nodeId;
+      const nodeName = target.dataset.nodeName || "";
+      // Open user management in detail panel
+      showConfigureUsersInDetailPanel();
+      // After panel is rendered, set a simple filter hint
+      setTimeout(() => {
+        try {
+          const clonedPanel = elements.detailPanel.querySelector('.detail-user-content');
+          if (clonedPanel) {
+            // Try to set the search input with node name to hint filtering
+            const searchInput = clonedPanel.querySelector('.filters-section .filter-input');
+            if (searchInput && nodeName) {
+              searchInput.value = nodeName;
+              searchInput.dispatchEvent(new Event('input'));
+            }
+            // Add a small banner indicating current context
+            const header = elements.detailPanel.querySelector('.detail-header h2');
+            if (header && nodeName) {
+              header.textContent = `Users connected to: ${nodeName}`;
+            }
+          }
+          // Emit a custom event for integrations to fetch users by nodeId
+          const evt = new CustomEvent('filterUsersForNode', { detail: { nodeId, nodeName } });
+          window.dispatchEvent(evt);
+        } catch (_e) {}
+      }, 150);
+      return;
     }
 
   };
@@ -3867,6 +3882,15 @@ const OrgUI = (() => {
     
     // Add the user content
     container.appendChild(userContent);
+
+    // Add back-to-details button to switch back to node details
+    const backBtn = document.createElement('button');
+    backBtn.type = 'button';
+    backBtn.className = 'btn btn-sm secondary';
+    backBtn.dataset.action = 'back-to-details';
+    backBtn.style.cssText = 'margin-top: 0.75rem; align-self: flex-start;';
+    backBtn.textContent = 'Back to details';
+    container.appendChild(backBtn);
     
     // Clear and populate detail panel
     elements.detailPanel.innerHTML = "";

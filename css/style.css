@@ -1,8 +1,10 @@
 ﻿.org-sticky {
   position: sticky;
   top: 1rem;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
+  min-height: 80vh; /* keep left column tall when switching views */
 }
 
 /* Floating view switch inside org-sticky bottom-left */
@@ -1434,135 +1436,6 @@ header .logo {
   background: #e9ecef;
 }
 
-main.app-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(380px, 1fr);
-  gap: 2rem;
-  padding: 2rem;
-  align-items: start;
-  min-height: auto;
-  transition: grid-template-columns 0.3s ease;
-}
-
-/* Admin panel open - show admin panel in right column */
-body.admin-panel-open .app-layout {
-  grid-template-columns: minmax(0, 2fr) minmax(380px, 1fr);
-  gap: 2rem;
-}
-
-body.admin-panel-open .detail-panel {
-  display: none;
-}
-
-/* Ensure detail panel is visible when admin panel is closed */
-body:not(.admin-panel-open) .detail-panel {
-  display: flex;
-}
-
-/* Ensure detail panel content uses full width */
-.detail-panel .detail-content {
-  width: 100%;
-  max-width: none;
-}
-
-.detail-panel .detail-section {
-  width: 100%;
-  max-width: none;
-}
-
-body.admin-panel-open .admin-panel {
-  width: 100%;
-  max-width: none;
-  display: flex;
-}
-
-/* When admin panel is open and a node is selected, give more space to admin panel */
-body.admin-panel-open.detail-expanded .app-layout {
-  grid-template-columns: minmax(0, 1fr) minmax(520px, 1.8fr);
-}
-
-/* Mobile responsive: stack vertically when screen is too small */
-@media (max-width: 1024px) {
-  main.app-layout {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
-    gap: 1.5rem;
-    padding: 1.5rem;
-    min-height: auto;
-  }
-  
-  .org-section {
-    order: 1;
-    min-height: auto;
-    margin-bottom: 0;
-  }
-  
-  .side-section {
-    order: 2;
-    min-height: auto;
-    margin-top: 0;
-  }
-  
-  /* Admin panel open on mobile - stack vertically */
-  body.admin-panel-open .app-layout {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
-    gap: 1.5rem;
-  }
-  
-  body.admin-panel-open .detail-panel {
-    display: none;
-  }
-}
-
-body.detail-expanded .app-layout {
-  grid-template-columns: minmax(0, 0.9fr) minmax(520px, 1.8fr);
-  align-items: stretch;
-}
-
-body.detail-expanded .org-section {
-  height: 100%;
-}
-
-body.detail-expanded .tree-container,
-body.detail-expanded .map-view {
-  height: 100%;
-  min-height: 100%;
-}
-
-body.admin-panel-open.detail-expanded .detail-panel {
-  display: none;
-}
-
-/* Override detail-expanded for mobile - still stack vertically */
-@media (max-width: 1024px) {
-  body.detail-expanded .app-layout {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
-  }
-  
-  body.detail-expanded .org-section {
-    height: auto !important;
-    min-height: auto !important;
-  }
-  
-  body.detail-expanded .tree-container,
-  body.detail-expanded .map-view {
-    height: 200px !important;
-    min-height: 200px !important;
-    max-height: 200px !important;
-  }
-  
-  /* Admin panel open on mobile overrides detail-expanded */
-  body.admin-panel-open.detail-expanded .app-layout {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
-  }
-  
-  body.admin-panel-open.detail-expanded .detail-panel {
-    display: none !important;
-  }
-}
 
 .org-section {
   background: transparent;
@@ -2837,59 +2710,6 @@ body.admin-panel-open.detail-expanded .detail-panel {
   border-radius: 16px 16px 0 0;
 }
 
-.detail-panel.expanded {
-  overflow: auto;
-}
-
-.detail-panel .detail-content {
-  flex: 1 1 auto;
-  overflow: auto;
-}
-
-.detail-content {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-/* Reduce gap in detail content on mobile */
-@media (max-width: 1024px) {
-  .detail-content {
-    gap: 0.5rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .detail-content {
-    gap: 0.25rem;
-  }
-}
-
-/* Single-column layout for detail panel to use full width */
-@media (min-width: 1200px) {
-  .detail-content {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    align-items: stretch;
-  }
-  
-  /* Display inputs and outputs side by side */
-  .detail-section[data-section-type="inputs-outputs"] {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-  }
-}
-
-/* For smaller screens, still show inputs/outputs side by side and metrics in 2 columns */
-@media (min-width: 768px) {
-  .detail-section[data-section-type="inputs-outputs"] {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-  }
-}
 
 /* Reduce gaps in inputs-outputs section on mobile */
 @media (max-width: 1024px) {
