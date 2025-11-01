@@ -1655,13 +1655,14 @@ const OrgUI = (() => {
 
       }
 
+      return;
+    }
+
     if (action === "back-to-details") {
       // Return to node details view
       showingAdminContent = false;
       renderDetailPanel();
       return;
-    }
-
     }
 
     if (action === "open-users") {
