@@ -2366,7 +2366,7 @@ const OrgUI = (() => {
     
     mobileMenuOverlay.classList.remove('hidden');
     mobileMenuToggle.classList.add('active');
-    document.body.style.overflow = 'hidden';
+    document.body.classList.add('mobile-menu-open');
     
     // Sync admin button states
     syncMobileAdminButtons();
@@ -2380,7 +2380,7 @@ const OrgUI = (() => {
     
     mobileMenuOverlay.classList.add('hidden');
     mobileMenuToggle.classList.remove('active');
-    document.body.style.overflow = '';
+    document.body.classList.remove('mobile-menu-open');
   };
 
 

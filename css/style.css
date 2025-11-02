@@ -7,6 +7,28 @@
   min-height: 80vh; /* keep left column tall when switching views */
 }
 
+/* Reduce gap in org-sticky on mobile */
+@media (max-width: 1024px) {
+  .org-sticky {
+    gap: 0.5rem;
+    top: 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .org-sticky {
+    gap: 0.25rem;
+    top: 0.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .org-sticky {
+    gap: 0.125rem;
+    top: 0.125rem;
+  }
+}
+
 /* Floating view switch inside org-sticky bottom-left */
 .org-sticky { position: sticky; }
 .view-switch-floating {
@@ -386,14 +408,69 @@ header {
   
   /* Make header more compact on mobile */
   .app-header {
-    padding: 1rem 1.5rem;
+    padding: 1rem 1rem 1rem 1rem;
     position: relative;
     min-height: auto;
+    padding-top: 4.5rem; /* Space for fixed buttons */
+  }
+  
+  @media (max-width: 480px) {
+    .app-header {
+      padding-top: 4rem;
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+    }
+  }
+  
+  /* Ensure header content doesn't overflow */
+  .app-header .org-info {
+    max-width: calc(100% - 10rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .app-header .org-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  
+  .app-header .org-description {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
   }
 
   /* In fullscreen on mobile, keep the fixed view switch button visible */
   body.detail-expanded .desktop-view-switch {
     display: flex !important;
+  }
+  
+  /* Prevent body scroll when mobile menu is open */
+  body.mobile-menu-open {
+    overflow: hidden !important;
+    position: fixed !important;
+    width: 100% !important;
+    height: 100% !important;
+    touch-action: none;
+  }
+  
+  /* Better touch targets on mobile */
+  button, 
+  .mobile-menu-action,
+  .mobile-menu-close {
+    -webkit-tap-highlight-color: rgba(255, 90, 0, 0.2);
+    touch-action: manipulation;
+  }
+  
+  /* Improve scroll behavior on mobile */
+  .mobile-menu-content,
+  .detail-panel,
+  .admin-panel {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 
   /* Also keep toolbar present (collapsed) while in fullscreen on mobile */
@@ -446,20 +523,25 @@ header {
     position: fixed !important;
     top: 1rem !important;
     right: 1rem !important;
-    z-index: 1001 !important;
+    z-index: 1002 !important;
     background: var(--surface, #fff) !important;
     border: 2px solid var(--brand-orange) !important;
     border-radius: 12px !important;
-    padding: 0.75rem !important;
-    box-shadow: var(--shadow) !important;
+    padding: 0.625rem !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
     transition: all 0.3s ease !important;
     cursor: pointer !important;
     min-width: 48px !important;
     min-height: 48px !important;
+    width: 48px !important;
+    height: 48px !important;
     justify-content: center !important;
     align-items: center !important;
     flex-direction: column !important;
     gap: 4px !important;
+    box-sizing: border-box !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
   }
 
   /* Show view toggle button on mobile */
@@ -467,8 +549,8 @@ header {
     display: flex !important;
     position: fixed !important;
     top: 1rem !important;
-    right: 5rem !important;
-    z-index: 1001 !important;
+    right: 4.25rem !important;
+    z-index: 1002 !important;
     background: var(--brand-gradient) !important;
     border: none !important;
     border-radius: 8px !important;
@@ -479,6 +561,31 @@ header {
     cursor: pointer !important;
     align-items: center !important;
     justify-content: center !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+  
+  /* Adjust positioning on very small screens */
+  @media (max-width: 480px) {
+    .mobile-menu-toggle {
+      right: 0.75rem !important;
+      top: 0.75rem !important;
+      width: 44px !important;
+      height: 44px !important;
+      min-width: 44px !important;
+      min-height: 44px !important;
+    }
+    
+    .mobile-view-toggle {
+      right: 3.5rem !important;
+      top: 0.75rem !important;
+      width: 44px !important;
+      height: 44px !important;
+      min-width: 44px !important;
+      min-height: 44px !important;
+    }
   }
 
   /* Hide mobile view toggle on desktop */
@@ -508,33 +615,47 @@ header {
   align-self: start; /* left column height is based on content, not the detail panel */
 }
 
-/* Sticky, fixed-height tree and map (desktop) */
-.tree-container,
-.map-view {
-  height: 520px;
-  min-height: 520px;
-  max-height: 520px;
-  overflow: hidden; /* map/tree manage their own scroll/zoom */
-  background: var(--surface, #fff);
-  border-radius: 8px;
+/* Sticky, fixed-height tree and map (desktop only) */
+@media (min-width: 1025px) {
+  .tree-container,
+  .map-view {
+    height: 520px;
+    min-height: 520px;
+    max-height: 520px;
+    overflow: hidden; /* map/tree manage their own scroll/zoom */
+    background: var(--surface, #fff);
+    border-radius: 8px;
+  }
 }
 
-/* Sticky heights in tablet/mobile; a bit smaller */
+/* Sticky heights in tablet/mobile - use more screen space */
 @media (max-width: 1024px) {
   .tree-container,
   .map-view {
-    height: 440px;
-    min-height: 440px;
-    max-height: 440px;
+    height: calc(100vh - 8rem) !important;
+    min-height: calc(100vh - 8rem) !important;
+    max-height: calc(100vh - 8rem) !important;
+    overflow: hidden !important;
+    background: var(--surface, #fff);
+    border-radius: 8px;
   }
 }
 
 @media (max-width: 768px) {
   .tree-container,
   .map-view {
-    height: 380px;
-    min-height: 380px;
-    max-height: 380px;
+    height: calc(100vh - 7rem) !important;
+    min-height: calc(100vh - 7rem) !important;
+    max-height: calc(100vh - 7rem) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .tree-container,
+  .map-view {
+    height: calc(100vh - 6.5rem) !important;
+    min-height: calc(100vh - 6.5rem) !important;
+    max-height: calc(100vh - 6.5rem) !important;
   }
 }
 
@@ -544,6 +665,20 @@ header {
   width: 100% !important;
   height: 100% !important;
   display: block;
+  min-height: 100% !important;
+}
+
+/* Ensure map-view container uses full height on mobile */
+@media (max-width: 1024px) {
+  .map-view {
+    display: flex !important;
+    flex-direction: column;
+  }
+  
+  .map-view .map-svg {
+    flex: 1;
+    min-height: 0;
+  }
 }
 
 /* Ensure ancestors allow position: sticky to work */
@@ -635,26 +770,30 @@ body.detail-expanded .app-toolbar {
 }
 
 
-  .view-toggle-arrow {
-    font-size: 1.2rem !important;
-    color: #fff !important;
-    transition: transform 0.3s ease !important;
-    font-weight: bold !important;
-  }
-
-  .mobile-view-toggle.collapsed .view-toggle-arrow {
-    transform: rotate(-90deg) !important;
-  }
 
   /* Hide main content when collapsed */
-  .main-content-collapsed .tree-container,
-  .main-content-collapsed .map-view {
+  body.main-content-collapsed .tree-container,
+  body.main-content-collapsed .map-view {
     display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
   }
 
-  .main-content-collapsed .detail-panel {
+  body.main-content-collapsed .org-section {
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  body.main-content-collapsed .detail-panel {
     width: 100% !important;
     max-width: 100% !important;
+    margin-top: 0 !important;
+  }
+  
+  body.main-content-collapsed .side-section {
+    margin-top: 0 !important;
   }
   
   .mobile-menu-toggle:hover {
@@ -1864,37 +2003,14 @@ header .logo {
   transform: scale(1.05);
 }
 
-.view-toggle-line {
-  width: 18px;
-  height: 2px;
-  background: #fff;
-  border-radius: 1px;
-  transition: all 0.3s ease;
-  transform-origin: center;
-}
-
-.mobile-view-toggle .view-toggle-line:nth-child(1) {
-  transform: translateY(-4px);
-}
-
-.mobile-view-toggle .view-toggle-line:nth-child(2) {
-  transform: translateY(0);
-}
-
-.mobile-view-toggle .view-toggle-line:nth-child(3) {
-  transform: translateY(4px);
-}
-
-.mobile-view-toggle.active .view-toggle-line:nth-child(1) {
-  transform: translateY(0) rotate(45deg);
-}
-
-.mobile-view-toggle.active .view-toggle-line:nth-child(2) {
-  opacity: 0;
-}
-
-.mobile-view-toggle.active .view-toggle-line:nth-child(3) {
-  transform: translateY(0) rotate(-45deg);
+/* View toggle arrow - matches HTML structure */
+.mobile-view-toggle .view-toggle-arrow {
+  display: inline-block;
+  font-size: 1rem;
+  color: #fff;
+  transition: transform 0.3s ease;
+  line-height: 1;
+  font-weight: bold;
 }
 
 /* Mobile menu overlay */
@@ -1905,23 +2021,52 @@ header .logo {
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
+  z-index: 999;
   display: flex;
   align-items: flex-start;
   justify-content: flex-end;
   padding: 1rem;
   backdrop-filter: blur(4px);
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.mobile-menu-overlay.hidden {
+  display: none;
 }
 
 .mobile-menu-content {
   background: var(--surface, #fff);
   border-radius: 12px;
   box-shadow: var(--shadow);
-  width: 280px;
-  max-width: 90vw;
-  max-height: 80vh;
+  width: 300px;
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 2rem);
   overflow-y: auto;
   animation: slideInFromRight 0.3s ease-out;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  margin-top: 0.5rem; /* Small space from top */
+  position: relative;
+}
+
+@media (max-width: 480px) {
+  .mobile-menu-content {
+    width: calc(100vw - 1rem);
+    max-width: calc(100vw - 1rem);
+    margin-top: 0.5rem;
+    border-radius: 12px 0 0 12px;
+  }
 }
 
 @keyframes slideInFromRight {
@@ -1974,20 +2119,23 @@ header .logo {
   padding: 0.5rem;
 }
 
-.mobile-menu-action {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  border: none;
-  background: transparent;
-  border-radius: 8px;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.2s ease;
-  margin-bottom: 0.25rem;
-}
+  .mobile-menu-action {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
+    margin-bottom: 0.25rem;
+    min-height: 48px; /* Better touch target */
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
 
 .mobile-menu-action:hover {
   background: var(--accent-background);
