@@ -10,8 +10,10 @@
 /* Reduce gap in org-sticky on mobile */
 @media (max-width: 1024px) {
   .org-sticky {
+    position: static;
     gap: 0.5rem;
     top: 0.5rem;
+    min-height: auto;
   }
 }
 
@@ -457,20 +459,82 @@ header {
     touch-action: none;
   }
   
-  /* Better touch targets on mobile */
+  /* Better touch targets on mobile - minimum 44x44px */
   button, 
   .mobile-menu-action,
-  .mobile-menu-close {
+  .mobile-menu-close,
+  .tree-toggle,
+  .tree-item-header,
+  .map-node-toggle-box {
     -webkit-tap-highlight-color: rgba(255, 90, 0, 0.2);
     touch-action: manipulation;
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Ensure tree items are easily tappable */
+  .tree-item-header {
+    min-height: 48px;
+    padding: 0.75rem 1rem;
+  }
+  
+  .tree-toggle {
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
+    font-size: 1.2rem;
+  }
+  
+  /* Prevent text selection on tree/map during touch */
+  .tree-container,
+  .map-view,
+  .tree-item-header,
+  .map-node {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  
+  /* Allow text selection in detail panel */
+  .detail-panel,
+  .detail-panel * {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
   }
   
   /* Improve scroll behavior on mobile */
   .mobile-menu-content,
   .detail-panel,
-  .admin-panel {
+  .admin-panel,
+  .tree-container,
+  .map-view {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+    scroll-behavior: smooth;
+  }
+  
+  /* Better touch scrolling for tree container */
+  .tree-container {
+    touch-action: pan-y pinch-zoom;
+    overflow-y: auto !important; /* Ensure scrolling works on mobile */
+    overflow-x: hidden !important;
+  }
+  
+  /* Map view should allow pan/zoom */
+  .map-view {
+    touch-action: pan-x pan-y pinch-zoom;
+    overflow: hidden;
+  }
+  
+  /* Prevent horizontal scroll on mobile */
+  body {
+    overflow-x: hidden;
+    position: relative;
   }
 
   /* Also keep toolbar present (collapsed) while in fullscreen on mobile */
@@ -1327,11 +1391,55 @@ header .logo {
     padding: 1rem;
     font-size: 1rem;
     min-height: 48px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 8px;
+  }
+  
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-width: 2px;
   }
   
   .form-group label {
     font-size: 1rem;
     margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+  
+  /* Better button sizes on mobile */
+  button.primary,
+  button.secondary,
+  button.danger,
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger {
+    min-height: 48px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(255, 90, 0, 0.2);
+  }
+}
+
+@media (max-width: 480px) {
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 0.875rem;
+    font-size: 0.95rem;
+  }
+  
+  button.primary,
+  button.secondary,
+  button.danger,
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.95rem;
   }
 }
 
@@ -2630,27 +2738,34 @@ header .logo {
 /* Mobile: adjust tree container height */
 @media (max-width: 1024px) {
   .tree-container {
-    height: 200px;
-    padding: 0.75rem;
+    padding: 1rem;
     margin-bottom: 0;
     font-size: 0.95rem;
-    position: sticky;
-    top: 1rem;
+    position: relative;
+    top: auto;
+    border-radius: 12px;
   }
   
   .tree-item-header {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.85rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
   }
   
   .tree-label {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
+    flex: 1;
   }
   
   .tree-toggle {
-    width: 22px;
-    height: 22px;
-    font-size: 0.75rem;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 1.2rem;
+    flex-shrink: 0;
   }
 }
 
@@ -2830,20 +2945,74 @@ header .logo {
   .detail-panel {
     height: auto;
     min-height: 60vh;
-    max-height: 80vh;
-    padding: 1.5rem;
+    max-height: 85vh;
+    padding: 1rem;
     margin-top: 0;
-    font-size: 1rem;
+    font-size: 0.95rem;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   
   .detail-header h2 {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
+    margin-bottom: 0.75rem;
   }
   
   .detail-section h3 {
     font-size: 1.1rem;
-    margin: 1rem 0 0.75rem;
+    margin: 0.75rem 0 0.5rem;
+  }
+  
+  /* Better touch targets for detail panel links */
+  .detail-support-link {
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .detail-panel {
+    min-height: 50vh;
+    max-height: 75vh;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+  
+  .detail-header h2 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .detail-section h3 {
+    font-size: 1rem;
+    margin: 0.5rem 0 0.5rem;
+  }
+  
+  .detail-support-link {
+    min-height: 44px;
+    padding: 0.75rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .detail-panel {
+    min-height: 45vh;
+    max-height: 70vh;
+    padding: 0.5rem;
+    font-size: 0.85rem;
+  }
+  
+  .detail-header h2 {
+    font-size: 1.1rem;
+  }
+  
+  .detail-section h3 {
+    font-size: 0.95rem;
   }
 }
 
@@ -2862,13 +3031,20 @@ header .logo {
 /* Reduce gaps in inputs-outputs section on mobile */
 @media (max-width: 1024px) {
   .detail-section[data-section-type="inputs-outputs"] {
-    gap: 0.5rem;
+    gap: 0.75rem;
+    display: grid;
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 768px) {
   .detail-section[data-section-type="inputs-outputs"] {
-    gap: 0.25rem;
+    gap: 0.5rem;
+  }
+  
+  /* Make inputs-outputs single column on mobile for better readability */
+  .detail-section[data-section-type="inputs-outputs"] {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -2994,11 +3170,51 @@ header .logo {
   padding: 0.2rem 0.65rem;
   cursor: pointer;
   transition: background 0.2s ease;
+  font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 .relation-link:hover {
   background: var(--hover-color, var(--brand-orange));
   color: #fff;
+}
+
+/* Make relation-link buttons smaller and more proportional on mobile */
+@media (max-width: 768px) {
+  .relation-link {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.85rem;
+    min-height: auto; /* Remove min-height constraint */
+    height: auto;
+    line-height: 1.4;
+  }
+  
+  .detail-relation-item {
+    font-size: 0.85rem;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  
+  .relation-desc {
+    font-size: 0.8rem;
+    flex-basis: 100%;
+    margin-top: 0.125rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .relation-link {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .detail-relation-item {
+    font-size: 0.8rem;
+  }
+  
+  .relation-desc {
+    font-size: 0.75rem;
+  }
 }
 
 .relation-desc {
@@ -3022,6 +3238,99 @@ header .logo {
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
+}
+
+@media (max-width: 1024px) {
+  .admin-panel {
+    padding: 1rem;
+    gap: 0.75rem;
+    border-radius: 10px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    max-height: 80vh;
+  }
+  
+  .admin-tabs {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .admin-tab {
+    min-height: 44px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    flex: 1 1 auto;
+    min-width: calc(50% - 0.25rem);
+    touch-action: manipulation;
+  }
+  
+  .admin-form {
+    gap: 0.75rem;
+  }
+  
+  .admin-form input,
+  .admin-form select,
+  .admin-form textarea {
+    min-height: 44px;
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+  
+  .admin-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .admin-actions button {
+    min-height: 48px;
+    width: 100%;
+    touch-action: manipulation;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-panel {
+    padding: 0.75rem;
+    max-height: 75vh;
+  }
+  
+  .admin-tabs {
+    gap: 0.375rem;
+  }
+  
+  .admin-tab {
+    min-width: calc(50% - 0.1875rem);
+    padding: 0.5rem;
+    font-size: 0.85rem;
+  }
+  
+  .admin-form h3 {
+    font-size: 1rem;
+  }
+  
+  .admin-form label {
+    font-size: 0.9rem;
+  }
+  
+  .admin-form input,
+  .admin-form select,
+  .admin-form textarea {
+    padding: 0.75rem;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-panel {
+    padding: 0.5rem;
+    max-height: 70vh;
+  }
+  
+  .admin-tab {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.375rem;
+  }
 }
 
 .admin-panel.open {
@@ -4763,6 +5072,71 @@ button.danger {
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 0.5rem;
+    align-items: flex-start;
+    padding-top: 2rem;
+  }
+  
+  .modal-content {
+    max-width: 100%;
+    max-height: 85vh;
+    border-radius: 12px;
+    margin: auto 0;
+  }
+  
+  .modal-header {
+    padding: 1rem 1.25rem;
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    z-index: 1;
+  }
+  
+  .modal-header h2 {
+    font-size: 1.25rem;
+  }
+  
+  .modal-close {
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .modal-form {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 0.25rem;
+    padding-top: 1.5rem;
+  }
+  
+  .modal-content {
+    max-height: 80vh;
+    border-radius: 10px;
+  }
+  
+  .modal-header {
+    padding: 0.75rem 1rem;
+  }
+  
+  .modal-header h2 {
+    font-size: 1.1rem;
+  }
+  
+  .modal-form {
+    padding: 1rem;
+  }
 }
 
 .modal-content.large {

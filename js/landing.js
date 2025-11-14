@@ -376,15 +376,30 @@ const LandingPage = (() => {
       // Save organization data with unique key
       localStorage.setItem(`org_${orgId}`, JSON.stringify(orgData));
       
-      // Create initial organization structure
+      // Create initial organization structure (completely empty)
       const initialStructure = createInitialStructure(orgData);
       localStorage.setItem(`org_structure_${orgId}`, JSON.stringify(initialStructure));
+      
+      // Set default branding for new organization
+      const defaultBranding = {
+        primaryColor: '#ff5a00',
+        secondaryColor: '#e53e3e',
+        fontFamily: 'system',
+        fontSize: '16',
+        logo: null
+      };
+      localStorage.setItem(`org_branding_${orgId}`, JSON.stringify(defaultBranding));
       
       // Save organization list
       saveOrganizationToList(orgId, orgData.name);
       
       // Set current organization
       localStorage.setItem('current_organization_id', orgId);
+      
+      // Clear OrgStore state to ensure fresh load
+      if (typeof OrgStore !== 'undefined' && OrgStore.clear) {
+        OrgStore.clear();
+      }
       
       // Show success message
       showSuccessMessage('Organization created successfully!');
@@ -437,36 +452,41 @@ const LandingPage = (() => {
   
   const loadJumpYardDemo = () => {
     const jumpyardOrgId = 'demo_org';
-    const orgData = JSON.parse(localStorage.getItem(`org_${jumpyardOrgId}`) || '{}');
     
-    if (orgData.id) {
-      // Demo exists, check if password is required
-      if (orgData.password) {
-        showLoginModal(jumpyardOrgId);
-      } else {
-        // No password required, login directly
+    // Always re-initialize demo to ensure fresh demo data and branding
+    console.log('Loading demo organization, ensuring fresh data...');
+    initializeJumpYardDemo().then(() => {
+      const orgData = JSON.parse(localStorage.getItem(`org_${jumpyardOrgId}`) || '{}');
+      
+      if (orgData.id) {
+        // Clear OrgStore state to ensure fresh load
+        if (typeof OrgStore !== 'undefined' && OrgStore.clear) {
+          OrgStore.clear();
+        }
+        
+        // Set current organization
         localStorage.setItem('current_organization_id', jumpyardOrgId);
+        
+        // Load demo branding (always use default demo branding)
+        const demoBranding = {
+          primaryColor: '#ff5a00',
+          secondaryColor: '#e53e3e',
+          fontFamily: 'system',
+          fontSize: '16',
+          logo: null
+        };
+        localStorage.setItem(`org_branding_${jumpyardOrgId}`, JSON.stringify(demoBranding));
+        
+        // Apply demo branding
         loadOrganizationBranding(jumpyardOrgId);
         showMainApp();
-      }
-    } else {
-      // Demo not found, try to create it
-      console.log('Demo organization not found, creating it...');
-      initializeJumpYardDemo().then(() => {
-        // Try again after creation
-        const newOrgData = JSON.parse(localStorage.getItem(`org_${jumpyardOrgId}`) || '{}');
-        if (newOrgData.id) {
-          localStorage.setItem('current_organization_id', jumpyardOrgId);
-          loadOrganizationBranding(jumpyardOrgId);
-          showMainApp();
-        } else {
-          showErrorMessage('Failed to create demo organization. Please refresh the page.');
-        }
-      }).catch(error => {
-        console.error('Error creating demo organization:', error);
+      } else {
         showErrorMessage('Failed to create demo organization. Please refresh the page.');
-      });
-    }
+      }
+    }).catch(error => {
+      console.error('Error loading demo organization:', error);
+      showErrorMessage('Failed to load demo organization. Please refresh the page.');
+    });
   };
   
   const showLoginModal = (orgId = null) => {
@@ -779,6 +799,16 @@ const LandingPage = (() => {
       return;
     }
     
+    // Reset branding to defaults first
+    document.documentElement.style.removeProperty('--brand-orange');
+    document.documentElement.style.removeProperty('--brand-red');
+    document.documentElement.style.removeProperty('--brand-gradient');
+    document.documentElement.style.removeProperty('--font-family');
+    document.documentElement.style.removeProperty('--base-font-size');
+    document.body.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+    document.body.style.fontSize = '16px';
+    
+    // Load branding for this specific organization
     const brandingData = localStorage.getItem(`org_branding_${orgId}`);
     if (brandingData) {
       try {
@@ -786,7 +816,26 @@ const LandingPage = (() => {
         applyBranding(branding);
       } catch (error) {
         console.error('Error loading branding:', error);
+        // Apply defaults if loading fails
+        const defaultBranding = {
+          primaryColor: '#ff5a00',
+          secondaryColor: '#e53e3e',
+          fontFamily: 'system',
+          fontSize: '16',
+          logo: null
+        };
+        applyBranding(defaultBranding);
       }
+    } else {
+      // Apply defaults if no branding found
+      const defaultBranding = {
+        primaryColor: '#ff5a00',
+        secondaryColor: '#e53e3e',
+        fontFamily: 'system',
+        fontSize: '16',
+        logo: null
+      };
+      applyBranding(defaultBranding);
     }
   };
   

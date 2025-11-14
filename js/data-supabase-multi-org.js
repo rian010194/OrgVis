@@ -302,6 +302,16 @@ const OrgStore = (() => {
     }
   };
 
+  const clearState = () => {
+    state.nodesById.clear();
+    state.rootIds = [];
+    state.isLoaded = false;
+    state.currentOrganizationId = null;
+    state.lastError = null;
+    state.loadPromise = null;
+    notify(); // Notify subscribers that state was cleared
+  };
+
   const load = async (organizationId = null) => {
     // If no organization ID provided, try to get from localStorage
     if (!organizationId) {
@@ -310,6 +320,12 @@ const OrgStore = (() => {
 
     if (!organizationId) {
       throw new Error('No organization selected');
+    }
+
+    // If switching to a different organization, clear state first
+    if (state.isLoaded && state.currentOrganizationId !== organizationId) {
+      console.log(`Switching organizations: ${state.currentOrganizationId} -> ${organizationId}`);
+      clearState();
     }
 
     // If already loaded for this organization, return cached data
@@ -852,9 +868,14 @@ const OrgStore = (() => {
     return result;
   };
 
+  const clear = () => {
+    clearState();
+  };
+
   return {
     load: loadWithSubscriptions,
     ensureLoaded,
+    clear,
     getSnapshot,
     getNode,
     getChildren,
