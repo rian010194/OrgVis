@@ -43,13 +43,16 @@ const LandingPage = (() => {
   const initializeJumpYardDemo = async () => {
     const jumpyardOrgId = 'demo_org';
     
+    // Try to get existing demo organization data first to preserve createdAt
+    const existingData = JSON.parse(localStorage.getItem(`org_${jumpyardOrgId}`) || '{}');
+    
     // Always create/update demo organization
     const jumpyardData = {
       name: 'Demo',
       description: 'Demo organization with sample data and structure',
       type: 'company',
       password: null, // No password required
-      createdAt: new Date().toISOString(),
+      createdAt: existingData.createdAt || new Date().toISOString(), // Preserve existing createdAt or create new
       id: jumpyardOrgId
     };
     
@@ -369,7 +372,8 @@ const LandingPage = (() => {
       type: formData.get('orgType'),
       password: password ? await hashPassword(password) : null,
       createdAt: new Date().toISOString(),
-      id: orgId
+      id: orgId,
+      isEmpty: true // Flag to indicate this is a new empty organization
     };
     
     try {
@@ -440,6 +444,11 @@ const LandingPage = (() => {
         showLoginModal(orgId);
       } else {
         // No password, load directly
+        // Clear OrgStore state to ensure fresh load for this organization
+        if (typeof OrgStore !== 'undefined' && OrgStore.clear) {
+          OrgStore.clear();
+        }
+        
         localStorage.setItem('current_organization_id', orgId);
         loadOrganizationBranding(orgId);
         showMainApp();
@@ -570,6 +579,11 @@ const LandingPage = (() => {
     }
     
     // Fallback to organization-level login
+    // Clear OrgStore state to ensure fresh load for this organization
+    if (typeof OrgStore !== 'undefined' && OrgStore.clear) {
+      OrgStore.clear();
+    }
+    
     localStorage.setItem('current_organization_id', org.id);
     loadOrganizationBranding(org.id);
     hideLoginModal();
@@ -752,6 +766,11 @@ const LandingPage = (() => {
       // Apply branding to the page
       applyBranding(customizationData);
       
+      // Clear OrgStore state to ensure fresh load for new organization
+      if (typeof OrgStore !== 'undefined' && OrgStore.clear) {
+        OrgStore.clear();
+      }
+      
       // Hide modal and show app
       hideCustomizationModal();
       showMainApp();
@@ -785,6 +804,15 @@ const LandingPage = (() => {
       showErrorMessage('Error saving default branding. Please try again.');
       return;
     }
+    
+    // Apply branding
+    applyBranding(defaultBranding);
+    
+    // Clear OrgStore state to ensure fresh load for new organization
+    if (typeof OrgStore !== 'undefined' && OrgStore.clear) {
+      OrgStore.clear();
+    }
+    
     hideCustomizationModal();
     showMainApp();
   };

@@ -960,6 +960,15 @@ const OrgUI = (() => {
     renderRelationView();
 
     refreshAdminPanel();
+    
+    // Also refresh map view if it's initialized
+    if (typeof OrgMap !== "undefined" && OrgMap && typeof OrgMap.refresh === "function") {
+      // Only refresh if map view is currently visible
+      const mapContainer = document.getElementById('mapView');
+      if (mapContainer && !mapContainer.classList.contains('hidden')) {
+        OrgMap.refresh();
+      }
+    }
 
   };
 

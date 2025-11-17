@@ -65,8 +65,14 @@
     if (currentView === "map") {
       treeContainer.classList.add("hidden");
       mapContainer.classList.remove("hidden");
-      if (typeof OrgMap !== "undefined" && OrgMap && typeof OrgMap.show === "function") {
-        OrgMap.show();
+      // Ensure OrgMap is initialized before showing
+      if (typeof OrgMap !== "undefined" && OrgMap) {
+        if (typeof OrgMap.init === "function") {
+          OrgMap.init();
+        }
+        if (typeof OrgMap.show === "function") {
+          OrgMap.show();
+        }
         
         // Focus on the currently selected node when switching to map view
         if (typeof OrgUI !== "undefined" && OrgUI && typeof OrgUI.getSelectedNodeId === "function") {

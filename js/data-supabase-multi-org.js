@@ -322,6 +322,9 @@ const OrgStore = (() => {
       throw new Error('No organization selected');
     }
 
+    console.log('OrgStore.load() called with organizationId:', organizationId);
+    console.log('Current state - isLoaded:', state.isLoaded, 'currentOrganizationId:', state.currentOrganizationId);
+
     // If switching to a different organization, clear state first
     if (state.isLoaded && state.currentOrganizationId !== organizationId) {
       console.log(`Switching organizations: ${state.currentOrganizationId} -> ${organizationId}`);
@@ -330,6 +333,7 @@ const OrgStore = (() => {
 
     // If already loaded for this organization, return cached data
     if (state.isLoaded && state.currentOrganizationId === organizationId) {
+      console.log('Organization already loaded, returning cached data');
       return getSnapshot();
     }
 
@@ -339,7 +343,7 @@ const OrgStore = (() => {
 
     state.loadPromise = (async () => {
       try {
-        console.log('Loading data for organization:', organizationId);
+        console.log('=== Starting load for organization:', organizationId, '===');
         
         // Test Supabase connection first
         try {
@@ -360,16 +364,58 @@ const OrgStore = (() => {
         }
         
         // First, ensure the organization exists in the database
+        console.log('Ensuring organization exists in Supabase:', organizationId);
         await ensureOrganizationExists(organizationId);
         
         // Load nodes with metrics from Supabase for specific organization
+        console.log('Calling getNodesWithMetrics with organizationId:', organizationId);
         const supabaseData = await window.orgDb.getNodesWithMetrics(organizationId);
         
-        console.log('Loaded from Supabase:', supabaseData.length, 'nodes');
-        console.log('Raw Supabase data:', supabaseData);
+        console.log('=== Supabase returned:', supabaseData ? supabaseData.length : 0, 'nodes for organization:', organizationId, '===');
+        if (supabaseData && supabaseData.length > 0) {
+          console.log('First node sample:', { id: supabaseData[0]?.id, organization_id: supabaseData[0]?.organization_id, name: supabaseData[0]?.name });
+        }
+        
+        // Verify that all nodes belong to the correct organization
+        const filteredNodes = (supabaseData || []).filter(node => {
+          if (!node || node.organization_id !== organizationId) {
+            console.warn('Filtered out node with wrong organization_id:', node?.id, 'expected:', organizationId, 'got:', node?.organization_id);
+            return false;
+          }
+          return true;
+        });
+        
+        console.log('After filtering by organization_id:', filteredNodes.length, 'nodes');
+        
+        // Check if this is an empty organization that should remain empty
+        const orgData = JSON.parse(localStorage.getItem(`org_${organizationId}`) || '{}');
+        const isDemoOrg = organizationId === 'demo_org' || organizationId === 'jumpyard';
+        const isEmptyOrganization = !isDemoOrg && orgData && orgData.isEmpty === true;
+        
+        // If organization is marked as empty and Supabase returned no nodes, keep it empty
+        if (isEmptyOrganization && filteredNodes.length === 0) {
+          console.log("Empty organization confirmed (no nodes in Supabase), keeping empty structure (no mock data)");
+          state.nodesById.clear();
+          state.rootIds = [];
+          rebuildIndexes();
+          state.isLoaded = true;
+          state.currentOrganizationId = organizationId;
+          state.lastError = null;
+          notify();
+          return getSnapshot();
+        }
+        
+        // If we successfully loaded nodes from Supabase, mark organization as no longer empty
+        if (filteredNodes.length > 0) {
+          if (orgData && orgData.isEmpty === true) {
+            orgData.isEmpty = false;
+            localStorage.setItem(`org_${organizationId}`, JSON.stringify(orgData));
+            console.log('Organization marked as no longer empty (nodes found in Supabase)');
+          }
+        }
         
         state.nodesById.clear();
-        supabaseData.forEach((rawNode) => {
+        filteredNodes.forEach((rawNode) => {
           const node = normaliseNode(window.convertSupabaseToFrontend(rawNode));
           state.nodesById.set(node.id, node);
         });
@@ -377,8 +423,19 @@ const OrgStore = (() => {
         // Load relations from Supabase for specific organization
         const relations = await window.orgDb.getRelations(organizationId);
         
+        // Verify that all relations belong to the correct organization
+        const filteredRelations = (relations || []).filter(relation => {
+          if (!relation || relation.organization_id !== organizationId) {
+            console.warn('Filtered out relation with wrong organization_id:', relation?.id, 'expected:', organizationId, 'got:', relation?.organization_id);
+            return false;
+          }
+          return true;
+        });
+        
+        console.log('Loaded relations from Supabase:', filteredRelations.length, 'relations for organization:', organizationId);
+        
         // Add relations to nodes
-        relations.forEach((relation) => {
+        filteredRelations.forEach((relation) => {
           const fromNode = state.nodesById.get(relation.from_node_id);
           const toNode = state.nodesById.get(relation.to_node_id);
           
@@ -413,43 +470,113 @@ const OrgStore = (() => {
         console.error("Error details:", {
           message: error.message,
           code: error.code,
+          status: error.status,
           details: error.details,
           hint: error.hint
         });
         
-        // Fallback to mock data if Supabase fails
-        console.log("Falling back to mock data...");
-        try {
-          const response = await fetch('mock/org.json');
-          if (!response.ok) {
-            throw new Error(`Kunde inte ladda mock data: ${response.status} ${response.statusText}`);
-          }
-          const payload = await response.json();
-          
-          if (!Array.isArray(payload.nodes)) {
-            throw new Error("Ogiltigt mock data: nodes saknas");
-          }
-          
+        // For NEW/EMPTY organizations, NEVER use mock data - always use empty structure
+        // But exclude demo_org which should always load its data
+        // Check localStorage to see if this is a new empty organization
+        const orgData = JSON.parse(localStorage.getItem(`org_${organizationId}`) || '{}');
+        const isDemoOrg = organizationId === 'demo_org' || organizationId === 'jumpyard';
+        
+        // Check if organization is marked as empty (no data created yet)
+        // OR if it's a new organization created recently (less than 2 minutes ago)
+        const isRecentNewOrg = orgData && orgData.createdAt && 
+          (Date.now() - new Date(orgData.createdAt).getTime()) < 120000; // Created less than 2 minutes ago
+        const isEmptyOrganization = !isDemoOrg && orgData && orgData.isEmpty === true;
+        const isNewOrganization = isEmptyOrganization || (!isDemoOrg && isRecentNewOrg);
+        
+        if (isNewOrganization) {
+          console.log("New/empty organization detected (isEmpty:", isEmptyOrganization, "isRecent:", isRecentNewOrg, "), using empty structure (no mock data)");
           state.nodesById.clear();
-          payload.nodes.forEach((rawNode) => {
-            const node = normaliseNode(rawNode);
-            state.nodesById.set(node.id, node);
-          });
-          
+          state.rootIds = [];
           rebuildIndexes();
           state.isLoaded = true;
           state.currentOrganizationId = organizationId;
           state.lastError = null;
-          console.log("Successfully loaded mock data as fallback");
           notify();
           return getSnapshot();
-        } catch (fallbackError) {
-          console.error("Fallback to mock data failed", fallbackError);
-          console.error("Both Supabase and mock data loading failed");
+        }
+        
+        // Check if this is a connection error (should use fallback) or just empty organization
+        // Only use mock data fallback for actual connection/database errors, not for empty organizations
+        const isConnectionError = error.message && (
+          error.message.includes('connection') || 
+          error.message.includes('network') ||
+          error.message.includes('fetch') ||
+          error.message.includes('Failed to fetch') ||
+          error.code === 'PGRST116' || // PostgREST not found error
+          error.status === 0 || // Network error
+          (error.status && error.status >= 500) // Server errors
+        );
+        
+        if (isConnectionError) {
+          // Fallback to mock data only if it's a real connection error
+          // For demo_org, always try to load mock data if Supabase fails
+          // For new organizations, never use mock data
+          if (isNewOrganization) {
+            console.log("New organization with connection error, using empty structure (no mock data)");
+            state.nodesById.clear();
+            state.rootIds = [];
+            rebuildIndexes();
+            state.isLoaded = true;
+            state.currentOrganizationId = organizationId;
+            state.lastError = null;
+            notify();
+            return getSnapshot();
+          }
           
-          // Create a more informative error message
-          const errorMessage = `Data loading failed: ${error.message}. Fallback to mock data also failed: ${fallbackError.message}`;
-          throw new Error(errorMessage);
+          console.log("Connection error detected, falling back to mock data...");
+          try {
+            const response = await fetch('mock/org.json');
+            if (!response.ok) {
+              throw new Error(`Kunde inte ladda mock data: ${response.status} ${response.statusText}`);
+            }
+            const payload = await response.json();
+            
+            if (!Array.isArray(payload.nodes)) {
+              throw new Error("Ogiltigt mock data: nodes saknas");
+            }
+            
+            state.nodesById.clear();
+            payload.nodes.forEach((rawNode) => {
+              const node = normaliseNode(rawNode);
+              state.nodesById.set(node.id, node);
+            });
+            
+            rebuildIndexes();
+            state.isLoaded = true;
+            state.currentOrganizationId = organizationId;
+            state.lastError = null;
+            console.log("Successfully loaded mock data as fallback");
+            notify();
+            return getSnapshot();
+          } catch (fallbackError) {
+            console.error("Fallback to mock data failed", fallbackError);
+            // If fallback fails, create empty organization instead of throwing
+            state.nodesById.clear();
+            state.rootIds = [];
+            rebuildIndexes();
+            state.isLoaded = true;
+            state.currentOrganizationId = organizationId;
+            state.lastError = null;
+            console.log("Both Supabase and mock data failed, using empty organization");
+            notify();
+            return getSnapshot();
+          }
+        } else {
+          // For other errors (like organization not found or empty), just use empty structure
+          console.log("Non-connection error, using empty organization structure");
+          state.nodesById.clear();
+          state.rootIds = [];
+          rebuildIndexes();
+          state.isLoaded = true;
+          state.currentOrganizationId = organizationId;
+          state.lastError = null;
+          notify();
+          return getSnapshot();
         }
       } finally {
         state.loadPromise = null;
@@ -564,6 +691,14 @@ const OrgStore = (() => {
       console.log('Saving to Supabase:', supabaseData);
       const result = await window.orgDb.createNode(supabaseData);
       console.log('Supabase createNode result:', result);
+      
+      // Mark organization as no longer empty when first node is created
+      const orgData = JSON.parse(localStorage.getItem(`org_${state.currentOrganizationId}`) || '{}');
+      if (orgData && orgData.isEmpty === true) {
+        orgData.isEmpty = false;
+        localStorage.setItem(`org_${state.currentOrganizationId}`, JSON.stringify(orgData));
+        console.log('Organization marked as no longer empty (first node created)');
+      }
 
       state.nodesById.set(node.id, node);
       if (node.parent) {

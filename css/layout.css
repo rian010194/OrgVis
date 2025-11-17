@@ -67,6 +67,18 @@ body.admin-panel-open.detail-expanded .app-layout {
     margin-top: 0;
   }
   
+  /* When main content is collapsed, make detail panel take full height - accounting for sticky header */
+  body.main-content-collapsed .app-layout {
+    grid-template-rows: 1fr;
+    height: calc(100vh - 4.5rem);
+    min-height: calc(100vh - 4.5rem);
+  }
+  
+  body.main-content-collapsed .side-section {
+    height: 100%;
+    min-height: 100%;
+  }
+  
   /* Admin panel open on mobile - stack vertically */
   body.admin-panel-open .app-layout {
     grid-template-columns: 1fr;
@@ -76,6 +88,44 @@ body.admin-panel-open.detail-expanded .app-layout {
   
   body.admin-panel-open .detail-panel {
     display: none;
+  }
+  
+  /* Admin panel open + main content collapsed */
+  body.admin-panel-open.main-content-collapsed .app-layout {
+    grid-template-rows: 1fr;
+    height: calc(100vh - 4.5rem);
+    min-height: calc(100vh - 4.5rem);
+  }
+  
+  body.admin-panel-open.main-content-collapsed .admin-panel {
+    height: 100%;
+    min-height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  @media (max-width: 768px) {
+    body.main-content-collapsed .app-layout {
+      height: calc(100vh - 4rem);
+      min-height: calc(100vh - 4rem);
+    }
+    
+    body.admin-panel-open.main-content-collapsed .app-layout {
+      height: calc(100vh - 4rem);
+      min-height: calc(100vh - 4rem);
+    }
+  }
+  
+  @media (max-width: 480px) {
+    body.main-content-collapsed .app-layout {
+      height: calc(100vh - 3.5rem);
+      min-height: calc(100vh - 3.5rem);
+    }
+    
+    body.admin-panel-open.main-content-collapsed .app-layout {
+      height: calc(100vh - 3.5rem);
+      min-height: calc(100vh - 3.5rem);
+    }
   }
 }
 
@@ -143,43 +193,43 @@ body.detail-expanded .map-view {
   }
 }
 
-/* On mobile, use viewport height for better space usage */
+/* On mobile, use viewport height for better space usage - accounting for sticky header */
 @media (max-width: 1024px) {
   .tree-container,
   .map-view {
-    height: calc(100vh - 8rem) !important;
-    min-height: calc(100vh - 8rem) !important;
-    max-height: calc(100vh - 8rem) !important;
+    height: calc(100vh - 5.5rem) !important;
+    min-height: calc(100vh - 5.5rem) !important;
+    max-height: calc(100vh - 5.5rem) !important;
   }
   
   .org-section {
-    min-height: calc(100vh - 8rem);
+    min-height: calc(100vh - 5.5rem);
   }
 }
 
 @media (max-width: 768px) {
   .tree-container,
   .map-view {
-    height: calc(100vh - 7rem) !important;
-    min-height: calc(100vh - 7rem) !important;
-    max-height: calc(100vh - 7rem) !important;
+    height: calc(100vh - 5rem) !important;
+    min-height: calc(100vh - 5rem) !important;
+    max-height: calc(100vh - 5rem) !important;
   }
   
   .org-section {
-    min-height: calc(100vh - 7rem);
+    min-height: calc(100vh - 5rem);
   }
 }
 
 @media (max-width: 480px) {
   .tree-container,
   .map-view {
-    height: calc(100vh - 6.5rem) !important;
-    min-height: calc(100vh - 6.5rem) !important;
-    max-height: calc(100vh - 6.5rem) !important;
+    height: calc(100vh - 4.5rem) !important;
+    min-height: calc(100vh - 4.5rem) !important;
+    max-height: calc(100vh - 4.5rem) !important;
   }
   
   .org-section {
-    min-height: calc(100vh - 6.5rem);
+    min-height: calc(100vh - 4.5rem);
   }
 }
 
