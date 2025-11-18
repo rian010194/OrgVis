@@ -394,7 +394,7 @@ const OrgStore = (() => {
         
         // If organization is marked as empty and Supabase returned no nodes, keep it empty
         if (isEmptyOrganization && filteredNodes.length === 0) {
-          console.log("Empty organization confirmed (no nodes in Supabase), keeping empty structure (no mock data)");
+          console.log("Empty organization confirmed (no nodes in Supabase), keeping empty structure");
           state.nodesById.clear();
           state.rootIds = [];
           rebuildIndexes();
@@ -475,8 +475,7 @@ const OrgStore = (() => {
           hint: error.hint
         });
         
-        // For NEW/EMPTY organizations, NEVER use mock data - always use empty structure
-        // But exclude demo_org which should always load its data
+        // For NEW/EMPTY organizations, always use empty structure
         // Check localStorage to see if this is a new empty organization
         const orgData = JSON.parse(localStorage.getItem(`org_${organizationId}`) || '{}');
         const isDemoOrg = organizationId === 'demo_org' || organizationId === 'jumpyard';
@@ -489,7 +488,7 @@ const OrgStore = (() => {
         const isNewOrganization = isEmptyOrganization || (!isDemoOrg && isRecentNewOrg);
         
         if (isNewOrganization) {
-          console.log("New/empty organization detected (isEmpty:", isEmptyOrganization, "isRecent:", isRecentNewOrg, "), using empty structure (no mock data)");
+          console.log("New/empty organization detected (isEmpty:", isEmptyOrganization, "isRecent:", isRecentNewOrg, "), using empty structure");
           state.nodesById.clear();
           state.rootIds = [];
           rebuildIndexes();
@@ -500,84 +499,16 @@ const OrgStore = (() => {
           return getSnapshot();
         }
         
-        // Check if this is a connection error (should use fallback) or just empty organization
-        // Only use mock data fallback for actual connection/database errors, not for empty organizations
-        const isConnectionError = error.message && (
-          error.message.includes('connection') || 
-          error.message.includes('network') ||
-          error.message.includes('fetch') ||
-          error.message.includes('Failed to fetch') ||
-          error.code === 'PGRST116' || // PostgREST not found error
-          error.status === 0 || // Network error
-          (error.status && error.status >= 500) // Server errors
-        );
-        
-        if (isConnectionError) {
-          // Fallback to mock data only if it's a real connection error
-          // For demo_org, always try to load mock data if Supabase fails
-          // For new organizations, never use mock data
-          if (isNewOrganization) {
-            console.log("New organization with connection error, using empty structure (no mock data)");
-            state.nodesById.clear();
-            state.rootIds = [];
-            rebuildIndexes();
-            state.isLoaded = true;
-            state.currentOrganizationId = organizationId;
-            state.lastError = null;
-            notify();
-            return getSnapshot();
-          }
-          
-          console.log("Connection error detected, falling back to mock data...");
-          try {
-            const response = await fetch('mock/org.json');
-            if (!response.ok) {
-              throw new Error(`Kunde inte ladda mock data: ${response.status} ${response.statusText}`);
-            }
-            const payload = await response.json();
-            
-            if (!Array.isArray(payload.nodes)) {
-              throw new Error("Ogiltigt mock data: nodes saknas");
-            }
-            
-            state.nodesById.clear();
-            payload.nodes.forEach((rawNode) => {
-              const node = normaliseNode(rawNode);
-              state.nodesById.set(node.id, node);
-            });
-            
-            rebuildIndexes();
-            state.isLoaded = true;
-            state.currentOrganizationId = organizationId;
-            state.lastError = null;
-            console.log("Successfully loaded mock data as fallback");
-            notify();
-            return getSnapshot();
-          } catch (fallbackError) {
-            console.error("Fallback to mock data failed", fallbackError);
-            // If fallback fails, create empty organization instead of throwing
-            state.nodesById.clear();
-            state.rootIds = [];
-            rebuildIndexes();
-            state.isLoaded = true;
-            state.currentOrganizationId = organizationId;
-            state.lastError = null;
-            console.log("Both Supabase and mock data failed, using empty organization");
-            notify();
-            return getSnapshot();
-          }
-        } else {
-          // For other errors (like organization not found or empty), just use empty structure
-          console.log("Non-connection error, using empty organization structure");
-          state.nodesById.clear();
-          state.rootIds = [];
-          rebuildIndexes();
-          state.isLoaded = true;
-          state.currentOrganizationId = organizationId;
-          state.lastError = null;
-          notify();
-          return getSnapshot();
-        }
+        // On any error, use empty organization structure
+        console.log("Error loading from Supabase, using empty organization structure");
+        state.nodesById.clear();
+        state.rootIds = [];
+        rebuildIndexes();
+        state.isLoaded = true;
+        state.currentOrganizationId = organizationId;
+        state.lastError = null;
+        notify();
+        return getSnapshot();
       } finally {
         state.loadPromise = null;
       }

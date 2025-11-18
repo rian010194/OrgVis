@@ -14,7 +14,7 @@ const LandingPage = (() => {
       localStorage.removeItem('current_organization_id');
     }
     
-    // Initialize with JumpYard demo organization if none exists
+    // Initialize with demo organization if none exists
     initializeJumpYardDemo();
     
     // Check if there are existing organizations
@@ -46,7 +46,7 @@ const LandingPage = (() => {
     // Try to get existing demo organization data first to preserve createdAt
     const existingData = JSON.parse(localStorage.getItem(`org_${jumpyardOrgId}`) || '{}');
     
-    // Always create/update demo organization
+    // Always create/update demo organization with generic structure
     const jumpyardData = {
       name: 'Demo',
       description: 'Demo organization with sample data and structure',
@@ -59,7 +59,7 @@ const LandingPage = (() => {
     // Save Demo organization
     localStorage.setItem(`org_${jumpyardOrgId}`, JSON.stringify(jumpyardData));
     
-    // Create demo organization structure with some sample data
+    // Create demo organization structure with generic sample data
     const demoStructure = createJumpYardDemoStructure();
     localStorage.setItem(`org_structure_${jumpyardOrgId}`, JSON.stringify(demoStructure));
     
@@ -81,84 +81,199 @@ const LandingPage = (() => {
     return {
       nodes: [
         {
-          id: 'demo_root',
-          name: 'Demo',
-          type: 'Unit',
+          id: 'demo_ceo',
+          name: 'CEO',
+          type: 'Individual',
           parent: null,
-          role: 'Demo organization showcasing organizational structure and management',
+          role: 'Chief Executive Officer - Leading the organization and setting strategic direction',
           responsibilities: [
-            'Strategic leadership and vision',
-            'Digital transformation initiatives',
-            'Organizational excellence',
-            'Innovation and growth'
+            'Strategic planning and vision',
+            'Executive leadership',
+            'Stakeholder management',
+            'Organizational growth'
           ],
           outcomes: [
-            'Market leadership',
-            'Digital transformation success',
-            'Organizational efficiency',
-            'Innovation pipeline'
+            'Strategic goals achieved',
+            'Organizational growth',
+            'Strong stakeholder relationships',
+            'Market leadership'
           ],
           supportOffice: null
         },
         {
-          id: 'jumpyard_tech',
-          name: 'Technology Division',
+          id: 'demo_hr',
+          name: 'Human Resources',
           type: 'Department',
-          parent: 'jumpyard_root',
-          role: 'Leading technology innovation and digital solutions',
+          parent: 'demo_ceo',
+          role: 'Managing talent acquisition, development, and employee relations',
           responsibilities: [
+            'Recruitment and hiring',
+            'Employee development',
+            'Performance management',
+            'Compensation and benefits'
+          ],
+          outcomes: [
+            'High employee satisfaction',
+            'Strong talent pipeline',
+            'Effective performance reviews',
+            'Competitive compensation packages'
+          ],
+          supportOffice: null
+        },
+        {
+          id: 'demo_finance',
+          name: 'Finance',
+          type: 'Department',
+          parent: 'demo_ceo',
+          role: 'Managing financial planning, accounting, and reporting',
+          responsibilities: [
+            'Budget planning and control',
+            'Financial reporting',
+            'Cash flow management',
+            'Financial analysis'
+          ],
+          outcomes: [
+            'Accurate financial reports',
+            'Effective budget management',
+            'Strong financial health',
+            'Informed financial decisions'
+          ],
+          supportOffice: null
+        },
+        {
+          id: 'demo_it',
+          name: 'IT & Technology',
+          type: 'Department',
+          parent: 'demo_ceo',
+          role: 'Managing technology infrastructure and digital solutions',
+          responsibilities: [
+            'IT infrastructure management',
             'Software development',
-            'Technology infrastructure',
-            'Digital product development',
+            'Cybersecurity',
             'Technical support'
           ],
           outcomes: [
-            'Innovative digital products',
-            'Robust technology platform',
-            'High-quality software solutions',
-            'Excellent technical support'
+            'Reliable IT systems',
+            'Secure technology environment',
+            'Efficient technical support',
+            'Innovative digital solutions'
           ],
           supportOffice: null
         },
         {
-          id: 'jumpyard_ops',
-          name: 'Operations',
+          id: 'demo_sales',
+          name: 'Sales',
           type: 'Department',
-          parent: 'jumpyard_root',
-          role: 'Ensuring smooth business operations and customer satisfaction',
+          parent: 'demo_ceo',
+          role: 'Driving revenue through customer acquisition and relationship management',
           responsibilities: [
-            'Business operations management',
-            'Customer service excellence',
-            'Process optimization',
-            'Quality assurance'
+            'Customer acquisition',
+            'Sales pipeline management',
+            'Client relationship management',
+            'Revenue growth'
           ],
           outcomes: [
-            'Efficient business processes',
-            'High customer satisfaction',
-            'Operational excellence',
-            'Quality standards compliance'
+            'Revenue targets achieved',
+            'Growing customer base',
+            'Strong client relationships',
+            'Market expansion'
+          ],
+          supportOffice: null
+        },
+        {
+          id: 'demo_marketing',
+          name: 'Marketing',
+          type: 'Department',
+          parent: 'demo_ceo',
+          role: 'Building brand awareness and driving customer engagement',
+          responsibilities: [
+            'Brand management',
+            'Marketing campaigns',
+            'Digital marketing',
+            'Market research'
+          ],
+          outcomes: [
+            'Increased brand awareness',
+            'Effective marketing campaigns',
+            'Lead generation',
+            'Market insights'
+          ],
+          supportOffice: null
+        },
+        {
+          id: 'demo_operations',
+          name: 'Operations',
+          type: 'Department',
+          parent: 'demo_ceo',
+          role: 'Ensuring efficient day-to-day business operations',
+          responsibilities: [
+            'Process optimization',
+            'Quality assurance',
+            'Supply chain management',
+            'Operational efficiency'
+          ],
+          outcomes: [
+            'Streamlined processes',
+            'High quality standards',
+            'Cost efficiency',
+            'Operational excellence'
+          ],
+          supportOffice: null
+        },
+        {
+          id: 'demo_product',
+          name: 'Product Development',
+          type: 'Department',
+          parent: 'demo_ceo',
+          role: 'Developing and managing products and services',
+          responsibilities: [
+            'Product strategy',
+            'Product development',
+            'Product lifecycle management',
+            'Innovation'
+          ],
+          outcomes: [
+            'Successful product launches',
+            'Innovative products',
+            'Product roadmap execution',
+            'Customer satisfaction with products'
           ],
           supportOffice: null
         }
       ],
       relations: [
         {
-          from: 'jumpyard_tech',
-          to: 'jumpyard_ops',
-          desc: 'Provides technical support and digital solutions'
+          from: 'demo_it',
+          to: 'demo_operations',
+          desc: 'Provides IT infrastructure and technical support'
+        },
+        {
+          from: 'demo_marketing',
+          to: 'demo_sales',
+          desc: 'Generates leads and supports sales efforts'
+        },
+        {
+          from: 'demo_product',
+          to: 'demo_sales',
+          desc: 'Provides products for sales team'
+        },
+        {
+          from: 'demo_finance',
+          to: 'demo_operations',
+          desc: 'Provides financial planning and budget oversight'
         }
       ],
       metrics: {
-        'jumpyard_root': [
+        'demo_ceo': [
           {
-            name: 'Revenue',
+            name: 'Revenue Growth',
             type: 'line',
-            unit: 'SEK',
+            unit: '%',
             values: [
-              { label: 'Q1 2024', value: 2500000 },
-              { label: 'Q2 2024', value: 2800000 },
-              { label: 'Q3 2024', value: 3200000 },
-              { label: 'Q4 2024', value: 3500000 }
+              { label: 'Q1 2024', value: 5 },
+              { label: 'Q2 2024', value: 8 },
+              { label: 'Q3 2024', value: 12 },
+              { label: 'Q4 2024', value: 15 }
             ]
           },
           {
@@ -166,10 +281,36 @@ const LandingPage = (() => {
             type: 'pie',
             unit: '%',
             values: [
-              { label: 'Very Satisfied', value: 65 },
-              { label: 'Satisfied', value: 25 },
-              { label: 'Neutral', value: 8 },
+              { label: 'Very Satisfied', value: 60 },
+              { label: 'Satisfied', value: 28 },
+              { label: 'Neutral', value: 10 },
               { label: 'Dissatisfied', value: 2 }
+            ]
+          }
+        ],
+        'demo_sales': [
+          {
+            name: 'Sales Performance',
+            type: 'bar',
+            unit: 'units',
+            values: [
+              { label: 'Q1', value: 120 },
+              { label: 'Q2', value: 145 },
+              { label: 'Q3', value: 160 },
+              { label: 'Q4', value: 180 }
+            ]
+          }
+        ],
+        'demo_marketing': [
+          {
+            name: 'Marketing Budget Allocation',
+            type: 'pie',
+            unit: '%',
+            values: [
+              { label: 'Digital Marketing', value: 40 },
+              { label: 'Content Creation', value: 25 },
+              { label: 'Events & Sponsorships', value: 20 },
+              { label: 'Market Research', value: 15 }
             ]
           }
         ]
